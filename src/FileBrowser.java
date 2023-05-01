@@ -1,3 +1,4 @@
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -56,13 +57,13 @@ import javax.swing.tree.DefaultTreeModel;
 public class FileBrowser extends JPanel implements ComponentListener {
 	private static final long serialVersionUID = 1L;
 	private JFrame frame;
-	private JPanel affichagePanel, showPanel;
+	private JPanel displayPanel, showPanel;
 	private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton;
-	private JLabel footerInfoLabel;
+	private JLabel footerInfoLabel; //파일 주소 출력
 	private DefaultMutableTreeNode computer, root;
 	private DefaultTreeModel treeModel;
 	private JTree tree;
-	private JTextField arbreTextField;
+	private JTextField treeTextField;
 	private JScrollPane treeScroll, showScrollPane;
 	private String currentFolder = "", selectedFolder = null;
 	private int width = 1000;
@@ -79,6 +80,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 //			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 //		} catch (Exception e) {
 //		}
+		//GUI 전체 Frame
 		frame = new JFrame("File Browser");
 		frame.setPreferredSize(new Dimension(width, height));
 		frame.setSize(frame.getPreferredSize());
@@ -88,57 +90,60 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setResizable(true);
 		frame.setFocusable(true);
-		frame.setBackground(Color.black);
+		frame.setBackground(Color.white);
 		frame.setIconImage(getImg("img/file4.jpg"));
 		frame.add(this, BorderLayout.CENTER);
 
 		setPreferredSize(new Dimension(width, height));
 		setSize(getPreferredSize());
-		setBackground(Color.BLACK);
+		setBackground(Color.white);
 		setFocusable(true);
-		setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
+		setBorder(BorderFactory.createBevelBorder(0, Color.white, Color.black));
 		setLayout(new BorderLayout(0, 0));
 
+		//이전 위치로 return
 		retButton = new JButton(" ");
 		retButton.setIcon(new ImageIcon(getImg("img/back.png", 40, 30).getImage()));
 		retButton.setBackground(new Color(0, 0, 0, 0));
 		retButton.setOpaque(false);
 		retButton.setFocusable(false);
 
-		arbreTextField = new JTextField("=> Computer");
-		arbreTextField.setEditable(false);
-		arbreTextField.setOpaque(false);
-		arbreTextField.setForeground(Color.white);
-		arbreTextField.setFont(new Font("Tahoma", Font.BOLD, 14));
+		treeTextField = new JTextField("=> Computer");
+		treeTextField.setEditable(false);
+		treeTextField.setOpaque(false);
+		treeTextField.setForeground(Color.black);
+		treeTextField.setFont(new Font("Tahoma", Font.BOLD, 14));
 
 		showPanel = new JPanel();
 		showPanel.setOpaque(false);
 		showPanel.setLayout(new FlowLayout(0));
 
+		// 하단 기능 버튼 addFolder, addFile, rename, saveFile
 		addFolderButton = new JButton("new Folder");
 		addFolderButton.setOpaque(false);
 		addFolderButton.setBackground(new Color(0, 0, 0, 0));
-		addFolderButton.setForeground(Color.WHITE);
+		addFolderButton.setForeground(Color.black);
 		addFolderButton.setFocusable(false);
 
 		addFileButton = new JButton("new File");
 		addFileButton.setOpaque(false);
 		addFileButton.setBackground(new Color(0, 0, 0, 0));
-		addFileButton.setForeground(Color.WHITE);
+		addFileButton.setForeground(Color.black);
 		addFileButton.setFocusable(false);
 
 		renameFileButton = new JButton("Rename");
 		renameFileButton.setOpaque(false);
 		renameFileButton.setBackground(new Color(0, 0, 0, 0));
-		renameFileButton.setForeground(Color.WHITE);
+		renameFileButton.setForeground(Color.black);
 		renameFileButton.setFocusable(false);
 
 		saveFileButton = new JButton("Save");
 		saveFileButton.setOpaque(false);
 		saveFileButton.setBackground(new Color(0, 0, 0, 0));
-		saveFileButton.setForeground(Color.WHITE);
+		saveFileButton.setForeground(Color.black);
 		saveFileButton.setFocusable(false);
 
+		//footerPanel - 패널을 묶는 패널인듯
 		JPanel bttonsFooterPanel = new JPanel();
 		bttonsFooterPanel.setOpaque(false);
 		bttonsFooterPanel.setLayout(new FlowLayout(0));
@@ -147,6 +152,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		bttonsFooterPanel.add(addFileButton);
 		bttonsFooterPanel.add(addFolderButton);
 
+		//현재 폴더의 파일 정보를 얻음
 		File file = new File(currentFolder);
 		footerInfoLabel = new JLabel();
 		footerInfoLabel.setIcon(fileSystemView.getSystemIcon(file));
@@ -154,29 +160,31 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		footerInfoLabel.setToolTipText(file.getPath());
 		footerInfoLabel.setPreferredSize(new Dimension(120, 60));
 		footerInfoLabel.setSize(footerInfoLabel.getPreferredSize());
-		footerInfoLabel.setForeground(Color.white);
+		footerInfoLabel.setForeground(Color.black);
 
+		// 최하단 기능 버튼 + 파일 개수
 		JPanel footerPanel = new JPanel();
 		footerPanel.setPreferredSize(new Dimension(750, getHeight() / 20));
 		footerPanel.setSize(footerPanel.getPreferredSize());
-		footerPanel.setBackground(Color.black);
+		footerPanel.setBackground(Color.white);
 		footerPanel.setLayout(new BorderLayout(0, 0));
 		footerPanel.add(footerInfoLabel, BorderLayout.WEST);
 		footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
+		// 리턴 버튼 + 파일 위치
 		JPanel barPanel = new JPanel();
 		barPanel.setOpaque(false);
 		barPanel.setLayout(new BorderLayout(0, 0));
 		barPanel.add(retButton, BorderLayout.WEST);
-		barPanel.add(arbreTextField, BorderLayout.CENTER);
+		barPanel.add(treeTextField, BorderLayout.CENTER);
 
-		affichagePanel = new JPanel();
-		affichagePanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
-		affichagePanel.setOpaque(false);
-		affichagePanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
-		affichagePanel.setLayout(new BorderLayout(0, 0));
-		affichagePanel.add(barPanel, BorderLayout.NORTH);
-		affichagePanel.add(footerPanel, BorderLayout.SOUTH);
+		displayPanel = new JPanel();
+		displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
+		displayPanel.setOpaque(false);
+		displayPanel.setBorder(BorderFactory.createBevelBorder(0, Color.white, Color.black));
+		displayPanel.setLayout(new BorderLayout(0, 0));
+		displayPanel.add(barPanel, BorderLayout.NORTH);
+		displayPanel.add(footerPanel, BorderLayout.SOUTH);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -191,8 +199,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		for (File file : files) {
 			node1 = new DefaultMutableTreeNode(file);
 			computer.add(node1);
-			node1.add(new DefaultMutableTreeNode(new Boolean(true)));
-			remplirShowPane(file, 0);
+			node1.add(new DefaultMutableTreeNode(true));
+			//파일을 보여주는 pane을 채움
+			fillShowPane(file, 0);
 		}
 
 //		File fileRoot = fileSystemView.getHomeDirectory();// new File("C:\\Users\\The Mh\\Desktop\\");
@@ -219,9 +228,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
 				File file = new File(node.getUserObject().toString());
 				if (file != null) {
 					currentFolder = file.getAbsolutePath();
-					arbreTextField.setText(currentFolder);
+					treeTextField.setText(currentFolder);
 				} else {
-					arbreTextField.setText("Computer");
+					treeTextField.setText("Computer");
 					currentFolder = "";
 				}
 				OpenFile(file);
@@ -269,7 +278,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 				if (currentFolder != null && !currentFolder.equals("")) {
 					currentFolder = new File(currentFolder).getParent();
 					if (currentFolder != null && !currentFolder.equals("")) {
-						arbreTextField.setText(currentFolder);
+						treeTextField.setText(currentFolder);
 						OpenFile(new File(currentFolder));
 					}
 				}
@@ -325,7 +334,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 						else
 							file.renameTo(new File(selectedFolder + ".txt"));
 						OpenFile(new File(currentFolder));
-						arbreTextField.setText(currentFolder);
+						treeTextField.setText(currentFolder);
 					}
 					selectedFolder = null;
 				}
@@ -349,16 +358,17 @@ public class FileBrowser extends JPanel implements ComponentListener {
 			}
 		});
 
-		JScrollPane AfficageScroll = new JScrollPane(showPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+		//주 패널 정보 출력 - 파일 트리 정보 + 파일들
+		JScrollPane displayScroll = new JScrollPane(showPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		AfficageScroll.setOpaque(false);
-		AfficageScroll.getViewport().add(showPanel);
-		AfficageScroll.getViewport().setOpaque(false);
-		AfficageScroll.getViewport().validate();
-		AfficageScroll.setPreferredSize(new Dimension(750, (int) AfficageScroll.getPreferredSize().getHeight()));
-		affichagePanel.add(AfficageScroll, BorderLayout.CENTER);
-//		affichagePanel.add(showPanel, BorderLayout.CENTER);
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, affichagePanel);
+		displayScroll.setOpaque(false);
+		displayScroll.getViewport().add(showPanel);
+		displayScroll.getViewport().setOpaque(false);
+		displayScroll.getViewport().validate();
+		displayScroll.setPreferredSize(new Dimension(750, (int) displayScroll.getPreferredSize().getHeight()));
+		displayPanel.add(displayScroll, BorderLayout.CENTER);
+//		displayPanel.add(showPanel, BorderLayout.CENTER);
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, treeScroll, displayPanel);
 		splitPane.setOpaque(false);
 		add(splitPane, BorderLayout.CENTER);
 		validate();
@@ -388,13 +398,13 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		frame.setVisible(true);
 	}
 
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);// clear and repaint
-		g.drawImage(getImg("img/background7.jpg"), 0, 0, getWidth(), getHeight(), this);
-		g.drawImage(getImg("img/Hacker-silhouette.jpg"), (int) treeScroll.getWidth(), 0,
-				(int) getWidth() - treeScroll.getWidth(), getHeight(), this);
-	}
+//    @Override
+//    public void paintComponent(Graphics g) {
+//        super.paintComponent(g);// clear and repaint
+//        g.drawImage(getImg("img/background7.jpg"), 0, 0, getWidth(), getHeight(), this);
+//        g.drawImage(getImg("img/Hacker-silhouette.jpg"), (int) treeScroll.getWidth(), 0,
+//                (int) getWidth() - treeScroll.getWidth(), getHeight(), this);
+//    }
 
 	// TODO OpenFile for open selected file selected from JTree and showit in Show
 	// is Panel
@@ -472,7 +482,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 					footerInfoLabel.setText(" " + files.length + " element(s)");
 					footerInfoLabel.setIcon(fileSystemView.getSystemIcon(file));
 					for (File f : files) {
-						remplirShowPane(f, 1);
+						fillShowPane(f, 1);
 					}
 				}
 			}
@@ -481,7 +491,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		}
 	}
 
-	private void remplirShowPane(File f, int chois) {
+	//파일 정보를 보여주는 pane을 채움
+	private void fillShowPane(File f, int choice) {
 		JButton fileButton = new JButton();
 		try {
 			ImageIcon imgIcon = (ImageIcon) fileSystemView.getSystemIcon(f);
@@ -492,7 +503,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 			fileButton.setHorizontalTextPosition(SwingConstants.CENTER);
 			fileButton.setVerticalTextPosition(JButton.BOTTOM);
 			fileButton.setToolTipText(f.getPath());
-			if (chois == 0)
+			if (choice == 0)
 				fileButton.setPreferredSize(new Dimension(140, 150));
 			else
 				fileButton.setPreferredSize(new Dimension(100, 120));
@@ -508,6 +519,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		}
 	}
 
+	//파일 읽는 기능
 	private String readFile(String file) {
 		// LIS LE FICHIER
 		String lines = "";
@@ -561,11 +573,11 @@ public class FileBrowser extends JPanel implements ComponentListener {
 				DefaultMutableTreeNode childNode = new DefaultMutableTreeNode(file);
 				node.add(childNode);
 				if (file.isDirectory())
-					childNode.add(new DefaultMutableTreeNode(new Boolean(true)));
+					childNode.add(new DefaultMutableTreeNode(true));
 //					createChildren(childNode);
 			}
 		} else
-			node.add(new DefaultMutableTreeNode(new Boolean(true)));
+			node.add(new DefaultMutableTreeNode(true));
 	}
 
 	public Image getImg(String sh) {
@@ -582,7 +594,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		try {
 			Image img = getImg(sh);
 			img = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);// getImg(sh).getScaledInstance(width,
-																			// height, Image.SCALE_SMOOTH)
+			// height, Image.SCALE_SMOOTH)
 			return new ImageIcon(img);
 		} catch (Exception e) {
 			System.out.println("!! Ereur : image {\"" + sh + "\"} not found :: " + e.getMessage());
@@ -626,7 +638,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 				} else {
 					currentFolder = sh;
 					OpenFile(new File(currentFolder));
-					arbreTextField.setText(currentFolder);
+					treeTextField.setText(currentFolder);
 					selectedFolder = null;
 				}
 			}
@@ -637,7 +649,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 			menu.show(e.getComponent(), e.getX(), e.getY());
 		}
 
-		// TODO PopMrnu
+		// TODO PopMenu
+		//우클릭 했을 때 팝업이 나오면 그 때 사용할 기능
 		class PopUpDemo extends JPopupMenu {
 			private static final long serialVersionUID = 1L;
 			JMenuItem rename, addFolder, addFile, openInDesktop;
@@ -712,7 +725,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
 		@Override
 		public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded,
-				boolean leaf, int row, boolean hasFocus) {
+													  boolean leaf, int row, boolean hasFocus) {
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
 			File file = new File(node.getUserObject().toString());
 			label.setIcon(fileSystemView.getSystemIcon(file));
