@@ -53,12 +53,23 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
 
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.PullCommand;
+import org.eclipse.jgit.api.PushCommand;
+import org.eclipse.jgit.api.RemoteAddCommand;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.errors.RepositoryNotFoundException;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.URIish;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
 
 public class FileBrowser extends JPanel implements ComponentListener {
 	private static final long serialVersionUID = 1L;
 	private JFrame frame;
 	private JPanel displayPanel, showPanel;
-	private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton;
+	private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, createRepoButton;
 	private JLabel footerInfoLabel; //파일 주소 출력
 	private DefaultMutableTreeNode computer, root;
 	private DefaultTreeModel treeModel;
@@ -171,20 +182,28 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		footerPanel.add(footerInfoLabel, BorderLayout.WEST);
 		footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
+		// feature2. git repository creation을 위한 메뉴 제공
+		createRepoButton = new JButton("create repository");
+		createRepoButton.setOpaque(false);
+		createRepoButton.setBackground(new Color(0, 0, 0, 0));
+		createRepoButton.setForeground(Color.black);
+		createRepoButton.setFocusable(false);
+
 		// 리턴 버튼 + 파일 위치
 		JPanel barPanel = new JPanel();
 		barPanel.setOpaque(false);
 		barPanel.setLayout(new BorderLayout(0, 0));
 		barPanel.add(retButton, BorderLayout.WEST);
 		barPanel.add(treeTextField, BorderLayout.CENTER);
+		barPanel.add(createRepoButton, BorderLayout.SOUTH); // feature2 임시 위치
 
 		displayPanel = new JPanel();
 		displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
 		displayPanel.setOpaque(false);
 		displayPanel.setBorder(BorderFactory.createBevelBorder(0, Color.white, Color.black));
 		displayPanel.setLayout(new BorderLayout(0, 0));
-		displayPanel.add(barPanel, BorderLayout.NORTH);
-		displayPanel.add(footerPanel, BorderLayout.SOUTH);
+		displayPanel.add(barPanel, BorderLayout.NORTH); // 리턴 버튼 + 파일 위치
+		displayPanel.add(footerPanel, BorderLayout.SOUTH); // 파일 정보 + save, rename, new file, new folder 버튼
 	}
 
 	@SuppressWarnings("deprecation")
@@ -358,6 +377,22 @@ public class FileBrowser extends JPanel implements ComponentListener {
 			}
 		});
 
+		// feature 2 repository 생성
+		createRepoButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				File localPath = new File(currentFolder);
+				System.out.println(root);
+				try {
+					Git repo = Git.init().setDirectory(localPath).call();
+					System.out.println("Having repository: " + repo.getRepository().getDirectory());
+				} catch (GitAPIException e) {
+					throw new RuntimeException(e);
+				}
+
+			}
+		});
+
 		//주 패널 정보 출력 - 파일 트리 정보 + 파일들
 		JScrollPane displayScroll = new JScrollPane(showPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -509,7 +544,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 				fileButton.setPreferredSize(new Dimension(100, 120));
 			fileButton.setSize(fileButton.getPreferredSize());
 			fileButton.setBackground(new Color(0, 0, 0, 0));
-			fileButton.setForeground(Color.white);
+			fileButton.setForeground(Color.black);
 			fileButton.setOpaque(false);
 			fileButton.addMouseListener(new Mouse(fileButton.getToolTipText()));
 			showPanel.add(fileButton);
