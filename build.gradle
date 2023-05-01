@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+archivesBaseName = 'FileBrowser'
+version = '1.0-SNAPSHOT'
+
+sourceSets.main.java.srcDirs = ['src']
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'FileBrowser'
+    }
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '6.5.0.202303070854-r'
+}
