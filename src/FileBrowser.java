@@ -44,6 +44,7 @@ import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.border.LineBorder;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.event.TreeSelectionEvent;
@@ -497,7 +498,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		try {
 			ImageIcon imgIcon = (ImageIcon) fileSystemView.getSystemIcon(f);
 			Image img = imgIcon.getImage();
-			img = img.getScaledInstance(25, 35, Image.SCALE_SMOOTH);
+			img = img.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
 			fileButton.setIcon(new ImageIcon(img));
 			fileButton.setText(fileSystemView.getSystemDisplayName(f));
 			fileButton.setHorizontalTextPosition(SwingConstants.CENTER);
@@ -508,10 +509,11 @@ public class FileBrowser extends JPanel implements ComponentListener {
 			else
 				fileButton.setPreferredSize(new Dimension(100, 120));
 			fileButton.setSize(fileButton.getPreferredSize());
-			fileButton.setBackground(new Color(0, 0, 0, 0));
-			fileButton.setForeground(Color.white);
+			fileButton.setBackground(Color.white);
+			fileButton.setForeground(Color.black);
 			fileButton.setOpaque(false);
 			fileButton.addMouseListener(new Mouse(fileButton.getToolTipText()));
+			fileButton.setBorder(new LineBorder(Color.BLACK, 0));
 			showPanel.add(fileButton);
 		} catch (Exception e) {
 			System.out.println("!! Ereur : " + e);
