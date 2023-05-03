@@ -71,6 +71,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JTextArea textArea;
     private JPanel bttonsFooterPanel = new JPanel();
 
+    private JPanel barPanel = new JPanel();
+
     private boolean isCommitMenuOpened = false;
 
     private void build() {
@@ -153,15 +155,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
         bttonsFooterPanel.add(addFileButton);
         bttonsFooterPanel.add(addFolderButton);
 
-        // 커밋 메뉴 버튼
-        commitMenuButton = new JButton("Commit Menu");
-        commitMenuButton.setOpaque(false);
-        commitMenuButton.setBackground(new Color(0, 0, 0, 0));
-        commitMenuButton.setForeground(Color.black);
-        commitMenuButton.setFocusable(false);
-        // 푸터에 추가
-        bttonsFooterPanel.add(commitMenuButton);
-
         //현재 폴더의 파일 정보를 얻음
         File file = new File(currentFolder);
         footerInfoLabel = new JLabel();
@@ -182,11 +175,20 @@ public class FileBrowser extends JPanel implements ComponentListener {
         footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
         // 리턴 버튼 + 파일 위치
-        JPanel barPanel = new JPanel();
         barPanel.setOpaque(false);
         barPanel.setLayout(new BorderLayout(0, 0));
         barPanel.add(retButton, BorderLayout.WEST);
         barPanel.add(treeTextField, BorderLayout.CENTER);
+
+        // 커밋 메뉴 버튼
+        commitMenuButton = new JButton("Commit Menu");
+        commitMenuButton.setOpaque(false);
+        commitMenuButton.setBackground(new Color(0, 0, 0, 0));
+        commitMenuButton.setForeground(Color.black);
+        commitMenuButton.setFocusable(false);
+        // 상단 파일 경로 오른쪽에 커밋 메뉴 추가
+        barPanel.add(commitMenuButton, BorderLayout.EAST);
+        // bttonsFooterPanel.add(commitMenuButton);
 
         displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
         displayPanel.setOpaque(false);
@@ -219,7 +221,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
                     CustomSwingUtilities customSwingUtilities = new CustomSwingUtilities();
-                    commitPanel = customSwingUtilities.showCommitMenu(currentFolder, commitPanel, getHeight());
+                    commitPanel = customSwingUtilities.showCommitMenu(currentFolder, getHeight());
                     displayPanel.add(commitPanel, BorderLayout.EAST);
                     displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + commitPanel.getWidth(), getHeight()));
                     frame.setSize(new Dimension(width + commitPanel.getWidth(), height));
