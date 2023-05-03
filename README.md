@@ -42,6 +42,7 @@
 - 2023-04 : 적절한 오픈소스 탐색 및 프로그래밍 언어 선정  
 - 2023-05-01 : eclipse project를 gradle project로 변경  
 - 2023-05-03 : commit menu ui 추가  
+- 2023-05-03 : create repository 버튼 생성
 
 ## Details About Implementation
 ### 주요 의존성
@@ -64,11 +65,6 @@
 ## Original Project Introduction
 > Writing a simple file browser in Java SWING
 
-### TODO
-- ~~creation 버튼 생성~~
-- ~~버튼 기능(git init) 추가~~
-- 버튼 위치 조정
-- 이미 관리 중인 폴더가 있으면 메뉴에 새로운 폴더를 생성할 수 없도록 제한
 
 원본 프로젝트는 java로 구현한 file browser입니다.
 ***

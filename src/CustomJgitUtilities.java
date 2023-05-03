@@ -1,5 +1,7 @@
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,5 +18,13 @@ public class CustomJgitUtilities {
             // failed to open repository
         }
         return false;
+    }
+
+    public static Repository createNewRepository(String path) throws IOException {
+        // create the directory
+        Repository repository = FileRepositoryBuilder.create(new File(path, ".git"));
+        repository.create();
+
+        return repository;
     }
 }
