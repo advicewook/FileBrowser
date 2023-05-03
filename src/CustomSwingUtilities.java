@@ -5,29 +5,34 @@ import org.eclipse.jgit.lib.Repository;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Set;
 
 public class CustomSwingUtilities {
-    public JPanel showCommitMenu(String path, JPanel commitPanel, int height) {
+    public JPanel showCommitMenu(String path, int height) {
 
-        try (Repository repository = CookbookHelper.openJGitCookbookRepository()) {
-            try (Git git = new Git(repository)) {
-                Status status = git.status().call();
-                System.out.println("Added: " + status.getAdded());
-                System.out.println("Changed: " + status.getChanged());
-                System.out.println("IgnoredNotInIndex: " + status.getIgnoredNotInIndex());
-                System.out.println("Modified: " + status.getModified());
-                System.out.println("Removed: " + status.getRemoved());
-                System.out.println("Untracked: " + status.getUntracked());
-            } catch (GitAPIException e) {
-                throw new RuntimeException(e);
-            }
-        } catch (IOException e) {
+        Status status;
+        try (Git git = Git.open(new File(path))) {
+            status = git.status().call();
+            System.out.println("Added: " + status.getAdded());
+            System.out.println("Changed: " + status.getChanged());
+            System.out.println("Modified: " + status.getModified());
+            System.out.println("Removed: " + status.getRemoved());
+            System.out.println("Untracked: " + status.getUntracked());
+        } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);
         }
 
+        Set<String> untrackedSet = status.getUntracked();
+        Set<String> modifiedSet = status.getModified();
+        Set<String> addedSet = status.getAdded();
+        Set<String> changedSet = status.getChanged();
+        Set<String> removedSet = status.getRemoved();
+
         // 커밋 패널 부모 컨테이너
-        commitPanel = new JPanel();
+        JPanel commitPanel = new JPanel();
         commitPanel.setOpaque(false);
         commitPanel.setSize(new Dimension(300, height));
         commitPanel.setLayout(new BorderLayout());
@@ -42,7 +47,7 @@ public class CustomSwingUtilities {
         topHeader.setOpaque(false);
         topHeader.setLayout(new FlowLayout(0));
         topHeader.setSize(new Dimension(300, 35));
-        // 커밋 패널 - 중단 텍스트
+        // 커밋 패널 - 상단 텍스트
         JLabel unstagedLabel = new JLabel();
         unstagedLabel.setText("Unstaged");
         unstagedLabel.setPreferredSize(new Dimension(60, 30));
@@ -56,8 +61,13 @@ public class CustomSwingUtilities {
         stageButton.setForeground(Color.black);
         stageButton.setFocusable(false);
         topHeader.add(stageButton);
-        // 커밋 패널 - 상단 리스트
+        // 커밋 패널 - 상단 리스트 컨테이너
         JPanel unstagedPanel = new JPanel();
+        unstagedPanel.setLayout(new BoxLayout(unstagedPanel, BoxLayout.Y_AXIS));
+        // 커밋 패널 - 상단 리스트 추가
+        getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
+        getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
+        // 커밋 패널 - 상단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane unstagedScrollPanel = new JScrollPane(unstagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         unstagedScrollPanel.setOpaque(false);
@@ -93,8 +103,14 @@ public class CustomSwingUtilities {
         unStageButton.setForeground(Color.black);
         unStageButton.setFocusable(false);
         middleHeader.add(unStageButton);
-        // 커밋 패널 - 중단 리스트
+        // 커밋 패널 - 중단 리스트 컨테이너
         JPanel stagedPanel = new JPanel();
+        stagedPanel.setLayout(new BoxLayout(stagedPanel, BoxLayout.Y_AXIS));
+        // 커밋 패널 - 중단 리스트 추가
+        getJCheckBoxList(addedSet, stagedPanel, "added");
+        getJCheckBoxList(changedSet, stagedPanel, "changed");
+        getJCheckBoxList(removedSet, stagedPanel, "removed");
+        // 커밋 패널 - 중단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane stagedScrollPanel = new JScrollPane(stagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         stagedScrollPanel.setOpaque(false);
@@ -135,9 +151,9 @@ public class CustomSwingUtilities {
 //        textField.setVisible(true);
 //        textField.setSize(300,120);
         // 커밋 패널 - 하단 텍스트 영역
-        JTextArea textArea = new JTextArea(3,1);
+        JTextArea textArea = new JTextArea(3, 1);
         textArea.setVisible(true);
-        textArea.setSize(300,120);
+        textArea.setSize(300, 120);
 
         JScrollPane scrollTextArea = new JScrollPane(textArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -155,5 +171,61 @@ public class CustomSwingUtilities {
         commitPanel.add(bottomCommitPanel, BorderLayout.SOUTH);
 
         return commitPanel;
+    }
+
+    public void getJCheckBoxList(Set<String> statusSet, JPanel container, String status) {
+        Iterator<String> statusIterator = statusSet.iterator();
+        while (statusIterator.hasNext()) {
+            JPanel layout = new JPanel();
+            layout.setLayout(new BoxLayout(layout, BoxLayout.X_AXIS));
+            JCheckBox statusFile = new JCheckBox(statusIterator.next());
+            layout.setAlignmentX(Component.LEFT_ALIGNMENT);
+            JLabel label=new JLabel();
+            Image img;
+            ImageIcon imageIcon;
+            // status에 따른 icon 생성
+            switch (status) {
+                case "untracked":
+                    img = new ImageIcon("src\\" + "/img/untracked.png").getImage();
+                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(16, 14));
+                    break;
+                case "modified":
+                    img = new ImageIcon("src\\" + "/img/modified.png").getImage();
+                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(16, 14));
+                    break;
+                case "added":
+                    img = new ImageIcon("src\\" + "/img/added.png").getImage();
+                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(16, 14));
+                    break;
+                case "changed":
+                    img = new ImageIcon("src\\" + "/img/changed.png").getImage();
+                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(16, 14));
+                    break;
+                case "removed":
+                    img = new ImageIcon("src\\" + "/img/removed.png").getImage();
+                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(16, 14));
+                    break;
+                default: break;
+            }
+            layout.add(label);
+            layout.add(statusFile);
+
+            container.add(layout);
+        }
     }
 }
