@@ -182,12 +182,26 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		footerPanel.add(footerInfoLabel, BorderLayout.WEST);
 		footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
-		// feature2. git repository creation을 위한 메뉴 제공
+		// git repository creation 버튼 추가
 		createRepoButton = new JButton("create repository");
 		createRepoButton.setOpaque(false);
 		createRepoButton.setBackground(new Color(0, 0, 0, 0));
 		createRepoButton.setForeground(Color.black);
 		createRepoButton.setFocusable(false);
+
+		// test button
+		JButton t = new JButton("test menu");
+		t.setOpaque(false);
+		t.setBackground(new Color(0, 0, 0, 0));
+		t.setForeground(Color.black);
+		t.setFocusable(false);
+
+		// 버튼 두 개 합치기
+		JPanel gitMenuPanel = new JPanel();
+		gitMenuPanel.setOpaque(false);
+		gitMenuPanel.setLayout(new BorderLayout(0, 0));
+		gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
+		gitMenuPanel.add(t, BorderLayout.EAST);
 
 		// 리턴 버튼 + 파일 위치
 		JPanel barPanel = new JPanel();
@@ -195,12 +209,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		barPanel.setLayout(new BorderLayout(0, 0));
 		barPanel.add(retButton, BorderLayout.WEST);
 		barPanel.add(treeTextField, BorderLayout.CENTER);
-		barPanel.add(createRepoButton, BorderLayout.SOUTH); // feature2 임시 위치
+		barPanel.add(gitMenuPanel, BorderLayout.EAST); // feature2 임시 위치
 
 		displayPanel = new JPanel();
 		displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
 		displayPanel.setOpaque(false);
-		displayPanel.setBorder(BorderFactory.createBevelBorder(0, Color.white, Color.black));
+		//displayPanel.setBorder(BorderFactory.createBevelBorder(0, Color.white, Color.black));
 		displayPanel.setLayout(new BorderLayout(0, 0));
 		displayPanel.add(barPanel, BorderLayout.NORTH); // 리턴 버튼 + 파일 위치
 		displayPanel.add(footerPanel, BorderLayout.SOUTH); // 파일 정보 + save, rename, new file, new folder 버튼
@@ -381,6 +395,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 		createRepoButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				// 이미 생성된 레포인지 검사하는 코드 추가
 				File localPath = new File(currentFolder);
 				System.out.println(root);
 				try {
