@@ -1,19 +1,23 @@
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.RevertCommand;
-import org.eclipse.jgit.api.RmCommand;
+import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.api.errors.JGitInternalException;
+import org.eclipse.jgit.lib.IndexDiff;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Map;
+import java.util.Set;
 
 public class CustomJgitUtilities {
     public static boolean isGitRepository(String path) {
@@ -29,215 +33,144 @@ public class CustomJgitUtilities {
         return false;
     }
 
-    public static Repository createNewRepository() throws IOException {
-        // prepare a new folder
-        File localPath = File.createTempFile("TestGitRepository", "");
-        if(!localPath.delete()) {
-            throw new IOException("Could not delete temporary file " + localPath);
-        }
-
+    public static Repository createNewRepository(String path) throws IOException {
         // create the directory
-        Repository repository = FileRepositoryBuilder.create(new File(localPath, ".git"));
+        Repository repository = FileRepositoryBuilder.create(new File(path, ".git"));
         repository.create();
 
         return repository;
     }
-
     //git add
-//    public class AddFile {
-//
-//        public static void main(String[] args) throws IOException, GitAPIException {
-//            final File localPath;
-//            // prepare a new test-repository
-//            try (Repository repository = CookbookHelper.createNewRepository()) {
-//                localPath = repository.getWorkTree();
-//
-//                try (Git git = new Git(repository)) {
-//                    // create the file
-//                    File myFile = new File(repository.getDirectory().getParent(), "testfile");
-//                    if(!myFile.createNewFile()) {
-//                        throw new IOException("Could not create file " + myFile);
-//                    }
-//
-//                    // run the add-call
-//                    git.add()
-//                            .addFilepattern("testfile")
-//                            .call();
-//
-//                    System.out.println("Added file " + myFile + " to repository at " + repository.getDirectory());
-//                }
-//            }
-//
-//            // clean up here to not keep using more and more disk-space for these samples
-//            FileUtils.deleteDirectory(localPath);
-//        }
-//    }
-//    //git restore
-//    public class RevertCommit {
-//
-//        public static void main(String[] args) throws IOException, GitAPIException {
-//            final File path;
-//            try (Repository repository = CookbookHelper.createNewRepository()) {
-//                try (Git git = new Git(repository)) {
-//                    path = repository.getWorkTree();
-//                    System.out.println("Repository at " + path);
-//
-//                    // Create a new file and add it to the index
-//                    File newFile = new File(path, "file1.txt");
-//                    FileUtils.writeStringToFile(newFile, "Line 1\r\n", "UTF-8", true);
-//                    git.add().addFilepattern("file1.txt").call();
-//                    RevCommit rev1 = git.commit().setAuthor("test", "test@test.com").setMessage("Commit Log 1").call();
-//                    System.out.println("Rev1: " + rev1);
-//
-//                    // commit some changes
-//                    FileUtils.writeStringToFile(newFile, "Line 2\r\n", "UTF-8", true);
-//                    git.add().addFilepattern("file1.txt").call();
-//                    RevCommit rev2 = git.commit().setAll(true).setAuthor("test", "test@test.com").setMessage("Commit Log 2").call();
-//                    System.out.println("Rev2: " + rev2);
-//
-//                    // commit some changes
-//                    FileUtils.writeStringToFile(newFile, "Line 3\r\n", "UTF-8", true);
-//                    git.add().addFilepattern("file1.txt").call();
-//                    RevCommit rev3 = git.commit().setAll(true).setAuthor("test", "test@test.com").setMessage("Commit Log 3").call();
-//                    System.out.println("Rev3: " + rev3);
-//
-//                    // print logs
-//                    Iterable<RevCommit> gitLog = git.log().call();
-//                    for (RevCommit logMessage : gitLog) {
-//                        System.out.println("Before revert: " + logMessage.getName() + " - " + logMessage.getFullMessage());
-//                    }
-//
-//                    RevertCommand revertCommand = git.revert();
-//                    // revert to revision 2
-//                    revertCommand.include(rev3);
-//                    RevCommit revCommit = revertCommand.call();
-//                    System.out.println("Reverted: " + revCommit);
-//                    System.out.println("Reverted refs: " + revertCommand.getRevertedRefs());
-//                    System.out.println("Unmerged paths: " + revertCommand.getUnmergedPaths());
-//                    System.out.println("Failing results: " + revertCommand.getFailingResult());
-//
-//                    // print logs
-//                    gitLog = git.log().call();
-//                    for (RevCommit logMessage : gitLog) {
-//                        System.out.println("After revert: " + logMessage.getName() + " - " + logMessage.getFullMessage());
-//                    }
-//
-//                    System.out.println("File contents: " + FileUtils.readFileToString(newFile, "UTF-8"));
-//                }
-//            }
-//
-//            // clean up here to not keep using more and more disk-space for these samples
-//            FileUtils.deleteDirectory(path);
-//        }
-//    }
-//    //git restore --staged
-//    public class RevertChanges {
-//
-//        public static void main(String[] args) throws IOException, GitAPIException {
-//            final File localPath;
-//            try (Repository repository = CookbookHelper.createNewRepository()) {
-//                localPath = repository.getWorkTree();
-//
-//                System.out.println("Listing local branches:");
-//                try (Git git = new Git(repository)) {
-//                    // set up a file
-//                    String fileName = "temptFile.txt";
-//                    File tempFile = new File(repository.getDirectory().getParentFile(), fileName);
-//                    if(!tempFile.createNewFile()) {
-//                        throw new IOException("Could not create temporary file " + tempFile);
-//                    }
-//                    Path tempFilePath = tempFile.toPath();
-//
-//                    // write some initial text to it
-//                    String initialText = "Initial Text";
-//                    System.out.println("Writing text [" + initialText + "] to file [" + tempFile.toString() + "]");
-//                    Files.write(tempFilePath, initialText.getBytes());
-//
-//                    // add the file and commit it
-//                    git.add().addFilepattern(fileName).call();
-//                    git.commit().setMessage("Added untracked file " + fileName + "to repo").call();
-//
-//                    // modify the file
-//                    Files.write(tempFilePath, "Some modifications".getBytes(), StandardOpenOption.APPEND);
-//
-//                    // assert that file's text does not equal initialText
-//                    if (initialText.equals(getTextFromFilePath(tempFilePath))) {
-//                        throw new IllegalStateException("Modified file's text should not equal " +
-//                                "its original state after modification");
-//                    }
-//
-//                    System.out.println("File now has text [" + getTextFromFilePath(tempFilePath) + "]");
-//
-//                    // revert the changes
-//                    git.checkout().addPath(fileName).call();
-//
-//                    // text should no longer have modifications
-//                    if (!initialText.equals(getTextFromFilePath(tempFilePath))) {
-//                        throw new IllegalStateException("Reverted file's text should equal its initial text");
-//                    }
-//
-//                    System.out.println("File modifications were reverted. " +
-//                            "File now has text [" + getTextFromFilePath(tempFilePath) + "]");
-//                }
-//            }
-//
-//            // clean up here to not keep using more and more disk-space for these samples
-//            FileUtils.deleteDirectory(localPath);
-//        }
-//
-//        private static String getTextFromFilePath(Path file) throws IOException {
-//            byte[] bytes = Files.readAllBytes(file);
-//            CharBuffer chars = Charset.defaultCharset().decode(ByteBuffer.wrap(bytes));
-//            return chars.toString();
-//        }
-//    }
-//    //git rm --cached
-//    public class GitRemove {
-//        public static void removeFile(String filePath) throws IOException, GitAPIException {
-//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//            try (Repository repository = builder.setGitDir(new File(".git"))
-//                    .readEnvironment() // scan environment GIT_* variables
-//                    .findGitDir() // scan up the file system tree
-//                    .build()) {
-//                try (Git git = new Git(repository)) {
-//                    RmCommand rm = git.rm().setCached(true);
-//                    rm.addFilepattern(filePath);
-//                    rm.call();
-//                    System.out.println("Removed file " + filePath + " from index.");
-//                }
-//            }
-//        }
-//    }
-//    //git rm
-//    public class GitRemove {
-//        public static void removeFile(String filePath) throws IOException, GitAPIException {
-//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//            try (Repository repository = builder.setGitDir(new File(".git"))
-//                    .readEnvironment() // scan environment GIT_* variables
-//                    .findGitDir() // scan up the file system tree
-//                    .build()) {
-//                try (Git git = new Git(repository)) {
-//                    RmCommand rm = git.rm();
-//                    rm.addFilepattern(filePath);
-//                    rm.call();
-//                    System.out.println("Removed file " + filePath + " from repository.");
-//                }
-//            }
-//        }
-//    }
-//    //git mv
-//    public class GitMove {
-//        public static void moveFile(String oldPath, String newPath) throws IOException, GitAPIException {
-//            FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//            try (Repository repository = builder.setGitDir(new File(".git"))
-//                    .readEnvironment() // scan environment GIT_* variables
-//                    .findGitDir() // scan up the file system tree
-//                    .build()) {
-//                try (Git git = new Git(repository)) {
-//                    git.mv().setForce(true).addFilepattern(oldPath).addFilepattern(newPath).call();
-//                    System.out.println("Moved file " + oldPath + " to " + newPath + ".");
-//                }
-//            }
-//        }
-//    }
-}
+        public static void addFile(String path,File file) throws IOException, GitAPIException {
+
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()) {
+                try (Git git = new Git(repository)) {
+                    git.add().addFilepattern(file.getName()).call();
+                    System.out.println("Added file " + file.getName() + " to repository.");
+                }
+            }
+
+            // clean up here to not keep using more and more disk-space for these samples
+            FileUtils.deleteDirectory(path);
+    }
+
+        //git restore
+    public static void restoreFile(String path, File file) throws IOException, GitAPIException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()) {
+                try (Git git = new Git(repository)) {
+                    ResetCommand resetCommand = git.reset();
+                    resetCommand.addPath(file.getPath());
+                    resetCommand.call();
+                    System.out.println("Restored file " + file.getPath() + " to its original state.");
+                }
+            }
+                // clean up here to not keep using more and more disk-space for these samples
+                FileUtils.deleteDirectory(file);
+            }
+        }
+
+
+
+        // git restore --cached
+        public static void restoreStagedFile(String path, File file) throws IOException, GitAPIException {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()) {
+                try (Git git = new Git(repository)) {
+                    ResetCommand resetCommand = git.reset();
+                    resetCommand.setRef("HEAD");
+                    resetCommand.addPath(file.getPath());
+                    resetCommand.call();
+                    System.out.println("Unstaged changes for file " + file.getPath());
+                }
+            }
+        }
+
+        //git rm --cached
+        public static void removeCachedFile(String path, File file) throws IOException, GitAPIException {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()) {
+                try (Git git = new Git(repository)) {
+                    RmCommand rm = git.rm();
+                    rm.setCached(true);
+                    rm.addFilepattern(file.getPath());
+                    rm.call();
+                    System.out.println("Removed cached file " + file.getPath());
+                }
+            }
+        }
+        //git rm
+        public static void removeFile(String path, File file) throws IOException, GitAPIException {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                    .readEnvironment() // scan environment GIT_* variables
+                    .findGitDir() // scan up the file system tree
+                    .build()) {
+                try (Git git = new Git(repository)) {
+                    RmCommand rm = git.rm();
+                    rm.addFilepattern(file.getPath());
+                    rm.call();
+                    System.out.println("Removed file " + file.getPath());
+                }
+            }
+        }
+        //git mv
+        public static void gitMove(File oldFile, File newFile, Repository repository) throws GitAPIException, IOException {
+            try (Git git = new Git(repository)) {
+                // Remove the old file from the repository
+                git.rm().addFilepattern(getRelativePath(repository, oldFile)).call();
+
+                // Add the new file to the repository
+                git.add().addFilepattern(getRelativePath(repository, newFile)).call();
+
+                // Rename the file in the working directory
+                if (!oldFile.renameTo(newFile)) {
+                    throw new IOException("Failed to rename file: " + oldFile + " -> " + newFile);
+                }
+
+                // Commit the changes
+                git.commit().setMessage("Moved " + oldFile + " to " + newFile).call();
+            }
+        }
+
+        private static String getRelativePath(Repository repository, File file) {
+            return repository.getDirectory().toPath().relativize(file.toPath()).toString();
+            }
+
+        public static void mvFile(String path, File file, String newName) throws IOException, GitAPIException {
+            try (Repository repository = Git.open(new File(path, ".git")).getRepository()) {
+                Git git = new Git(repository);
+                String oldFilePath = file.getPath();
+                String newFilePath = path + File.separator + newName;
+
+                // Add the file to the index with the old path
+                git.add().addFilepattern(oldFilePath).call();
+
+                // Use Files.move to rename the file
+                Files.move(Paths.get(oldFilePath), Paths.get(newFilePath));
+
+                // Add the new file to the index with the new path
+                git.add().addFilepattern(newFilePath).call();
+
+                git.commit().setMessage("Renamed file " + oldFilePath + " to " + newFilePath).call();
+            } catch (JGitInternalException e) {
+                throw new JGitInternalException("Error occurred while renaming file.", e);
+            }
+        }
+        }
+
+
+

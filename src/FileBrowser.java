@@ -1,4 +1,7 @@
 
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -57,7 +60,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
     private JPanel showPanel, commitPanel;
-    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton;
+    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
     private DefaultTreeModel treeModel;
@@ -180,15 +183,26 @@ public class FileBrowser extends JPanel implements ComponentListener {
         barPanel.add(retButton, BorderLayout.WEST);
         barPanel.add(treeTextField, BorderLayout.CENTER);
 
+        // 레포 생성 버튼
+        createRepoButton = new JButton("Create Repository");
+        createRepoButton.setOpaque(false);
+        createRepoButton.setBackground(new Color(0, 0, 0, 0));
+        createRepoButton.setForeground(Color.black);
+        createRepoButton.setFocusable(false);
+
         // 커밋 메뉴 버튼
         commitMenuButton = new JButton("Commit Menu");
         commitMenuButton.setOpaque(false);
         commitMenuButton.setBackground(new Color(0, 0, 0, 0));
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
-        // 상단 파일 경로 오른쪽에 커밋 메뉴 추가
-        barPanel.add(commitMenuButton, BorderLayout.EAST);
-        // bttonsFooterPanel.add(commitMenuButton);
+
+        JPanel gitMenuPanel = new JPanel();
+        gitMenuPanel.setOpaque(false);
+        gitMenuPanel.setLayout(new BorderLayout(0, 0));
+        gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
+        gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
+        barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
 
         displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
         displayPanel.setOpaque(false);
@@ -214,6 +228,26 @@ public class FileBrowser extends JPanel implements ComponentListener {
             //파일을 보여주는 pane을 채움
             fillShowPane(file, 0);
         }
+
+        // 레포 생성 버튼 리스너 추가
+        createRepoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                //System.out.println(currentFolder);
+                if (CustomJgitUtilities.isGitRepository(currentFolder)) {
+                    // 이미 레포가 생성된 폴더의 경우 경고창 띄우기
+                    JOptionPane.showMessageDialog(null, "이미 레파지토리가 존재합니다");
+
+                } else {
+                    try {
+                        Repository r = CustomJgitUtilities.createNewRepository(currentFolder);
+                        System.out.println("Having repository: " + r.getDirectory());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
         // 커밋 메뉴 버튼 리스너 추가
         commitMenuButton.addActionListener(new ActionListener() {
             @Override
