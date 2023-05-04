@@ -41,69 +41,77 @@ public class CustomJgitUtilities {
         return repository;
     }
 
-    public static boolean isUntracked(String path) throws IOException, GitAPIException {
+    public static boolean isUntracked(String path, String fileName) throws IOException, GitAPIException {
         try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
             try (Git git = new Git(repository)) {
                 // get the status of all files in the repository
                 Status status = git.status().call();
 
-                // check if the path is untracked
-                return status.getUntracked().contains(path);
+                // check if the fileName is untracked
+                return status.getUntracked().contains(fileName);
             }
         }
     }
 
-    public static boolean isModified(String path) throws IOException, GitAPIException {
+    public static boolean isModified(String path, String fileName) throws IOException, GitAPIException {
         try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
             try (Git git = new Git(repository)) {
                 // get the status of all files in the repository
                 Status status = git.status().call();
 
-                // check if the path is modified
-                return status.getModified().contains(path);
+                // check if the fileName is modified
+                return status.getModified().contains(fileName);
             }
         }
     }
 
-    public static boolean isStaged(String path) throws IOException, GitAPIException {
+    public static boolean isStaged(String path, String fileName) throws IOException, GitAPIException {
         try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
-            try (Git git = new Git(repository)) {
+            try (Git git = Git.open(new File(path))) {
                 // get the status of all files in the repository
                 Status status = git.status().call();
 
-                // check if the path is staged
-                return status.getChanged().contains(path);
+                // check if the fileName is staged
+                return status.getAdded().contains(fileName);
             }
         }
     }
 
-    public static boolean isCommitted(String path) throws IOException, GitAPIException {
+
+    public static boolean isCommitted(String path, String fileName) throws IOException, GitAPIException {
         try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
             try (Git git = new Git(repository)) {
                 // get the status of all files in the repository
                 Status status = git.status().call();
 
-                // check if the path is committed or unmodified
-                return !status.getUncommittedChanges().contains(path) && !status.getUntracked().contains(path);
+                // check if the fileName is committed or unmodified
+                return !status.getUncommittedChanges().contains(fileName) && !status.getUntracked().contains(fileName);
             }
         }
     }
 
     //git add
-    public static void addFile(String path, String fileName) throws IOException, GitAPIException {
-
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-                .readEnvironment() // scan environment GIT_* variables
-                .findGitDir() // scan up the file system tree
-                .build()) {
-            try (Git git = new Git(repository)) {
-                git.add().addFilepattern(fileName).call();
-                System.out.println("Added file " + fileName + " to repository.");
-            }
+    public static void addFile(String path, String fileName) {
+        try (Git git = Git.open(new File(path))) {
+            git.add().addFilepattern(fileName).call();
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
         }
-
     }
+//    public static void addFile(String path, String fileName) throws IOException, GitAPIException {
+//
+//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+//                .readEnvironment() // scan environment GIT_* variables
+//                .findGitDir() // scan up the file system tree
+//                .build()) {
+//            try (Git git = new Git(repository)) {
+//                git.add().addFilepattern(fileName).call();
+//                System.out.println("Added file " + fileName + " to repository.");
+//            }
+//        }
+//
+//    }
 
     //git restore
     public static void restoreModifiedFile(String path, String fileName) {

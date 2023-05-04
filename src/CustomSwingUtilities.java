@@ -1,3 +1,4 @@
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -19,6 +20,7 @@ import java.util.Set;
 public class CustomSwingUtilities {
 
     public CustomSwingUtilities(){}
+    
     public JPanel showCommitMenu(String path, int height) {
 
         Status status;
@@ -69,42 +71,12 @@ public class CustomSwingUtilities {
         stageButton.setForeground(Color.black);
         stageButton.setFocusable(false);
         topHeader.add(stageButton);
-
-
         // 커밋 패널 - 상단 리스트 컨테이너
         JPanel unstagedPanel = new JPanel();
         unstagedPanel.setLayout(new BoxLayout(unstagedPanel, BoxLayout.Y_AXIS));
         // 커밋 패널 - 상단 리스트 추가
         getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
         getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
-
-
-        Set<String> selectedItems1 = new HashSet<>();
-        for (Component c : unstagedPanel.getComponents()) {
-            if (c instanceof JCheckBox) {
-                JCheckBox checkbox = (JCheckBox) c;
-                if (checkbox.isSelected()) {
-                    selectedItems1.add(checkbox.getText());
-                }
-            }
-        }
-
-        //체크박스에 선택된 아이템들을 staging
-        stageButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                try {
-                    Iterator<String> iter1 = selectedItems1.iterator();
-                    while(iter1.hasNext()){
-                        CustomJgitUtilities.addFile(path,iter1.next());
-                    }
-                } catch (IOException | GitAPIException e) {
-                    // Handle the exception
-                    e.printStackTrace();
-                }
-
-            }
-        });
         // 커밋 패널 - 상단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane unstagedScrollPanel = new JScrollPane(unstagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -150,32 +122,7 @@ public class CustomSwingUtilities {
         getJCheckBoxList(changedSet, stagedPanel, "changed");
         getJCheckBoxList(removedSet, stagedPanel, "removed");
 
-        Set<String> selectedItems2 = new HashSet<>();
-        for (Component c : stagedPanel.getComponents()) {
-            if (c instanceof JCheckBox) {
-                JCheckBox checkbox = (JCheckBox) c;
-                if (checkbox.isSelected()) {
-                    selectedItems2.add(checkbox.getText());
-                }
-            }
-        }
 
-        //체크박스에 선택된 아이템들을 unstaging
-        unStageButton.addActionListener(new ActionListener(){
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                try {
-                    Iterator<String> iter1 = selectedItems2.iterator();
-                    while(iter1.hasNext()){
-                        CustomJgitUtilities.restoreStagedFile(path,iter1.next());
-                    }
-                } catch (Exception e) {
-                    // Handle the exception
-                    e.printStackTrace();
-                }
-
-            }
-        });
         // 커밋 패널 - 중단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane stagedScrollPanel = new JScrollPane(stagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -231,6 +178,55 @@ public class CustomSwingUtilities {
         // 커밋 패넝 - 하단 병합
         bottomCommitPanel.add(bottomHeader, BorderLayout.NORTH);
         bottomCommitPanel.add(scrollTextArea, BorderLayout.CENTER);
+
+        //체크박스에 선택된 아이템들을 staging
+        stageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Set<String> selectedItems1 = new HashSet<>();
+                addSelectedItems(unstagedPanel, selectedItems1);
+                try {
+                    Iterator<String> iter1 = selectedItems1.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.addFile(path,iter1.next());
+                    }
+                } catch (Exception ex) {
+                    // Handle the exception
+                    ex.printStackTrace();
+                }
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                commitPanel.revalidate();
+                commitPanel.repaint();
+            }
+        });
+        //체크박스에 선택된 아이템들을 unstaging
+        unStageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Set<String> selectedItems2 = new HashSet<>();
+                addSelectedItems(stagedPanel, selectedItems2);
+                try {
+                    Iterator<String> iter1 = selectedItems2.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.restoreStagedFile(path,iter1.next());
+                    }
+                } catch (Exception e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                commitPanel.revalidate();
+                commitPanel.repaint();
+            }
+        });
+
+
         // 커밋 패널 부모 컨테이너에 추가
         commitPanel.add(topCommitPanel, BorderLayout.NORTH);
         commitPanel.add(middleCommitPanel, BorderLayout.CENTER);
@@ -292,6 +288,19 @@ public class CustomSwingUtilities {
             layout.add(statusFile);
 
             container.add(layout);
+        }
+    }
+    public void addSelectedItems(Container container, Set<String> selectedItems) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JCheckBox) {
+                JCheckBox checkbox = (JCheckBox) c;
+                if (checkbox.isSelected()) {
+                    selectedItems.add(checkbox.getText());
+                    System.out.println(checkbox.getText());
+                }
+            } else if (c instanceof Container) {
+                addSelectedItems((Container) c, selectedItems);
+            }
         }
     }
 }
