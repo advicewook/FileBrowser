@@ -54,8 +54,6 @@ public class CustomJgitUtilities {
             }
         }
 
-        // clean up here to not keep using more and more disk-space for these samples
-        FileUtils.deleteDirectory(path);
     }
 
     //git restore

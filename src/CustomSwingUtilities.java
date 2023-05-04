@@ -11,10 +11,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class CustomSwingUtilities {
+
+    public CustomSwingUtilities(){}
     public JPanel showCommitMenu(String path, int height) {
 
         Status status;
@@ -73,12 +77,24 @@ public class CustomSwingUtilities {
         // 커밋 패널 - 상단 리스트 추가
         getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
         getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
-        //리스트에 있는 파일들을 staging
+
+
+        Set<String> selectedItems1 = new HashSet<>();
+        for (Component c : unstagedPanel.getComponents()) {
+            if (c instanceof JCheckBox) {
+                JCheckBox checkbox = (JCheckBox) c;
+                if (checkbox.isSelected()) {
+                    selectedItems1.add(checkbox.getText());
+                }
+            }
+        }
+
+        //체크박스에 선택된 아이템들을 staging
         stageButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    Iterator<String> iter1 = modifiedSet.iterator();
+                    Iterator<String> iter1 = selectedItems1.iterator();
                     while(iter1.hasNext()){
                         CustomJgitUtilities.addFile(path,iter1.next());
                     }
@@ -86,15 +102,7 @@ public class CustomSwingUtilities {
                     // Handle the exception
                     e.printStackTrace();
                 }
-                try {
-                    Iterator<String> iter2 = untrackedSet.iterator();
-                    while(iter2.hasNext()){
-                        CustomJgitUtilities.addFile(path,iter2.next());
-                    }
-                } catch (IOException | GitAPIException e) {
-                    // Handle the exception
-                    e.printStackTrace();
-                }
+
             }
         });
         // 커밋 패널 - 상단 리스트 컨테이너를 스크롤 컨테이너에 삽입
@@ -141,12 +149,23 @@ public class CustomSwingUtilities {
         getJCheckBoxList(addedSet, stagedPanel, "added");
         getJCheckBoxList(changedSet, stagedPanel, "changed");
         getJCheckBoxList(removedSet, stagedPanel, "removed");
-        // 리스트에 있는 파일들을 unstaging
+
+        Set<String> selectedItems2 = new HashSet<>();
+        for (Component c : stagedPanel.getComponents()) {
+            if (c instanceof JCheckBox) {
+                JCheckBox checkbox = (JCheckBox) c;
+                if (checkbox.isSelected()) {
+                    selectedItems2.add(checkbox.getText());
+                }
+            }
+        }
+
+        //체크박스에 선택된 아이템들을 unstaging
         unStageButton.addActionListener(new ActionListener(){
             @Override
             public void actionPerformed(ActionEvent arg0) {
                 try {
-                    Iterator<String> iter1 = addedSet.iterator();
+                    Iterator<String> iter1 = selectedItems2.iterator();
                     while(iter1.hasNext()){
                         CustomJgitUtilities.restoreStagedFile(path,iter1.next());
                     }
@@ -154,24 +173,7 @@ public class CustomSwingUtilities {
                     // Handle the exception
                     e.printStackTrace();
                 }
-                try {
-                    Iterator<String> iter2 = changedSet.iterator();
-                    while(iter2.hasNext()){
-                        CustomJgitUtilities.restoreStagedFile(path,iter2.next());
-                    }
-                } catch (IOException | GitAPIException e) {
-                    // Handle the exception
-                    e.printStackTrace();
-                }
-                try {
-                    Iterator<String> iter3 = removedSet.iterator();
-                    while(iter3.hasNext()){
-                        CustomJgitUtilities.restoreStagedFile(path,iter3.next());
-                    }
-                } catch (IOException | GitAPIException e) {
-                    // Handle the exception
-                    e.printStackTrace();
-                }
+
             }
         });
         // 커밋 패널 - 중단 리스트 컨테이너를 스크롤 컨테이너에 삽입
