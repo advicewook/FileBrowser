@@ -41,39 +41,34 @@ public class CustomJgitUtilities {
         return repository;
     }
     //git add
-        public static void addFile(String path,File file) throws IOException, GitAPIException {
+    public static void addFile(String path, String fileName) throws IOException, GitAPIException {
 
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
+                .readEnvironment() // scan environment GIT_* variables
+                .findGitDir() // scan up the file system tree
+                .build()) {
+            try (Git git = new Git(repository)) {
+                git.add().addFilepattern(fileName).call();
+                System.out.println("Added file " + fileName + " to repository.");
+            }
+        }
+
+        // clean up here to not keep using more and more disk-space for these samples
+        FileUtils.deleteDirectory(path);
+    }
+
+        //git restore
+        public static void unstageFile(String path, String fileName) throws IOException, GitAPIException {
             FileRepositoryBuilder builder = new FileRepositoryBuilder();
             try (Repository repository = builder.setGitDir(new File(path + "/.git"))
                     .readEnvironment() // scan environment GIT_* variables
                     .findGitDir() // scan up the file system tree
                     .build()) {
                 try (Git git = new Git(repository)) {
-                    git.add().addFilepattern(file.getName()).call();
-                    System.out.println("Added file " + file.getName() + " to repository.");
+                    git.reset().setRef("HEAD").addPath(fileName).call();
+                    System.out.println("Unstaged file " + fileName + " in repository.");
                 }
-            }
-
-            // clean up here to not keep using more and more disk-space for these samples
-            FileUtils.deleteDirectory(path);
-    }
-
-        //git restore
-    public static void restoreFile(String path, File file) throws IOException, GitAPIException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-            try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-                    .readEnvironment() // scan environment GIT_* variables
-                    .findGitDir() // scan up the file system tree
-                    .build()) {
-                try (Git git = new Git(repository)) {
-                    ResetCommand resetCommand = git.reset();
-                    resetCommand.addPath(file.getPath());
-                    resetCommand.call();
-                    System.out.println("Restored file " + file.getPath() + " to its original state.");
-                }
-            }
-                // clean up here to not keep using more and more disk-space for these samples
-                FileUtils.deleteDirectory(file);
             }
         }
 
@@ -127,29 +122,8 @@ public class CustomJgitUtilities {
                 }
             }
         }
-        //git mv
-        public static void gitMove(File oldFile, File newFile, Repository repository) throws GitAPIException, IOException {
-            try (Git git = new Git(repository)) {
-                // Remove the old file from the repository
-                git.rm().addFilepattern(getRelativePath(repository, oldFile)).call();
 
-                // Add the new file to the repository
-                git.add().addFilepattern(getRelativePath(repository, newFile)).call();
-
-                // Rename the file in the working directory
-                if (!oldFile.renameTo(newFile)) {
-                    throw new IOException("Failed to rename file: " + oldFile + " -> " + newFile);
-                }
-
-                // Commit the changes
-                git.commit().setMessage("Moved " + oldFile + " to " + newFile).call();
-            }
-        }
-
-        private static String getRelativePath(Repository repository, File file) {
-            return repository.getDirectory().toPath().relativize(file.toPath()).toString();
-            }
-
+        //git mv (renaming)
         public static void mvFile(String path, File file, String newName) throws IOException, GitAPIException {
             try (Repository repository = Git.open(new File(path, ".git")).getRepository()) {
                 Git git = new Git(repository);

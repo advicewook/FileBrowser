@@ -65,12 +65,38 @@ public class CustomSwingUtilities {
         stageButton.setForeground(Color.black);
         stageButton.setFocusable(false);
         topHeader.add(stageButton);
+
+
         // 커밋 패널 - 상단 리스트 컨테이너
         JPanel unstagedPanel = new JPanel();
         unstagedPanel.setLayout(new BoxLayout(unstagedPanel, BoxLayout.Y_AXIS));
         // 커밋 패널 - 상단 리스트 추가
         getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
         getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
+        //리스트에 있는 파일들을 staging
+        stageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    Iterator<String> iter1 = modifiedSet.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.addFile(path,iter1.next());
+                    }
+                } catch (IOException | GitAPIException e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+                try {
+                    Iterator<String> iter2 = untrackedSet.iterator();
+                    while(iter2.hasNext()){
+                        CustomJgitUtilities.addFile(path,iter2.next());
+                    }
+                } catch (IOException | GitAPIException e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+            }
+        });
         // 커밋 패널 - 상단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane unstagedScrollPanel = new JScrollPane(unstagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -107,6 +133,7 @@ public class CustomSwingUtilities {
         unStageButton.setForeground(Color.black);
         unStageButton.setFocusable(false);
         middleHeader.add(unStageButton);
+
         // 커밋 패널 - 중단 리스트 컨테이너
         JPanel stagedPanel = new JPanel();
         stagedPanel.setLayout(new BoxLayout(stagedPanel, BoxLayout.Y_AXIS));
@@ -114,6 +141,39 @@ public class CustomSwingUtilities {
         getJCheckBoxList(addedSet, stagedPanel, "added");
         getJCheckBoxList(changedSet, stagedPanel, "changed");
         getJCheckBoxList(removedSet, stagedPanel, "removed");
+        // 리스트에 있는 파일들을 unstaging
+        unStageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                try {
+                    Iterator<String> iter1 = addedSet.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.unstageFile(path,iter1.next());
+                    }
+                } catch (IOException | GitAPIException e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+                try {
+                    Iterator<String> iter2 = changedSet.iterator();
+                    while(iter2.hasNext()){
+                        CustomJgitUtilities.unstageFile(path,iter2.next());
+                    }
+                } catch (IOException | GitAPIException e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+                try {
+                    Iterator<String> iter3 = removedSet.iterator();
+                    while(iter3.hasNext()){
+                        CustomJgitUtilities.unstageFile(path,iter3.next());
+                    }
+                } catch (IOException | GitAPIException e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+            }
+        });
         // 커밋 패널 - 중단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane stagedScrollPanel = new JScrollPane(stagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
