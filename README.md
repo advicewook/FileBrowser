@@ -28,7 +28,7 @@
 2. 아래 이미지를 참고하여 설정값을 변경합니다.  
    <img src="Screenshots/gradle-config-step1.png"/>  
 3. 설정이 완료되면 저장 후 Configuration창을 닫습니다.  
-4. 좌측 상단 'File > Settings > Editor > File Encodings'에서 Global Encoding과 Project Encoding이 모두 UTF-8로 되어 있는지 확인 후, UTF-8이 아니라면 UTF-8로 변경합니다. (코드에 한글 주석이 있기 때문에 필요한 과정입니다.)  
+4. 좌측 상단 'File > Settings > Editor > File Encodings'에서 Global Encoding과 Project Encoding, Default Encoding이 모두 UTF-8로 되어 있는지 확인 후, UTF-8이 아니라면 UTF-8로 변경합니다. (코드에 한글 주석이 있기 때문에 필요한 과정입니다.)  
    <img src="Screenshots/file-encoding.png"/>  
 5. 설정을 마친 후, 우측 상단에서 Run 버튼을 눌러 gradle 빌드를 실행합니다.  
    <img src="Screenshots/gradle-config-step1half.png"/>  
