@@ -20,9 +20,8 @@ import java.util.Set;
 public class CustomSwingUtilities {
 
     public CustomSwingUtilities(){}
-    
-    public JPanel showCommitMenu(String path, int height) {
 
+    public Status getStatus(String path){
         Status status;
         try (Git git = Git.open(new File(path))) {
             status = git.status().call();
@@ -35,6 +34,31 @@ public class CustomSwingUtilities {
             throw new RuntimeException(e);
         }
 
+
+
+        return status;
+    }
+    public JPanel showCommitMenu(String path, int height) {
+
+//        Status status;
+//        try (Git git = Git.open(new File(path))) {
+//            status = git.status().call();
+//            System.out.println("Added: " + status.getAdded());
+//            System.out.println("Changed: " + status.getChanged());
+//            System.out.println("Modified: " + status.getModified());
+//            System.out.println("Removed: " + status.getRemoved());
+//            System.out.println("Untracked: " + status.getUntracked());
+//        } catch (GitAPIException | IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        Set<String> untrackedSet = status.getUntracked();
+//        Set<String> modifiedSet = status.getModified();
+//        Set<String> addedSet = status.getAdded();
+//        Set<String> changedSet = status.getChanged();
+//        Set<String> removedSet = status.getRemoved();
+
+        Status status = getStatus(path);
         Set<String> untrackedSet = status.getUntracked();
         Set<String> modifiedSet = status.getModified();
         Set<String> addedSet = status.getAdded();
@@ -194,12 +218,8 @@ public class CustomSwingUtilities {
                     // Handle the exception
                     ex.printStackTrace();
                 }
-                stagedPanel.revalidate();
-                stagedPanel.repaint();
-                unstagedPanel.revalidate();
-                unstagedPanel.repaint();
-                commitPanel.revalidate();
-                commitPanel.repaint();
+
+
             }
         });
         //체크박스에 선택된 아이템들을 unstaging
@@ -217,12 +237,7 @@ public class CustomSwingUtilities {
                     // Handle the exception
                     e.printStackTrace();
                 }
-                stagedPanel.revalidate();
-                stagedPanel.repaint();
-                unstagedPanel.revalidate();
-                unstagedPanel.repaint();
-                commitPanel.revalidate();
-                commitPanel.repaint();
+
             }
         });
 

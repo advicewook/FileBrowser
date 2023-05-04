@@ -851,16 +851,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             showMessageDialog("You chode select File");
                     }
                 });
-                try {
-                    System.out.println(CustomJgitUtilities.isStaged(currentFolder, fileName));
-                    System.out.println(CustomJgitUtilities.isUntracked(currentFolder,fileName));
-                    System.out.println(CustomJgitUtilities.isModified(currentFolder, fileName));
-                    System.out.println(CustomJgitUtilities.isCommitted(currentFolder,fileName));
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (GitAPIException ex) {
-                    throw new RuntimeException(ex);
-                }
+
                 try {
                     if (CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
                         add(gitAddFile);
