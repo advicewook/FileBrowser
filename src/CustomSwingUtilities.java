@@ -148,7 +148,7 @@ public class CustomSwingUtilities {
                 try {
                     Iterator<String> iter1 = addedSet.iterator();
                     while(iter1.hasNext()){
-                        CustomJgitUtilities.unstageFile(path,iter1.next());
+                        CustomJgitUtilities.restoreStagedFile(path,iter1.next());
                     }
                 } catch (IOException | GitAPIException e) {
                     // Handle the exception
@@ -157,7 +157,7 @@ public class CustomSwingUtilities {
                 try {
                     Iterator<String> iter2 = changedSet.iterator();
                     while(iter2.hasNext()){
-                        CustomJgitUtilities.unstageFile(path,iter2.next());
+                        CustomJgitUtilities.restoreStagedFile(path,iter2.next());
                     }
                 } catch (IOException | GitAPIException e) {
                     // Handle the exception
@@ -166,7 +166,7 @@ public class CustomSwingUtilities {
                 try {
                     Iterator<String> iter3 = removedSet.iterator();
                     while(iter3.hasNext()){
-                        CustomJgitUtilities.unstageFile(path,iter3.next());
+                        CustomJgitUtilities.restoreStagedFile(path,iter3.next());
                     }
                 } catch (IOException | GitAPIException e) {
                     // Handle the exception

@@ -722,7 +722,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         class PopUpDemo extends JPopupMenu {
             private static final long serialVersionUID = 1L;
             JMenuItem rename, addFolder, addFile, openInDesktop;
-
+            JMenuItem add, restore, unstaging, untracking, deleteFiel
             public PopUpDemo(MouseEvent e) {
                 rename = new JMenuItem("-> Rename ");
                 rename.addActionListener(new ActionListener() {
