@@ -64,6 +64,7 @@ public class CustomSwingUtilities {
         // 커밋 패널 - 상단 리스트 컨테이너
         JPanel unstagedPanel = new JPanel();
         unstagedPanel.setLayout(new BoxLayout(unstagedPanel, BoxLayout.Y_AXIS));
+        unstagedPanel.setBackground(Color.white);
         // 커밋 패널 - 상단 리스트 추가
         getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
         getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
@@ -106,6 +107,7 @@ public class CustomSwingUtilities {
         // 커밋 패널 - 중단 리스트 컨테이너
         JPanel stagedPanel = new JPanel();
         stagedPanel.setLayout(new BoxLayout(stagedPanel, BoxLayout.Y_AXIS));
+        stagedPanel.setBackground(Color.white);
         // 커밋 패널 - 중단 리스트 추가
         getJCheckBoxList(addedSet, stagedPanel, "added");
         getJCheckBoxList(changedSet, stagedPanel, "changed");
@@ -177,8 +179,10 @@ public class CustomSwingUtilities {
         Iterator<String> statusIterator = statusSet.iterator();
         while (statusIterator.hasNext()) {
             JPanel layout = new JPanel();
+            layout.setBackground(Color.white);
             layout.setLayout(new BoxLayout(layout, BoxLayout.X_AXIS));
             JCheckBox statusFile = new JCheckBox(statusIterator.next());
+            statusFile.setBackground(Color.white);
             layout.setAlignmentX(Component.LEFT_ALIGNMENT);
             JLabel label=new JLabel();
             Image img;
@@ -187,41 +191,42 @@ public class CustomSwingUtilities {
             switch (status) {
                 case "untracked":
                     img = new ImageIcon("src\\" + "/img/untracked.png").getImage();
-                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
                     imageIcon = new ImageIcon(img);
                     label = new JLabel(imageIcon);
-                    label.setPreferredSize(new Dimension(16, 14));
+                    label.setPreferredSize(new Dimension(13, 13));
                     break;
                 case "modified":
                     img = new ImageIcon("src\\" + "/img/modified.png").getImage();
-                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
                     imageIcon = new ImageIcon(img);
                     label = new JLabel(imageIcon);
-                    label.setPreferredSize(new Dimension(16, 14));
+                    label.setPreferredSize(new Dimension(13, 13));
                     break;
                 case "added":
                     img = new ImageIcon("src\\" + "/img/added.png").getImage();
-                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
                     imageIcon = new ImageIcon(img);
                     label = new JLabel(imageIcon);
-                    label.setPreferredSize(new Dimension(16, 14));
+                    label.setPreferredSize(new Dimension(13, 13));
                     break;
                 case "changed":
                     img = new ImageIcon("src\\" + "/img/changed.png").getImage();
-                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
                     imageIcon = new ImageIcon(img);
                     label = new JLabel(imageIcon);
-                    label.setPreferredSize(new Dimension(16, 14));
+                    label.setPreferredSize(new Dimension(13, 13));
                     break;
                 case "removed":
                     img = new ImageIcon("src\\" + "/img/removed.png").getImage();
-                    img = img.getScaledInstance(14, 14, Image.SCALE_SMOOTH);
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
                     imageIcon = new ImageIcon(img);
                     label = new JLabel(imageIcon);
-                    label.setPreferredSize(new Dimension(16, 14));
+                    label.setPreferredSize(new Dimension(13, 13));
                     break;
                 default: break;
             }
+            label.setBorder(BorderFactory.createEmptyBorder(0 , 5, 0 , 0));
             layout.add(label);
             layout.add(statusFile);
 
