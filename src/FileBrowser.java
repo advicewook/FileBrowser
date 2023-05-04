@@ -751,10 +751,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.restoreModifiedFile(currentFolder, file.getName());
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (GitAPIException ex) {
-                            throw new RuntimeException(ex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 });
@@ -763,10 +761,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.restoreStagedFile(currentFolder, file.getName());
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (GitAPIException ex) {
-                            throw new RuntimeException(ex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 });
@@ -775,10 +771,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.removeCachedFile(currentFolder, file.getName());
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (GitAPIException ex) {
-                            throw new RuntimeException(ex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 });
@@ -788,10 +782,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.removeFile(currentFolder, file.getName());
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (GitAPIException ex) {
-                            throw new RuntimeException(ex);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
                         }
                     }
                 });
@@ -802,10 +794,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         if (newName != null && !newName.equals("")){
                             try {
                                 CustomJgitUtilities.mvFile(currentFolder, file.getName(), newName);
-                            } catch (IOException ex) {
-                                throw new RuntimeException(ex);
-                            } catch (GitAPIException ex) {
-                                throw new RuntimeException(ex);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
                     }
                     }

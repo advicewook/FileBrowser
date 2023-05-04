@@ -169,7 +169,7 @@ public class CustomSwingUtilities {
                     while(iter1.hasNext()){
                         CustomJgitUtilities.restoreStagedFile(path,iter1.next());
                     }
-                } catch (IOException | GitAPIException e) {
+                } catch (Exception e) {
                     // Handle the exception
                     e.printStackTrace();
                 }
