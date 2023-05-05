@@ -12,6 +12,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -218,6 +219,34 @@ public class CustomSwingUtilities {
                     // Handle the exception
                     ex.printStackTrace();
                 }
+                //1. remove all checkboxes
+                //2. update Status set
+                //3. get checkboxes
+
+                //1
+                removeCheckbox(unstagedPanel);
+                removeCheckbox(stagedPanel);
+
+                //2
+                Status temp = getStatus(path);
+
+                Set<String> tempuntrackedSet = temp.getUntracked();
+                Set<String> tempmodifiedSet = temp.getModified();
+                Set<String> tempaddedSet = temp.getAdded();
+                Set<String> tempchangedSet = temp.getChanged();
+                Set<String> tempremovedSet = temp.getRemoved();
+
+                //3
+                getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+                getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+                getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+                getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+                getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
 
 
             }
@@ -238,6 +267,34 @@ public class CustomSwingUtilities {
                     e.printStackTrace();
                 }
 
+                //1. remove all checkboxes
+                //2. update Status set
+                //3. get checkboxes
+
+                //1
+                removeCheckbox(unstagedPanel);
+                removeCheckbox(stagedPanel);
+
+                //2
+                Status temp = getStatus(path);
+
+                Set<String> tempuntrackedSet = temp.getUntracked();
+                Set<String> tempmodifiedSet = temp.getModified();
+                Set<String> tempaddedSet = temp.getAdded();
+                Set<String> tempchangedSet = temp.getChanged();
+                Set<String> tempremovedSet = temp.getRemoved();
+
+                //3
+                getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+                getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+                getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+                getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+                getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
             }
         });
 
@@ -304,6 +361,16 @@ public class CustomSwingUtilities {
 
             container.add(layout);
         }
+    }
+    public void removeCheckbox(Container container) {
+        // get all the components in the panel
+        for (Component c : container.getComponents()){
+            if (c instanceof JCheckBox)
+                container.remove(c);
+            else if(c instanceof Container)
+                removeCheckbox((Container) c);
+        }
+
     }
     public void addSelectedItems(Container container, Set<String> selectedItems) {
         for (Component c : container.getComponents()) {
