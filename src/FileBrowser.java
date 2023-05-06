@@ -231,22 +231,32 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
 		// 레포 생성 버튼 리스너 추가
 		createRepoButton.addActionListener(new ActionListener() {
-               @Override
-               public void actionPerformed(ActionEvent arg0) {
-                   //System.out.println(currentFolder);
-                   if (CustomJgitUtilities.isGitRepository(currentFolder)) {
-                       // 이미 레포가 생성된 폴더의 경우 경고창 띄우기
-                       JOptionPane.showMessageDialog(null, "이미 레파지토리가 존재합니다");
+           @Override
+           public void actionPerformed(ActionEvent arg0) {
+               //System.out.println(currentFolder);
+               if (CustomJgitUtilities.isGitRepository(currentFolder)) {
+                   // 이미 레포가 생성된 폴더의 경우 경고창 띄우기
+                   JOptionPane.showMessageDialog(null, "이미 레파지토리가 존재합니다");
 
-                   } else {
-                       try {
-                           Repository r = CustomJgitUtilities.createNewRepository(currentFolder);
-                           System.out.println("Having repository: " + r.getDirectory());
-                       } catch (IOException e) {
-                           throw new RuntimeException(e);
-                       }
+               } else {
+                   try {
+                       Repository r = CustomJgitUtilities.createNewRepository(currentFolder);
+                       System.out.println("Having repository: " + r.getDirectory());
+                   } catch (IOException e) {
+                       throw new RuntimeException(e);
                    }
                }
+               // 새로고침
+               showPanel.removeAll();
+               showPanel.revalidate();
+               showPanel.repaint();
+
+               File file = new File(currentFolder);
+               File[] files = file.listFiles();
+               for (File f : files){
+                   fillShowPane(f, 1);
+               }
+           }
            });
         // 커밋 메뉴 버튼 리스너 추가
         commitMenuButton.addActionListener(new ActionListener() {

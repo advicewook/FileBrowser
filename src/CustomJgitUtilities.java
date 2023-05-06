@@ -21,7 +21,6 @@ public class CustomJgitUtilities {
     }
 
     public static Repository createNewRepository(String path) throws IOException {
-        // create the directory
         Repository repository = FileRepositoryBuilder.create(new File(path, ".git"));
         repository.create();
 
