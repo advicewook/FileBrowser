@@ -183,12 +183,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
         barPanel.add(retButton, BorderLayout.WEST);
         barPanel.add(treeTextField, BorderLayout.CENTER);
 
-		// 레포 생성 버튼
-		createRepoButton = new JButton("Create Repository");
-		createRepoButton.setOpaque(false);
-		createRepoButton.setBackground(new Color(0, 0, 0, 0));
-		createRepoButton.setForeground(Color.black);
-		createRepoButton.setFocusable(false);
+        // 레포 생성 버튼
+        createRepoButton = new JButton("Create Repository");
+        createRepoButton.setOpaque(false);
+        createRepoButton.setBackground(new Color(0, 0, 0, 0));
+        createRepoButton.setForeground(Color.black);
+        createRepoButton.setFocusable(false);
 
         // 커밋 메뉴 버튼
         commitMenuButton = new JButton("Commit Menu");
@@ -197,12 +197,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
 
-		JPanel gitMenuPanel = new JPanel();
-		gitMenuPanel.setOpaque(false);
-		gitMenuPanel.setLayout(new BorderLayout(0, 0));
-		gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
-		gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
-		barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
+        JPanel gitMenuPanel = new JPanel();
+        gitMenuPanel.setOpaque(false);
+        gitMenuPanel.setLayout(new BorderLayout(0, 0));
+        gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
+        gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
+        barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
 
         displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
         displayPanel.setOpaque(false);
@@ -229,8 +229,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fillShowPane(file, 0);
         }
 
-		// 레포 생성 버튼 리스너 추가
-		createRepoButton.addActionListener(new ActionListener() {
+        // 레포 생성 버튼 리스너 추가
+        createRepoButton.addActionListener(new ActionListener() {
            @Override
            public void actionPerformed(ActionEvent arg0) {
                //System.out.println(currentFolder);
