@@ -42,6 +42,7 @@
 - 2023-04 : 적절한 오픈소스 탐색 및 프로그래밍 언어 선정  
 - 2023-05-01 : eclipse project를 gradle project로 변경  
 - 2023-05-03 : commit menu ui 추가  
+- 2023-05-03 : create repository 버튼 생성
 
 ## Details About Implementation
 ### 주요 의존성
@@ -64,7 +65,6 @@
 ## Original Project Introduction
 > Writing a simple file browser in Java SWING
 
-Screenshots of the application can be found in the [Wiki page](https://github.com/m-elkhou/FileBrowser/wiki).
 
 원본 프로젝트는 java로 구현한 file browser입니다.
 ***
