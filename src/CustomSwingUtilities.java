@@ -1,3 +1,4 @@
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -5,14 +6,23 @@ import org.eclipse.jgit.lib.Repository;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
 public class CustomSwingUtilities {
-    public JPanel showCommitMenu(String path, int height) {
 
+    public CustomSwingUtilities(){}
+
+    public Status getStatus(String path){
         Status status;
         try (Git git = Git.open(new File(path))) {
             status = git.status().call();
@@ -25,6 +35,31 @@ public class CustomSwingUtilities {
             throw new RuntimeException(e);
         }
 
+
+
+        return status;
+    }
+    public JPanel showCommitMenu(String path, int height) {
+
+//        Status status;
+//        try (Git git = Git.open(new File(path))) {
+//            status = git.status().call();
+//            System.out.println("Added: " + status.getAdded());
+//            System.out.println("Changed: " + status.getChanged());
+//            System.out.println("Modified: " + status.getModified());
+//            System.out.println("Removed: " + status.getRemoved());
+//            System.out.println("Untracked: " + status.getUntracked());
+//        } catch (GitAPIException | IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//
+//        Set<String> untrackedSet = status.getUntracked();
+//        Set<String> modifiedSet = status.getModified();
+//        Set<String> addedSet = status.getAdded();
+//        Set<String> changedSet = status.getChanged();
+//        Set<String> removedSet = status.getRemoved();
+
+        Status status = getStatus(path);
         Set<String> untrackedSet = status.getUntracked();
         Set<String> modifiedSet = status.getModified();
         Set<String> addedSet = status.getAdded();
@@ -104,6 +139,7 @@ public class CustomSwingUtilities {
         unStageButton.setForeground(Color.black);
         unStageButton.setFocusable(false);
         middleHeader.add(unStageButton);
+
         // 커밋 패널 - 중단 리스트 컨테이너
         JPanel stagedPanel = new JPanel();
         stagedPanel.setLayout(new BoxLayout(stagedPanel, BoxLayout.Y_AXIS));
@@ -112,6 +148,8 @@ public class CustomSwingUtilities {
         getJCheckBoxList(addedSet, stagedPanel, "added");
         getJCheckBoxList(changedSet, stagedPanel, "changed");
         getJCheckBoxList(removedSet, stagedPanel, "removed");
+
+
         // 커밋 패널 - 중단 리스트 컨테이너를 스크롤 컨테이너에 삽입
         JScrollPane stagedScrollPanel = new JScrollPane(stagedPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -167,6 +205,102 @@ public class CustomSwingUtilities {
         // 커밋 패넝 - 하단 병합
         bottomCommitPanel.add(bottomHeader, BorderLayout.NORTH);
         bottomCommitPanel.add(scrollTextArea, BorderLayout.CENTER);
+
+        //체크박스에 선택된 아이템들을 staging
+        stageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Set<String> selectedItems1 = new HashSet<>();
+                addSelectedItems(unstagedPanel, selectedItems1);
+                try {
+                    Iterator<String> iter1 = selectedItems1.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.addFile(path,iter1.next());
+                    }
+                } catch (Exception ex) {
+                    // Handle the exception
+                    ex.printStackTrace();
+                }
+                //1. remove all checkboxes
+                //2. update Status set
+                //3. get checkboxes
+
+                //1
+                removeCheckbox(unstagedPanel);
+                removeCheckbox(stagedPanel);
+
+                //2
+                Status temp = getStatus(path);
+
+                Set<String> tempuntrackedSet = temp.getUntracked();
+                Set<String> tempmodifiedSet = temp.getModified();
+                Set<String> tempaddedSet = temp.getAdded();
+                Set<String> tempchangedSet = temp.getChanged();
+                Set<String> tempremovedSet = temp.getRemoved();
+
+                //3
+                getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+                getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+                getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+                getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+                getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
+
+
+            }
+        });
+        //체크박스에 선택된 아이템들을 unstaging
+        unStageButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                Set<String> selectedItems2 = new HashSet<>();
+                addSelectedItems(stagedPanel, selectedItems2);
+                try {
+                    Iterator<String> iter1 = selectedItems2.iterator();
+                    while(iter1.hasNext()){
+                        CustomJgitUtilities.restoreStagedFile(path,iter1.next());
+                    }
+                } catch (Exception e) {
+                    // Handle the exception
+                    e.printStackTrace();
+                }
+
+                //1. remove all checkboxes
+                //2. update Status set
+                //3. get checkboxes
+
+                //1
+                removeCheckbox(unstagedPanel);
+                removeCheckbox(stagedPanel);
+
+                //2
+                Status temp = getStatus(path);
+
+                Set<String> tempuntrackedSet = temp.getUntracked();
+                Set<String> tempmodifiedSet = temp.getModified();
+                Set<String> tempaddedSet = temp.getAdded();
+                Set<String> tempchangedSet = temp.getChanged();
+                Set<String> tempremovedSet = temp.getRemoved();
+
+                //3
+                getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+                getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+                getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+                getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+                getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
+            }
+        });
+
+
         // 커밋 패널 부모 컨테이너에 추가
         commitPanel.add(topCommitPanel, BorderLayout.NORTH);
         commitPanel.add(middleCommitPanel, BorderLayout.CENTER);
@@ -231,6 +365,29 @@ public class CustomSwingUtilities {
             layout.add(statusFile);
 
             container.add(layout);
+        }
+    }
+    public void removeCheckbox(Container container) {
+        // get all the components in the panel
+        for (Component c : container.getComponents()){
+            if (c instanceof JCheckBox)
+                container.remove(c);
+            else if(c instanceof Container)
+                removeCheckbox((Container) c);
+        }
+
+    }
+    public void addSelectedItems(Container container, Set<String> selectedItems) {
+        for (Component c : container.getComponents()) {
+            if (c instanceof JCheckBox) {
+                JCheckBox checkbox = (JCheckBox) c;
+                if (checkbox.isSelected()) {
+                    selectedItems.add(checkbox.getText());
+                    System.out.println(checkbox.getText());
+                }
+            } else if (c instanceof Container) {
+                addSelectedItems((Container) c, selectedItems);
+            }
         }
     }
 }

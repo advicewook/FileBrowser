@@ -1,4 +1,4 @@
-
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 
@@ -258,6 +258,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                }
            }
            });
+
         // 커밋 메뉴 버튼 리스너 추가
         commitMenuButton.addActionListener(new ActionListener() {
             @Override
@@ -587,6 +588,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fileButton.setSize(fileButton.getPreferredSize());
             fileButton.setBackground(Color.white);
             fileButton.setForeground(Color.black);
+            fileButton.setForeground(Color.black);
             fileButton.setOpaque(false);
             fileButton.addMouseListener(new Mouse(fileButton.getToolTipText()));
             fileButton.setBorder(new LineBorder(Color.BLACK, 0));
@@ -732,8 +734,84 @@ public class FileBrowser extends JPanel implements ComponentListener {
         class PopUpDemo extends JPopupMenu {
             private static final long serialVersionUID = 1L;
             JMenuItem rename, addFolder, addFile, openInDesktop;
+            JMenuItem gitAddFile, gitRestoreModifiedFile, gitRestoreStaged, gitUntracking, gitDeleteFile, gitMvFile;
+            public PopUpDemo(MouseEvent e)  {
+                JButton tempButton = (JButton) e.getSource();
+                String fileName = tempButton.getText();
+                System.out.println(fileName);
+                System.out.println(currentFolder);
 
-            public PopUpDemo(MouseEvent e) {
+                gitAddFile = new JMenuItem("Add to git");
+                gitAddFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            CustomJgitUtilities.addFile(currentFolder,fileName);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+                gitRestoreModifiedFile = new JMenuItem("Unmodifying");
+                gitRestoreModifiedFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            CustomJgitUtilities.restoreModifiedFile(currentFolder, fileName);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+                gitRestoreStaged = new JMenuItem("Unstage changes");
+                gitRestoreStaged.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            CustomJgitUtilities.restoreStagedFile(currentFolder, fileName);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+                gitUntracking = new JMenuItem("Untracking");
+                gitUntracking.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            CustomJgitUtilities.removeCachedFile(currentFolder, fileName);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+                gitDeleteFile = new JMenuItem("Delete file");
+                gitDeleteFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            CustomJgitUtilities.removeFile(currentFolder, fileName);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                });
+                gitMvFile = new JMenuItem("Rename tracked file");
+                gitMvFile.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String newName = JOptionPane.showInputDialog(frame, " Enter the new Name : ");
+                        if (newName != null && !newName.equals("")){
+                            try {
+                                CustomJgitUtilities.mvFile(currentFolder, fileName, newName);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                    }
+                    }
+                });
+
+
                 rename = new JMenuItem("-> Rename ");
                 rename.addActionListener(new ActionListener() {
 
@@ -783,6 +861,37 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             showMessageDialog("You chode select File");
                     }
                 });
+
+                try {
+                    if (CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
+                        add(gitAddFile);
+                        addSeparator();
+
+                    }
+                    else if (CustomJgitUtilities.isModified(currentFolder, fileName)) {
+                        add(gitAddFile);
+                        add(gitRestoreModifiedFile);
+                        addSeparator();
+
+                    }
+                    else if (CustomJgitUtilities.isStaged(currentFolder, fileName)) {
+                        add(gitRestoreStaged);
+                        addSeparator();
+
+                    }
+                    else if (CustomJgitUtilities.isCommitted(currentFolder,fileName)) {
+                        add(gitUntracking);
+                        add(gitDeleteFile);
+                        add(gitMvFile);
+                        addSeparator();
+
+                    }
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (GitAPIException ex) {
+                    throw new RuntimeException(ex);
+                }
+
                 add(rename);
                 add(addFolder);
                 add(addFile);
