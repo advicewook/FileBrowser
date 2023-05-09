@@ -22,7 +22,7 @@ public class CustomSwingUtilities {
 
     public CustomSwingUtilities(){}
 
-    public Status getStatus(String path){
+    public static Status getStatus(String path){
         Status status;
         try (Git git = Git.open(new File(path))) {
             status = git.status().call();

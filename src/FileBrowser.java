@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -570,6 +571,45 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
     }
 
+    // todo 레포 안 폴더 파일도 트래킹
+    public String statusToString(String rootPath, String filePath) throws GitAPIException, IOException {
+        String status = "";
+        System.out.println("filePath - " + filePath);
+        System.out.println("rootPath - " + rootPath);
+        String fileInRepo = filePath.replace(rootPath+"\\","");
+        fileInRepo = fileInRepo.replace("\\","/");
+        System.out.println("file name : " + fileInRepo);
+
+        Status allFileStatus = CustomSwingUtilities.getStatus(rootPath);
+        Set<String> untracked = allFileStatus.getUntracked();
+        Set<String> modified = allFileStatus.getModified();
+        Set<String> added = allFileStatus.getAdded();
+        Set<String> changed = allFileStatus.getChanged();
+        Set<String> removed = allFileStatus.getRemoved();
+//        Set<String> unmodified = allFileStatus.get???
+
+        if (new File(filePath).isDirectory()) {
+            status = " "; // 폴더는 상태 표시 x
+        }
+        else if (fileInRepo.equals(".git")) {
+            status = "";
+        }
+        else if (fileInRepo.equals(".ignore")){
+            status = "ignored";
+        }
+        else if (untracked.contains(fileInRepo)){
+            status = "untracked";
+        }
+        else if (modified.contains(fileInRepo)){
+            status = "modified";
+        }else if (added.contains(fileInRepo) || changed.contains(fileInRepo) || removed.contains(fileInRepo)){
+            status = "staged";
+        }else{
+            status = "unmodified"; // committed
+        }
+        return status;
+    }
+    
     //파일 정보를 보여주는 pane을 채움
     private void fillShowPane(File f, int choice) {
         JButton fileButton = new JButton();
@@ -578,10 +618,31 @@ public class FileBrowser extends JPanel implements ComponentListener {
             Image img = imgIcon.getImage();
             img = img.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
             fileButton.setIcon(new ImageIcon(img));
-            fileButton.setText(fileSystemView.getSystemDisplayName(f));
+            String filename = fileSystemView.getSystemDisplayName(f);
+            String filePath = f.getPath();
+            String temp = filename;
+
+            // 레포 안의 파일
+            if (CustomJgitUtilities.isGitRepository(currentFolder)){
+                String status = statusToString(currentFolder, filePath);
+                temp = "<html><div style='text-align:center'>"+filename
+                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+            }
+
+            // 레포 안의 하위 폴더 처리
+            else if (CustomJgitUtilities.isSubGitRepository(currentFolder)){
+                File current = new File(currentFolder);
+                String rootRepoPath = CustomJgitUtilities.findRepoPath(current); 
+                String status = statusToString(rootRepoPath, filePath);
+                temp = "<html><div style='text-align:center'>"+filename
+                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+            }
+
+            fileButton.setText(temp);
             fileButton.setHorizontalTextPosition(SwingConstants.CENTER);
             fileButton.setVerticalTextPosition(JButton.BOTTOM);
             fileButton.setToolTipText(f.getPath());
+
             if (choice == 0)
                 fileButton.setPreferredSize(new Dimension(140, 150));
             else
