@@ -579,7 +579,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
     }
 
-    public String getStringStatus(String rootPath, String filePath) throws GitAPIException, IOException {
+    public String getStatusImage(String rootPath, String filePath) throws GitAPIException, IOException {
         String status = "";
         System.out.println("filePath - " + filePath);
         System.out.println("rootPath - " + rootPath);
@@ -593,26 +593,24 @@ public class FileBrowser extends JPanel implements ComponentListener {
         Set<String> added = allFileStatus.getAdded();
         Set<String> changed = allFileStatus.getChanged();
         Set<String> removed = allFileStatus.getRemoved();
-//        Set<String> unmodified = allFileStatus.get???
 
-        if (new File(filePath).isDirectory()) {
-            status = " "; // 폴더는 상태 표시 x
-        }
-        else if (fileInRepo.equals(".git")) {
-            status = "";
-        }
-        else if (fileInRepo.equals(".ignore")){
-            status = "ignored";
-        }
-        else if (untracked.contains(fileInRepo)){
-            status = "untracked";
+        if (untracked.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/BLKAXtnbdf.png\" width=\"15\" height=\"15\"/>";
         }
         else if (modified.contains(fileInRepo)){
-            status = "modified";
-        }else if (added.contains(fileInRepo) || changed.contains(fileInRepo) || removed.contains(fileInRepo)){
-            status = "staged";
-        }else{
-            status = "unmodified"; // committed
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/gnM3JMEk24.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if (added.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/GG2Ju2uJfm.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if(changed.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/Mpbg9fpQSD.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if(removed.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/38q8kGJzqP.png\" width=\"15\" height=\"15\"/>";
+        }
+        else{
+            status = " ";
         }
         return status;
     }
@@ -631,17 +629,21 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
             // 레포 안의 파일
             if (CustomJgitUtilities.isGitRepository(currentFolder)){
-                String status = getStringStatus(currentFolder, filePath);
-                temp = "<html><div style='text-align:center'>"+filename
-                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+                String status = getStatusImage(currentFolder, filePath);
+                if (!status.equals(" ")){
+                    temp = status+"<p>"+filename+"</p></html>";}
+//                temp = "<html><div style='text-align:center'>"+filename
+//                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
             }
 
             // 레포 안의 하위 폴더 처리
             else if (CustomJgitUtilities.isSubGitRepository(currentFolder)){
                 String rootRepoPath = CustomJgitUtilities.findRepoPath(new File(currentFolder));
-                String status = getStringStatus(rootRepoPath, filePath);
-                temp = "<html><div style='text-align:center'>"+filename
-                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+                String status = getStatusImage(rootRepoPath, filePath);
+                if (!status.equals(" ")){
+                    temp = status+"<p>"+filename+"</p></html>";}
+//                temp = "<html><div style='text-align:center'>"+filename
+//                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
             }
             fileButton.setText(temp);
             fileButton.setHorizontalTextPosition(SwingConstants.CENTER);
