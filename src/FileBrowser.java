@@ -1,7 +1,7 @@
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
-
+//
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
