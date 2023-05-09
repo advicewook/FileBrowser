@@ -34,6 +34,7 @@ public class CustomSwingUtilities {
         return instance;
     }
 
+
     public Status getStatus(String path){
         try {
             Status status;
@@ -46,7 +47,6 @@ public class CustomSwingUtilities {
                     replace("]","");
             Git git = Git.open(new File(replacedString));
             status = git.status().call();
-
             return status;
         } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);

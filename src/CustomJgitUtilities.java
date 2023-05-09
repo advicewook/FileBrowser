@@ -43,6 +43,16 @@ public class CustomJgitUtilities {
         return false;
     }
 
+    // 레포 경로 반환 메서드
+    public static String findRepoPath(File file) throws IOException, GitAPIException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repo = builder
+                .findGitDir(file.getParentFile())
+                .setMustExist(true)
+                .build();
+
+        return repo.getDirectory().getParent();}
+
     public static void getStatusForParentFolder(String path) throws IOException, GitAPIException {
         File file = new File(path);
         File parent = file.getParentFile();

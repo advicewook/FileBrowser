@@ -29,6 +29,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -60,8 +61,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private static final long serialVersionUID = 1L;
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
-    private JPanel showPanel, commitPanel;
-    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
+    public JPanel showPanel, commitPanel;
+    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton,
+            refreshButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
     private DefaultTreeModel treeModel;
@@ -201,10 +203,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
 
+        // 새로고침 버튼
+        refreshButton = new JButton("Refresh Status");
+        refreshButton.setOpaque(false);
+        refreshButton.setBackground(new Color(0, 0, 0, 0));
+        refreshButton.setForeground(Color.black);
+        refreshButton.setFocusable(false);
+
         JPanel gitMenuPanel = new JPanel();
         gitMenuPanel.setOpaque(false);
         gitMenuPanel.setLayout(new BorderLayout(0, 0));
-        gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
+        gitMenuPanel.add(refreshButton, BorderLayout.WEST);
+        gitMenuPanel.add(createRepoButton, BorderLayout.CENTER);
         gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
         barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
 
@@ -233,6 +243,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fillShowPane(file, 0);
         }
 
+        // 파일 상태 초기화 버튼 리스너 추가
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent arg0) {
+                updateShowPanel();
+            }
+        });
+
         // 레포 생성 버튼 리스너 추가
         createRepoButton.addActionListener(new ActionListener() {
            @Override
@@ -250,16 +268,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                        throw new RuntimeException(e);
                    }
                }
-               // 새로고침
-               showPanel.removeAll();
-               showPanel.revalidate();
-               showPanel.repaint();
-
-               File file = new File(currentFolder);
-               File[] files = file.listFiles();
-               for (File f : files){
-                   fillShowPane(f, 1);
-               }
+               updateShowPanel();
            }
            });
 
@@ -587,6 +596,42 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
     }
 
+    public String getStatusImage(String rootPath, String filePath) throws GitAPIException, IOException {
+        String status = "";
+        System.out.println("filePath - " + filePath);
+        System.out.println("rootPath - " + rootPath);
+        String fileInRepo = filePath.replace(rootPath+"\\","");
+        fileInRepo = fileInRepo.replace("\\","/");
+        System.out.println("file name : " + fileInRepo);
+
+        Status allFileStatus = CustomSwingUtilities.getStatus(rootPath);
+        Set<String> untracked = allFileStatus.getUntracked();
+        Set<String> modified = allFileStatus.getModified();
+        Set<String> added = allFileStatus.getAdded();
+        Set<String> changed = allFileStatus.getChanged();
+        Set<String> removed = allFileStatus.getRemoved();
+
+        if (untracked.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/BLKAXtnbdf.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if (modified.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/gnM3JMEk24.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if (added.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/GG2Ju2uJfm.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if(changed.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/Mpbg9fpQSD.png\" width=\"15\" height=\"15\"/>";
+        }
+        else if(removed.contains(fileInRepo)){
+            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/38q8kGJzqP.png\" width=\"15\" height=\"15\"/>";
+        }
+        else{
+            status = " ";
+        }
+        return status;
+    }
+    
     //파일 정보를 보여주는 pane을 채움
     private void fillShowPane(File f, int choice) {
         JButton fileButton = new JButton();
@@ -595,10 +640,33 @@ public class FileBrowser extends JPanel implements ComponentListener {
             Image img = imgIcon.getImage();
             img = img.getScaledInstance(35, 35, Image.SCALE_SMOOTH);
             fileButton.setIcon(new ImageIcon(img));
-            fileButton.setText(fileSystemView.getSystemDisplayName(f));
+            String filename = fileSystemView.getSystemDisplayName(f);
+            String filePath = f.getPath();
+            String temp = filename;
+
+            // 레포 안의 파일
+            if (CustomJgitUtilities.isGitRepository(currentFolder)){
+                String status = getStatusImage(currentFolder, filePath);
+                if (!status.equals(" ")){
+                    temp = status+"<p>"+filename+"</p></html>";}
+//                temp = "<html><div style='text-align:center'>"+filename
+//                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+            }
+
+            // 레포 안의 하위 폴더 처리
+            else if (CustomJgitUtilities.isSubGitRepository(currentFolder)){
+                String rootRepoPath = CustomJgitUtilities.findRepoPath(new File(currentFolder));
+                String status = getStatusImage(rootRepoPath, filePath);
+                if (!status.equals(" ")){
+                    temp = status+"<p>"+filename+"</p></html>";}
+//                temp = "<html><div style='text-align:center'>"+filename
+//                        +"<br><font color=\"#A9A9A9\">"+status+"</font></div></html>";
+            }
+            fileButton.setText(temp);
             fileButton.setHorizontalTextPosition(SwingConstants.CENTER);
             fileButton.setVerticalTextPosition(JButton.BOTTOM);
             fileButton.setToolTipText(f.getPath());
+
             if (choice == 0)
                 fileButton.setPreferredSize(new Dimension(140, 150));
             else
@@ -614,6 +682,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
         } catch (Exception e) {
             System.out.println("!! Ereur : " + e);
 //			e.getStackTrace();
+        }
+    }
+    public void updateShowPanel(){
+        // 새로고침
+        showPanel.removeAll();
+        showPanel.revalidate();
+        showPanel.repaint();
+
+        File file = new File(currentFolder);
+        File[] files = file.listFiles();
+        for (File f : files){
+            fillShowPane(f, 1);
         }
     }
 
@@ -1032,4 +1112,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
     public static void main(String[] args) {
         new FileBrowser();
     }
+
+
 }
