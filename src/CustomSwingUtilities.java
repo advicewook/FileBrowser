@@ -372,6 +372,8 @@ public class CustomSwingUtilities {
         for (Component c : container.getComponents()){
             if (c instanceof JCheckBox)
                 container.remove(c);
+            if (c instanceof JLabel)
+                container.remove(c);
             else if(c instanceof Container)
                 removeCheckbox((Container) c);
         }
