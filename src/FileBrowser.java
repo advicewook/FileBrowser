@@ -570,8 +570,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
             repaint();
         }
     }
-
-    // todo 레포 안 폴더 파일도 트래킹
+    
     public String statusToString(String rootPath, String filePath) throws GitAPIException, IOException {
         String status = "";
         System.out.println("filePath - " + filePath);
