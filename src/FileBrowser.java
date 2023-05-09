@@ -1,6 +1,7 @@
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -77,6 +78,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JPanel barPanel = new JPanel();
 
     private boolean isCommitMenuOpened = false;
+    
+    Repository currentGitRepository = null;
 
     private void build() {
 //		width = 950;
@@ -263,6 +266,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                if (!CustomJgitUtilities.isGitRepository(currentFolder)) {
+                    JOptionPane.showMessageDialog(null, "This is not under git repository. Please make it as a git repository first.");
+                    return;
+                }
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
                     CustomSwingUtilities customSwingUtilities = new CustomSwingUtilities();
@@ -273,11 +280,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     revalidate();
                     isCommitMenuOpened=true;
                 }else{
-                    displayPanel.remove(commitPanel);
-                    displayPanel.setSize(new Dimension((getWidth() * 7 / 10), getHeight()));
-                    frame.setSize(new Dimension(width, height));
-                    revalidate();
-                    isCommitMenuOpened=false;
+                    removeCommitMenuPanel();
                 }
             }
         });
@@ -353,8 +356,23 @@ public class FileBrowser extends JPanel implements ComponentListener {
         retButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                String parentFolder = new File(currentFolder).getParent();
+                FileRepositoryBuilder builder = new FileRepositoryBuilder();
+                Repository tempGitRepository = null;
+                try {
+                    tempGitRepository = builder.readEnvironment().findGitDir(new File(parentFolder)).build();
+                    if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
+                        removeCommitMenuPanel();
+                    }
+                } catch (RuntimeException | IOException ex) {
+                    if(tempGitRepository==null){
+                        removeCommitMenuPanel();
+                    }
+                }
+                currentGitRepository = tempGitRepository;
+
                 if (currentFolder != null && !currentFolder.equals("")) {
-                    currentFolder = new File(currentFolder).getParent();
+                    currentFolder = parentFolder;
                     if (currentFolder != null && !currentFolder.equals("")) {
                         treeTextField.setText(currentFolder);
                         OpenFile(new File(currentFolder));
@@ -712,6 +730,20 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository tempGitRepository = null;
+            try {
+                tempGitRepository = builder.readEnvironment().findGitDir(new File(currentFolder)).build();
+                if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
+                    removeCommitMenuPanel();
+                }
+            } catch (RuntimeException | IOException ex) {
+                if(tempGitRepository==null){
+                    removeCommitMenuPanel();
+                }
+            }
+            currentGitRepository = tempGitRepository;
+            
             if (e.getSource() != tree) {
                 if (e.getClickCount() == 1) {
                     selectedFolder = sh;
@@ -947,6 +979,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
     @Override
     public void componentShown(ComponentEvent arg0) {
 
+    }
+
+    public void removeCommitMenuPanel(){
+        displayPanel.remove(commitPanel);
+        displayPanel.setSize(new Dimension((getWidth() * 7 / 10), getHeight()));
+        frame.setSize(new Dimension(width, height));
+        revalidate();
+        isCommitMenuOpened=false;
     }
 
     // --------------------- test
