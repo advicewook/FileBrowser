@@ -2,24 +2,14 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.JGitInternalException;
-import org.eclipse.jgit.lib.IndexDiff;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class CustomJgitUtilities {
@@ -40,21 +30,15 @@ public class CustomJgitUtilities {
     //서브레포지토리 체크 메서드 - .git을 포함하는 상위 폴더까지 올라가서 검사
     public static boolean isSubGitRepository(String path) {
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        File dir = new File(path);
-        while (dir != null) {
-            File gitDir = new File(dir, ".git");
-            if (gitDir.exists()) {
-                try {
-                    Repository repo = builder.setGitDir(gitDir).readEnvironment().findGitDir().build();
-                    if (repo != null) {
-                        repo.close();
-                        return true;
-                    }
-                } catch (IOException e) {
-                    // failed to open repository
-                }
-            }
-            dir = dir.getParentFile();
+        Repository repository = null;
+        try {
+            repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        } catch (RuntimeException | IOException ex) {
+            repository = null;
+        }
+        if (repository != null) {
+            repository.close();
+            return true;
         }
         return false;
     }
@@ -99,223 +83,233 @@ public class CustomJgitUtilities {
     }
 
     public static boolean isUntracked(String path, String fileName) throws IOException, GitAPIException {
-        try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
-            try (Git git = new Git(repository)) {
-                // get the status of all files in the repository
-                Status status = git.status().call();
-
-                // check if the fileName is untracked
-                return status.getUntracked().contains(fileName);
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = null;
+        repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        try (Git git = new Git(repository)) {
+            Status status = git.status().call();
+            Set<String> untrackedSet = new HashSet<>();
+            Set<String> untrackedFileSet = status.getUntracked();
+            Set<String> untrackedFolderSet = status.getUntrackedFolders();
+            untrackedSet.addAll(untrackedFileSet);
+            untrackedSet.addAll(untrackedFolderSet);
+            Iterator<String> untrackedSetIterator = untrackedSet.iterator();
+            while (untrackedSetIterator.hasNext()) {
+                if(untrackedSetIterator.next().contains(fileName)){
+                    return true;
+                }
             }
+            return false;
         }
     }
 
     public static boolean isModified(String path, String fileName) throws IOException, GitAPIException {
-        try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
-            try (Git git = new Git(repository)) {
-                // get the status of all files in the repository
-                Status status = git.status().call();
-
-                // check if the fileName is modified
-                return status.getModified().contains(fileName);
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = null;
+        repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        try (Git git = new Git(repository)) {
+            Status status = git.status().call();
+            Set<String> modifiedSet = status.getModified();
+            Iterator<String> modifiedSetIterator = modifiedSet.iterator();
+            while (modifiedSetIterator.hasNext()) {
+                if(modifiedSetIterator.next().contains(fileName)){
+                    return true;
+                }
             }
+            return false;
         }
     }
 
     public static boolean isStaged(String path, String fileName) throws IOException, GitAPIException {
-        try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
-            try (Git git = Git.open(new File(path))) {
-                // get the status of all files in the repository
-                Status status = git.status().call();
-
-                // check if the fileName is staged
-                return status.getAdded().contains(fileName);
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = null;
+        repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        try (Git git = new Git(repository)) {
+            Status status = git.status().call();
+            Set<String> stagedSet = new HashSet<>();
+            Set<String> addedSet = status.getAdded();
+            Set<String> changedSet = status.getChanged();
+            Set<String> removedSet = status.getRemoved();
+            stagedSet.addAll(addedSet);
+            stagedSet.addAll(changedSet);
+            stagedSet.addAll(removedSet);
+            Iterator<String> addedSetIterator = stagedSet.iterator();
+            while (addedSetIterator.hasNext()) {
+                if(addedSetIterator.next().contains(fileName)){
+                    return true;
+                }
             }
+            return false;
         }
     }
 
 
     public static boolean isCommitted(String path, String fileName) throws IOException, GitAPIException {
-        try (Repository repository = new FileRepositoryBuilder().setGitDir(new File(path + "/.git")).build()) {
-            try (Git git = new Git(repository)) {
-                // get the status of all files in the repository
-                Status status = git.status().call();
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = null;
+        repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        try (Git git = new Git(repository)) {
+            Status status = git.status().call();
 
-                // check if the fileName is committed or unmodified
-                return !status.getUncommittedChanges().contains(fileName) && !status.getUntracked().contains(fileName);
+            Set<String> notInCommittedOrUnmodifiedSet = new HashSet<>();
+            notInCommittedOrUnmodifiedSet.addAll(status.getAdded());
+            notInCommittedOrUnmodifiedSet.addAll(status.getChanged());
+            notInCommittedOrUnmodifiedSet.addAll(status.getConflicting());
+            notInCommittedOrUnmodifiedSet.addAll(status.getMissing());
+            notInCommittedOrUnmodifiedSet.addAll(status.getModified());
+            notInCommittedOrUnmodifiedSet.addAll(status.getRemoved());
+            notInCommittedOrUnmodifiedSet.addAll(status.getUntracked());
+            notInCommittedOrUnmodifiedSet.addAll(status.getUntrackedFolders());
+
+            Iterator<String> notInCommittedOrUnmodifiedIterator = notInCommittedOrUnmodifiedSet.iterator();
+            while (notInCommittedOrUnmodifiedIterator.hasNext()) {
+                if(notInCommittedOrUnmodifiedIterator.next().contains(fileName)){
+                    return false;
+                }
             }
+            return true;
         }
     }
 
     //git add
     public static void addFile(String path, String fileName) {
-        try (Git git = Git.open(new File(path))) {
-            git.add().addFilepattern(fileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.add().addFilepattern(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void addFile(String path, String fileName) throws IOException, GitAPIException {
-//
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-//                .readEnvironment() // scan environment GIT_* variables
-//                .findGitDir() // scan up the file system tree
-//                .build()) {
-//            try (Git git = new Git(repository)) {
-//                git.add().addFilepattern(fileName).call();
-//                System.out.println("Added file " + fileName + " to repository.");
-//            }
-//        }
-//
-//    }
 
     //git restore
     public static void restoreModifiedFile(String path, String fileName) {
-        try (Git git = Git.open(new File(path))) {
-            git.checkout().addPath(fileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.checkout().addPath(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void restoreModifiedFile1(String path, String fileName) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-//                .readEnvironment() // scan environment GIT_* variables
-//                .findGitDir() // scan up the file system tree
-//                .build()) {
-//            try (Git git = new Git(repository)) {
-//                CheckoutCommand checkout = git.checkout();
-//                checkout.setAllPaths(true);
-//                checkout.setStartPoint("HEAD");
-//                checkout.addPath(fileName);
-//                checkout.call();
-//                System.out.println("Unmodified file " + fileName);
-//            }
-//        }
-//    }
-
-
-
 
     // git restore --cached
     public static void restoreStagedFile(String path, String fileName) {
-        try (Git git = Git.open(new File(path))) {
-            git.reset().addPath(fileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.reset().addPath(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void restoreStagedFile1(String path, String fileName) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-//                .readEnvironment() // scan environment GIT_* variables
-//                .findGitDir() // scan up the file system tree
-//                .build()) {
-//            try (Git git = new Git(repository)) {
-//                ResetCommand resetCommand = git.reset();
-//                resetCommand.setRef("HEAD");
-//                resetCommand.addPath(fileName);
-//                resetCommand.call();
-//                System.out.println("Unstaged changes for file " + fileName);
-//            }
-//        }
-//    }
 
     //git rm --cached
     public static void removeCachedFile(String path, String fileName) {
-        try (Git git = Git.open(new File(path))) {
-            git.rm().setCached(true).addFilepattern(fileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.rm().setCached(true).addFilepattern(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void removeCachedFile1(String path, String fileName) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-//                .readEnvironment() // scan environment GIT_* variables
-//                .findGitDir() // scan up the file system tree
-//                .build()) {
-//            try (Git git = new Git(repository)) {
-//                RmCommand rm = git.rm();
-//                rm.setCached(true);
-//                rm.addFilepattern(fileName);
-//                rm.call();
-//                System.out.println("Removed cached file " + fileName);
-//            }
-//        }
-//    }
-
 
     //git rm
     public static void removeFile(String path, String fileName) {
-        try (Git git = Git.open(new File(path))) {
-            git.rm().addFilepattern(fileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.rm().addFilepattern(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void removeFile1(String path, String fileName) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        try (Repository repository = builder.setGitDir(new File(path + "/.git"))
-//                .readEnvironment() // scan environment GIT_* variables
-//                .findGitDir() // scan up the file system tree
-//                .build()) {
-//            try (Git git = new Git(repository)) {
-//                RmCommand rm = git.rm();
-//                rm.addFilepattern(fileName);
-//                rm.call();
-//                System.out.println("Removed file " + fileName);
-//            }
-//        }
-//    }
-
 
     //git mv (renaming)
     public static void mvFile(String path, String oldFileName, String newFileName) {
-        try (Git git = Git.open(new File(path))) {
-            Files.move(Paths.get(path + "/" + oldFileName), Paths.get(path + "/" + newFileName));
-            git.add().addFilepattern(newFileName).call();
-            git.rm().addFilepattern(oldFileName).call();
-        } catch (IOException | GitAPIException e) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String replacedNewFileName = replacedPath + newFileName;
+            String replacedOldFileName = replacedPath + oldFileName;
+            Git git = Git.open(new File(replacedString));
+
+            Files.move(Paths.get(replacedString + "/" + replacedOldFileName), Paths.get(replacedString + "/" + replacedNewFileName));
+            git.add().addFilepattern(replacedNewFileName).call();
+            git.rm().addFilepattern(replacedOldFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
     }
-//    public static void mvFile1(String path, String fileName, String newName) throws IOException, GitAPIException {
-//        try (Repository repository = Git.open(new File(path, ".git")).getRepository()) {
-//            Git git = new Git(repository);
-//            String oldFilePath = path + File.separator + fileName;
-//            String newFilePath = path + File.separator + newName;
-//
-//            // Add the file to the index with the old path
-//            git.add().addFilepattern(oldFilePath).call();
-//
-//            // Use Files.move to rename the file
-//            Files.move(Paths.get(oldFilePath), Paths.get(newFilePath));
-//
-//            // Add the new file to the index with the new path
-//            git.add().addFilepattern(newFilePath).call();
-//
-//            git.commit().setMessage("Renamed file " + oldFilePath + " to " + newFilePath).call();
-//        } catch (JGitInternalException e) {
-//            throw new JGitInternalException("Error occurred while renaming file.", e);
-//        }
-//    }
-        //git commit
-//    public static void commit(String repoPath) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        Repository repository = builder.setWorkTree(new File(repoPath)).findGitDir().build();
-//        Git git = new Git(repository);
-//        git.commit().call();
-//    }
-//
-//        //git commit -m
-//    public static void commitWithMessage(String repoPath, String message) throws IOException, GitAPIException {
-//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-//        Repository repository = builder.setWorkTree(new File(repoPath)).findGitDir().build();
-//        Git git = new Git(repository);
-//        git.commit().setMessage(message).call();
-//    }
-
-
-    }
+}

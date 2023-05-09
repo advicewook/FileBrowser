@@ -81,6 +81,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     
     Repository currentGitRepository = null;
 
+    CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance();
     private void build() {
 //		width = 950;
 //		height = 600;
@@ -272,7 +273,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 }
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
-                    CustomSwingUtilities customSwingUtilities = new CustomSwingUtilities();
                     commitPanel = customSwingUtilities.showCommitMenu(currentFolder, getHeight());
                     displayPanel.add(commitPanel, BorderLayout.EAST);
                     displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + commitPanel.getWidth(), getHeight()));
@@ -779,6 +779,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.addFile(currentFolder,fileName);
+                            if (isCommitMenuOpened) {
+                                customSwingUtilities.revalidateCommitMenu(currentFolder);
+                            }
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -790,6 +793,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.restoreModifiedFile(currentFolder, fileName);
+                            if (isCommitMenuOpened) {
+                                customSwingUtilities.revalidateCommitMenu(currentFolder);
+                            }
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -801,6 +807,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.restoreStagedFile(currentFolder, fileName);
+                            if (isCommitMenuOpened) {
+                                customSwingUtilities.revalidateCommitMenu(currentFolder);
+                            }
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -812,6 +821,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.removeCachedFile(currentFolder, fileName);
+                            if (isCommitMenuOpened) {
+                                customSwingUtilities.revalidateCommitMenu(currentFolder);
+                            }
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -823,6 +835,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     public void actionPerformed(ActionEvent e) {
                         try {
                             CustomJgitUtilities.removeFile(currentFolder, fileName);
+                            if (isCommitMenuOpened) {
+                                customSwingUtilities.revalidateCommitMenu(currentFolder);
+                            }
+                            showPanel.removeAll();
+                            showPanel.revalidate();
+                            showPanel.repaint();
+
+                            File file = new File(currentFolder);
+                            File[] files = file.listFiles();
+                            for (File f : files){
+                                fillShowPane(f, 1);
+                            }
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -836,6 +860,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         if (newName != null && !newName.equals("")){
                             try {
                                 CustomJgitUtilities.mvFile(currentFolder, fileName, newName);
+                                if (isCommitMenuOpened) {
+                                    customSwingUtilities.revalidateCommitMenu(currentFolder);
+                                }
+                                showPanel.removeAll();
+                                showPanel.revalidate();
+                                showPanel.repaint();
+
+                                File file = new File(currentFolder);
+                                File[] files = file.listFiles();
+                                for (File f : files){
+                                    fillShowPane(f, 1);
+                                }
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
@@ -982,11 +1018,13 @@ public class FileBrowser extends JPanel implements ComponentListener {
     }
 
     public void removeCommitMenuPanel(){
-        displayPanel.remove(commitPanel);
-        displayPanel.setSize(new Dimension((getWidth() * 7 / 10), getHeight()));
-        frame.setSize(new Dimension(width, height));
-        revalidate();
-        isCommitMenuOpened=false;
+        if(commitPanel!=null){
+            displayPanel.remove(commitPanel);
+            displayPanel.setSize(new Dimension((getWidth() * 7 / 10), getHeight()));
+            frame.setSize(new Dimension(width, height));
+            revalidate();
+            isCommitMenuOpened=false;
+        }
     }
 
     // --------------------- test

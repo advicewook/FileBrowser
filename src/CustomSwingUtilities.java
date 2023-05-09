@@ -20,44 +20,47 @@ import java.util.List;
 
 public class CustomSwingUtilities {
 
-    public CustomSwingUtilities(){}
+    // 커밋 패널 - 상단 리스트 컨테이너
+    JPanel unstagedPanel = new JPanel();
+    // 커밋 패널 - 중단 리스트 컨테이너
+    JPanel stagedPanel = new JPanel();
+    private static CustomSwingUtilities instance;
+    private CustomSwingUtilities(){}
+
+    public static synchronized CustomSwingUtilities getInstance(){
+        if(instance==null){
+            instance=new CustomSwingUtilities();
+        }
+        return instance;
+    }
 
     public Status getStatus(String path){
-        Status status;
-        try (Git git = Git.open(new File(path))) {
+        try {
+            Status status;
+            FileRepositoryBuilder builder = new FileRepositoryBuilder();
+            Repository tempGitRepository;
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            Git git = Git.open(new File(replacedString));
             status = git.status().call();
-            System.out.println("Added: " + status.getAdded());
-            System.out.println("Changed: " + status.getChanged());
-            System.out.println("Modified: " + status.getModified());
-            System.out.println("Removed: " + status.getRemoved());
-            System.out.println("Untracked: " + status.getUntracked());
+
+            return status;
         } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);
         }
-        return status;
+
     }
 
     public JPanel showCommitMenu(String path, int height)  {
-
-//        Status status;
-//        try (Git git = Git.open(new File(path))) {
-//            status = git.status().call();
-//            System.out.println("Added: " + status.getAdded());
-//            System.out.println("Changed: " + status.getChanged());
-//            System.out.println("Modified: " + status.getModified());
-//            System.out.println("Removed: " + status.getRemoved());
-//            System.out.println("Untracked: " + status.getUntracked());
-//        } catch (GitAPIException | IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//
-//        Set<String> untrackedSet = status.getUntracked();
-//        Set<String> modifiedSet = status.getModified();
-//        Set<String> addedSet = status.getAdded();
-//        Set<String> changedSet = status.getChanged();
-//        Set<String> removedSet = status.getRemoved();
+        
+        removeCheckbox(unstagedPanel);
+        removeCheckbox(stagedPanel);
 
         Status status = getStatus(path);
+        Set<String> missingSet = status.getMissing();
         Set<String> untrackedSet = status.getUntracked();
         Set<String> modifiedSet = status.getModified();
         Set<String> addedSet = status.getAdded();
@@ -95,10 +98,10 @@ public class CustomSwingUtilities {
         stageButton.setFocusable(false);
         topHeader.add(stageButton);
         // 커밋 패널 - 상단 리스트 컨테이너
-        JPanel unstagedPanel = new JPanel();
         unstagedPanel.setLayout(new BoxLayout(unstagedPanel, BoxLayout.Y_AXIS));
         unstagedPanel.setBackground(Color.white);
         // 커밋 패널 - 상단 리스트 추가
+        getJCheckBoxList(missingSet, unstagedPanel, "removed");
         getJCheckBoxList(untrackedSet, unstagedPanel, "untracked");
         getJCheckBoxList(modifiedSet, unstagedPanel, "modified");
         // 커밋 패널 - 상단 리스트 컨테이너를 스크롤 컨테이너에 삽입
@@ -139,7 +142,6 @@ public class CustomSwingUtilities {
         middleHeader.add(unStageButton);
 
         // 커밋 패널 - 중단 리스트 컨테이너
-        JPanel stagedPanel = new JPanel();
         stagedPanel.setLayout(new BoxLayout(stagedPanel, BoxLayout.Y_AXIS));
         stagedPanel.setBackground(Color.white);
         // 커밋 패널 - 중단 리스트 추가
@@ -230,6 +232,7 @@ public class CustomSwingUtilities {
                 //2
                 Status temp = getStatus(path);
 
+                Set<String> tempmissingSet = temp.getMissing();
                 Set<String> tempuntrackedSet = temp.getUntracked();
                 Set<String> tempmodifiedSet = temp.getModified();
                 Set<String> tempaddedSet = temp.getAdded();
@@ -237,6 +240,7 @@ public class CustomSwingUtilities {
                 Set<String> tempremovedSet = temp.getRemoved();
 
                 //3
+                getJCheckBoxList(tempmissingSet, unstagedPanel, "removed");
                 getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
                 getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
                 getJCheckBoxList(tempaddedSet, stagedPanel, "added");
@@ -244,9 +248,7 @@ public class CustomSwingUtilities {
                 getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
 
                 unstagedPanel.revalidate();
-                unstagedPanel.repaint();
                 stagedPanel.revalidate();
-                stagedPanel.repaint();
 
 
             }
@@ -278,6 +280,7 @@ public class CustomSwingUtilities {
                 //2
                 Status temp = getStatus(path);
 
+                Set<String> tempmissingSet = temp.getMissing();
                 Set<String> tempuntrackedSet = temp.getUntracked();
                 Set<String> tempmodifiedSet = temp.getModified();
                 Set<String> tempaddedSet = temp.getAdded();
@@ -285,6 +288,7 @@ public class CustomSwingUtilities {
                 Set<String> tempremovedSet = temp.getRemoved();
 
                 //3
+                getJCheckBoxList(tempmissingSet, unstagedPanel, "removed");
                 getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
                 getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
                 getJCheckBoxList(tempaddedSet, stagedPanel, "added");
@@ -292,9 +296,7 @@ public class CustomSwingUtilities {
                 getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
 
                 unstagedPanel.revalidate();
-                unstagedPanel.repaint();
                 stagedPanel.revalidate();
-                stagedPanel.repaint();
             }
         });
 
@@ -321,6 +323,13 @@ public class CustomSwingUtilities {
             ImageIcon imageIcon;
             // status에 따른 icon 생성
             switch (status) {
+                case "missing":
+                    img = new ImageIcon("src\\" + "/img/removed.png").getImage();
+                    img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
+                    imageIcon = new ImageIcon(img);
+                    label = new JLabel(imageIcon);
+                    label.setPreferredSize(new Dimension(13, 13));
+                    break;
                 case "untracked":
                     img = new ImageIcon("src\\" + "/img/untracked.png").getImage();
                     img = img.getScaledInstance(13, 13, Image.SCALE_SMOOTH);
@@ -389,6 +398,36 @@ public class CustomSwingUtilities {
                 addSelectedItems((Container) c, selectedItems);
             }
         }
+    }
+
+    public void revalidateCommitMenu(String path){
+
+        //1
+        removeCheckbox(unstagedPanel);
+        removeCheckbox(stagedPanel);
+
+        //2
+        Status temp = getStatus(path);
+
+        Set<String> tempmissingSet = temp.getMissing();
+        Set<String> tempuntrackedSet = temp.getUntracked();
+        Set<String> tempmodifiedSet = temp.getModified();
+        Set<String> tempaddedSet = temp.getAdded();
+        Set<String> tempchangedSet = temp.getChanged();
+        Set<String> tempremovedSet = temp.getRemoved();
+
+        //3
+        getJCheckBoxList(tempmissingSet, unstagedPanel, "removed");
+        getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+        getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+        getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+        getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+        getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+        unstagedPanel.revalidate();
+        unstagedPanel.repaint();
+        stagedPanel.revalidate();
+        stagedPanel.repaint();
     }
 
 
