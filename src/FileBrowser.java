@@ -83,7 +83,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     
     Repository currentGitRepository = null;
 
-    CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance();
+    CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance(this);
     private void build() {
 //		width = 950;
 //		height = 600;
@@ -276,6 +276,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                if(isCommitMenuOpened){
+                    removeCommitMenuPanel();
+                    return;
+                }
                 if (!CustomJgitUtilities.isGitRepository(currentFolder)) {
                     JOptionPane.showMessageDialog(null, "This is not under git repository. Please make it as a git repository first.");
                     return;
@@ -604,7 +608,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         fileInRepo = fileInRepo.replace("\\","/");
         System.out.println("file name : " + fileInRepo);
 
-        Status allFileStatus = CustomSwingUtilities.getStatus(rootPath);
+        Status allFileStatus = customSwingUtilities.getStatus(rootPath);
         Set<String> untracked = allFileStatus.getUntracked();
         Set<String> modified = allFileStatus.getModified();
         Set<String> added = allFileStatus.getAdded();
@@ -612,19 +616,29 @@ public class FileBrowser extends JPanel implements ComponentListener {
         Set<String> removed = allFileStatus.getRemoved();
 
         if (untracked.contains(fileInRepo)){
-            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/BLKAXtnbdf.png\" width=\"15\" height=\"15\"/>";
+            status = "<html><div style='text-align:center;'>" +
+                    "<img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/BLKAXtnbdf.png\" width=\"15\" height=\"15\"/>"+
+                    "</div>";
         }
         else if (modified.contains(fileInRepo)){
-            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/gnM3JMEk24.png\" width=\"15\" height=\"15\"/>";
+            status = "<html><div style='text-align:center;'>" +
+                    "<img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/gnM3JMEk24.png\" width=\"15\" height=\"15\"/>"+
+                    "</div>";
         }
         else if (added.contains(fileInRepo)){
-            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/GG2Ju2uJfm.png\" width=\"15\" height=\"15\"/>";
+            status = "<html><div style='text-align:center;'>" +
+                    "<img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/GG2Ju2uJfm.png\" width=\"15\" height=\"15\"/>"+
+                    "</div>";
         }
         else if(changed.contains(fileInRepo)){
-            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/Mpbg9fpQSD.png\" width=\"15\" height=\"15\"/>";
+            status = "<html><div style='text-align:center;'>" +
+                    "<img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/Mpbg9fpQSD.png\" width=\"15\" height=\"15\"/>"+
+                    "</div>";
         }
         else if(removed.contains(fileInRepo)){
-            status = "<html><img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/38q8kGJzqP.png\" width=\"15\" height=\"15\"/>";
+            status = "<html><div style='text-align:center;'>" +
+                    "<img src=\"https://i.esdrop.com/d/f/1GbLJlgm9n/38q8kGJzqP.png\" width=\"15\" height=\"15\"/>"+
+                    "</div>";
         }
         else{
             status = " ";
@@ -862,6 +876,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             if (isCommitMenuOpened) {
                                 customSwingUtilities.revalidateCommitMenu(currentFolder);
                             }
+                            updateShowPanel();
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -876,6 +891,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             if (isCommitMenuOpened) {
                                 customSwingUtilities.revalidateCommitMenu(currentFolder);
                             }
+                            updateShowPanel();
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -890,6 +906,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             if (isCommitMenuOpened) {
                                 customSwingUtilities.revalidateCommitMenu(currentFolder);
                             }
+                            updateShowPanel();
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -904,6 +921,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             if (isCommitMenuOpened) {
                                 customSwingUtilities.revalidateCommitMenu(currentFolder);
                             }
+                            updateShowPanel();
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -918,15 +936,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                             if (isCommitMenuOpened) {
                                 customSwingUtilities.revalidateCommitMenu(currentFolder);
                             }
-                            showPanel.removeAll();
-                            showPanel.revalidate();
-                            showPanel.repaint();
-
-                            File file = new File(currentFolder);
-                            File[] files = file.listFiles();
-                            for (File f : files){
-                                fillShowPane(f, 1);
-                            }
+                            updateShowPanel();
                         } catch (Exception ex) {
                             ex.printStackTrace();
                         }
@@ -943,15 +953,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                                 if (isCommitMenuOpened) {
                                     customSwingUtilities.revalidateCommitMenu(currentFolder);
                                 }
-                                showPanel.removeAll();
-                                showPanel.revalidate();
-                                showPanel.repaint();
-
-                                File file = new File(currentFolder);
-                                File[] files = file.listFiles();
-                                for (File f : files){
-                                    fillShowPane(f, 1);
-                                }
+                                updateShowPanel();
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }

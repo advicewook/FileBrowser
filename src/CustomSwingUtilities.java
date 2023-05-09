@@ -25,11 +25,15 @@ public class CustomSwingUtilities {
     // 커밋 패널 - 중단 리스트 컨테이너
     JPanel stagedPanel = new JPanel();
     private static CustomSwingUtilities instance;
-    private CustomSwingUtilities(){}
 
-    public static synchronized CustomSwingUtilities getInstance(){
+    private FileBrowser fileBrowser;
+    private CustomSwingUtilities(FileBrowser fileBrowser){
+        this.fileBrowser=fileBrowser;
+    }
+
+    public static synchronized CustomSwingUtilities getInstance(FileBrowser fileBrowser){
         if(instance==null){
-            instance=new CustomSwingUtilities();
+            instance=new CustomSwingUtilities(fileBrowser);
         }
         return instance;
     }
@@ -249,7 +253,7 @@ public class CustomSwingUtilities {
 
                 unstagedPanel.revalidate();
                 stagedPanel.revalidate();
-
+                fileBrowser.updateShowPanel();
 
             }
         });
@@ -297,6 +301,7 @@ public class CustomSwingUtilities {
 
                 unstagedPanel.revalidate();
                 stagedPanel.revalidate();
+                fileBrowser.updateShowPanel();
             }
         });
 
