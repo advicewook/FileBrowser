@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class CustomJgitUtilities {
+    //기존 레포지토리 체크 메서드 - 해당 폴더만 검사
     public static boolean isGitRepository(String path) {
         try {
             Repository repository = Git.open(new File(path + "/.git")).getRepository();
@@ -34,6 +35,60 @@ public class CustomJgitUtilities {
             // failed to open repository
         }
         return false;
+    }
+    
+    //서브레포지토리 체크 메서드 - .git을 포함하는 상위 폴더까지 올라가서 검사
+    public static boolean isSubGitRepository(String path) {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        File dir = new File(path);
+        while (dir != null) {
+            File gitDir = new File(dir, ".git");
+            if (gitDir.exists()) {
+                try {
+                    Repository repo = builder.setGitDir(gitDir).readEnvironment().findGitDir().build();
+                    if (repo != null) {
+                        repo.close();
+                        return true;
+                    }
+                } catch (IOException e) {
+                    // failed to open repository
+                }
+            }
+            dir = dir.getParentFile();
+        }
+        return false;
+    }
+
+    public static void getStatusForParentFolder(String path) throws IOException, GitAPIException {
+        File file = new File(path);
+        File parent = file.getParentFile();
+
+        // find the parent folder including .git
+        while (parent != null && !new File(parent, ".git").exists()) {
+            parent = parent.getParentFile();
+        }
+
+        // check if the parent folder is under version control
+        if (parent == null) {
+            throw new IllegalArgumentException(path + " is not under version control");
+        }
+
+        Repository repository = Git.open(parent).getRepository();
+        Git git = new Git(repository);
+        Status status = git.status().call();
+
+        // loop through all subfolders and obtain status
+        for (File subfolder : parent.listFiles()) {
+            if (subfolder.isDirectory()) {
+                Status subfolderStatus = git.status().addPath(subfolder.getName()).call();
+                System.out.println("Status for " + subfolder.getAbsolutePath() + ":");
+                System.out.println("Added: " + subfolderStatus.getAdded());
+                System.out.println("Changed: " + subfolderStatus.getChanged());
+                System.out.println("Conflicting: " + subfolderStatus.getConflicting());
+                System.out.println("Missing: " + subfolderStatus.getMissing());
+                System.out.println("Modified: " + subfolderStatus.getModified());
+            }
+        }
     }
 
     public static Repository createNewRepository(String path) throws IOException {
@@ -246,7 +301,21 @@ public class CustomJgitUtilities {
 //            throw new JGitInternalException("Error occurred while renaming file.", e);
 //        }
 //    }
-
+        //git commit
+//    public static void commit(String repoPath) throws IOException, GitAPIException {
+//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//        Repository repository = builder.setWorkTree(new File(repoPath)).findGitDir().build();
+//        Git git = new Git(repository);
+//        git.commit().call();
+//    }
+//
+//        //git commit -m
+//    public static void commitWithMessage(String repoPath, String message) throws IOException, GitAPIException {
+//        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+//        Repository repository = builder.setWorkTree(new File(repoPath)).findGitDir().build();
+//        Git git = new Git(repository);
+//        git.commit().setMessage(message).call();
+//    }
 
 
     }

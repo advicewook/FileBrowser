@@ -3,6 +3,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,10 +14,9 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+import java.util.List;
+
 
 public class CustomSwingUtilities {
 
@@ -34,12 +34,10 @@ public class CustomSwingUtilities {
         } catch (GitAPIException | IOException e) {
             throw new RuntimeException(e);
         }
-
-
-
         return status;
     }
-    public JPanel showCommitMenu(String path, int height) {
+
+    public JPanel showCommitMenu(String path, int height)  {
 
 //        Status status;
 //        try (Git git = Git.open(new File(path))) {
@@ -390,4 +388,6 @@ public class CustomSwingUtilities {
             }
         }
     }
+
+
 }

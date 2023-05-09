@@ -263,6 +263,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent arg0) {
+                System.out.println(CustomJgitUtilities.isGitRepository(currentFolder));
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
                     CustomSwingUtilities customSwingUtilities = new CustomSwingUtilities();
@@ -863,23 +864,23 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 });
 
                 try {
-                    if (CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
+                    if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
                         add(gitAddFile);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isModified(currentFolder, fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isModified(currentFolder, fileName)) {
                         add(gitAddFile);
                         add(gitRestoreModifiedFile);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isStaged(currentFolder, fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isStaged(currentFolder, fileName)) {
                         add(gitRestoreStaged);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isCommitted(currentFolder,fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isCommitted(currentFolder,fileName)) {
                         add(gitUntracking);
                         add(gitDeleteFile);
                         add(gitMvFile);
