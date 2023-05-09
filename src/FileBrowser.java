@@ -895,23 +895,23 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 });
 
                 try {
-                    if (CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
+                    if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isUntracked(currentFolder,fileName)) {
                         add(gitAddFile);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isModified(currentFolder, fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isModified(currentFolder, fileName)) {
                         add(gitAddFile);
                         add(gitRestoreModifiedFile);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isStaged(currentFolder, fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isStaged(currentFolder, fileName)) {
                         add(gitRestoreStaged);
                         addSeparator();
 
                     }
-                    else if (CustomJgitUtilities.isCommitted(currentFolder,fileName)) {
+                    else if (CustomJgitUtilities.isSubGitRepository(currentFolder)&&CustomJgitUtilities.isCommitted(currentFolder,fileName)) {
                         add(gitUntracking);
                         add(gitDeleteFile);
                         add(gitMvFile);
