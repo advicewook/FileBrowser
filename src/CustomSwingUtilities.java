@@ -301,6 +301,43 @@ public class CustomSwingUtilities {
         });
 
 
+        commitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    CustomJgitUtilities.commitFile(path, textArea.getText());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+
+                textArea.setText("");
+                //1
+                removeCheckbox(unstagedPanel);
+                removeCheckbox(stagedPanel);
+
+                //2
+                Status temp = getStatus(path);
+
+                Set<String> tempuntrackedSet = temp.getUntracked();
+                Set<String> tempmodifiedSet = temp.getModified();
+                Set<String> tempaddedSet = temp.getAdded();
+                Set<String> tempchangedSet = temp.getChanged();
+                Set<String> tempremovedSet = temp.getRemoved();
+
+                //3
+                getJCheckBoxList(tempuntrackedSet, unstagedPanel, "untracked");
+                getJCheckBoxList(tempmodifiedSet, unstagedPanel, "modified");
+                getJCheckBoxList(tempaddedSet, stagedPanel, "added");
+                getJCheckBoxList(tempchangedSet, stagedPanel, "changed");
+                getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
+
+                unstagedPanel.revalidate();
+                unstagedPanel.repaint();
+                stagedPanel.revalidate();
+                stagedPanel.repaint();
+            }
+        });
+
         // 커밋 패널 부모 컨테이너에 추가
         commitPanel.add(topCommitPanel, BorderLayout.NORTH);
         commitPanel.add(middleCommitPanel, BorderLayout.CENTER);
