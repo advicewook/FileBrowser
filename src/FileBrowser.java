@@ -61,8 +61,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
     public JPanel showPanel, commitPanel;
-    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton,
-            refreshButton, createRepoButton;
+    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
     private DefaultTreeModel treeModel;
@@ -199,18 +198,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
 
-        // 새로고침 버튼
-        refreshButton = new JButton("Refresh Status");
-        refreshButton.setOpaque(false);
-        refreshButton.setBackground(new Color(0, 0, 0, 0));
-        refreshButton.setForeground(Color.black);
-        refreshButton.setFocusable(false);
-
         JPanel gitMenuPanel = new JPanel();
         gitMenuPanel.setOpaque(false);
         gitMenuPanel.setLayout(new BorderLayout(0, 0));
-        gitMenuPanel.add(refreshButton, BorderLayout.WEST);
-        gitMenuPanel.add(createRepoButton, BorderLayout.CENTER);
+        gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
         gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
         barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
 
@@ -239,14 +230,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fillShowPane(file, 0);
         }
 
-        // 파일 상태 초기화 버튼 리스너 추가
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                updateShowPanel();
-            }
-        });
-
         // 레포 생성 버튼 리스너 추가
         createRepoButton.addActionListener(new ActionListener() {
            @Override
@@ -254,7 +237,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                //System.out.println(currentFolder);
                if (CustomJgitUtilities.isGitRepository(currentFolder)) {
                    // 이미 레포가 생성된 폴더의 경우 경고창 띄우기
-                   JOptionPane.showMessageDialog(null, "이미 레파지토리가 존재합니다");
+                   JOptionPane.showMessageDialog(null, "The repository already exists.");
 
                } else {
                    try {
