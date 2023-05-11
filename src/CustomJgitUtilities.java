@@ -11,6 +11,8 @@ import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CustomJgitUtilities {
     //기존 레포지토리 체크 메서드 - 해당 폴더만 검사
@@ -93,6 +95,7 @@ public class CustomJgitUtilities {
     }
 
     public static boolean isUntracked(String path, String fileName) throws IOException, GitAPIException {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repository = null;
         repository = builder.readEnvironment().findGitDir(new File(path)).build();
@@ -104,8 +107,20 @@ public class CustomJgitUtilities {
             untrackedSet.addAll(untrackedFileSet);
             untrackedSet.addAll(untrackedFolderSet);
             Iterator<String> untrackedSetIterator = untrackedSet.iterator();
+
+            String replacedString = repository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            fileName = replacedPath + fileName;
+
             while (untrackedSetIterator.hasNext()) {
-                if(untrackedSetIterator.next().contains(fileName)){
+                if(untrackedSetIterator.next().equals(fileName)){
                     return true;
                 }
             }
@@ -114,6 +129,7 @@ public class CustomJgitUtilities {
     }
 
     public static boolean isModified(String path, String fileName) throws IOException, GitAPIException {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repository = null;
         repository = builder.readEnvironment().findGitDir(new File(path)).build();
@@ -121,8 +137,20 @@ public class CustomJgitUtilities {
             Status status = git.status().call();
             Set<String> modifiedSet = status.getModified();
             Iterator<String> modifiedSetIterator = modifiedSet.iterator();
+
+            String replacedString = repository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            fileName = replacedPath + fileName;
+
             while (modifiedSetIterator.hasNext()) {
-                if(modifiedSetIterator.next().contains(fileName)){
+                if(modifiedSetIterator.next().equals(fileName)){
                     return true;
                 }
             }
@@ -131,6 +159,7 @@ public class CustomJgitUtilities {
     }
 
     public static boolean isStaged(String path, String fileName) throws IOException, GitAPIException {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repository = null;
         repository = builder.readEnvironment().findGitDir(new File(path)).build();
@@ -144,8 +173,20 @@ public class CustomJgitUtilities {
             stagedSet.addAll(changedSet);
             stagedSet.addAll(removedSet);
             Iterator<String> addedSetIterator = stagedSet.iterator();
+
+            String replacedString = repository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            fileName = replacedPath + fileName;
+
             while (addedSetIterator.hasNext()) {
-                if(addedSetIterator.next().contains(fileName)){
+                if(addedSetIterator.next().equals(fileName)){
                     return true;
                 }
             }
@@ -155,6 +196,7 @@ public class CustomJgitUtilities {
 
 
     public static boolean isCommitted(String path, String fileName) throws IOException, GitAPIException {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository repository = null;
         repository = builder.readEnvironment().findGitDir(new File(path)).build();
@@ -172,8 +214,20 @@ public class CustomJgitUtilities {
             notInCommittedOrUnmodifiedSet.addAll(status.getUntrackedFolders());
 
             Iterator<String> notInCommittedOrUnmodifiedIterator = notInCommittedOrUnmodifiedSet.iterator();
+
+            String replacedString = repository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            fileName = replacedPath + fileName;
+
             while (notInCommittedOrUnmodifiedIterator.hasNext()) {
-                if(notInCommittedOrUnmodifiedIterator.next().contains(fileName)){
+                if(notInCommittedOrUnmodifiedIterator.next().equals(fileName)){
                     return false;
                 }
             }
@@ -183,6 +237,7 @@ public class CustomJgitUtilities {
 
     //git add
     public static void addFile(String path, String fileName) {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -206,6 +261,7 @@ public class CustomJgitUtilities {
 
     //git restore
     public static void restoreModifiedFile(String path, String fileName) {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -229,6 +285,7 @@ public class CustomJgitUtilities {
 
     // git restore --cached
     public static void restoreStagedFile(String path, String fileName) {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -252,6 +309,7 @@ public class CustomJgitUtilities {
 
     //git rm --cached
     public static void removeCachedFile(String path, String fileName) {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -275,6 +333,7 @@ public class CustomJgitUtilities {
 
     //git rm
     public static void removeFile(String path, String fileName) {
+        fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -298,6 +357,8 @@ public class CustomJgitUtilities {
 
     //git mv (renaming)
     public static void mvFile(String path, String oldFileName, String newFileName) {
+        oldFileName= extractText(oldFileName);
+        newFileName= extractText(newFileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
         Repository tempGitRepository;
         try {
@@ -321,5 +382,20 @@ public class CustomJgitUtilities {
         } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String extractText(String input){
+        String extractedText = "";
+        Pattern pattern = Pattern.compile("<p>(.*?)</p>");
+        Matcher matcher = pattern.matcher(input);
+
+        if(matcher.find()){
+            extractedText = matcher.group(1);
+        }
+
+        if(extractedText.equals("")){
+            return input;
+        }
+        return extractedText;
     }
 }
