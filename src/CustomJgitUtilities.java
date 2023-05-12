@@ -259,6 +259,16 @@ public class CustomJgitUtilities {
         }
     }
 
+    public static void commitFile(String path, String commitMsg) {
+        try (Git git = Git.open(new File(path))) {
+            git.commit()
+                    .setMessage(commitMsg)
+                    .call();
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+    }
+
     //git restore
     public static void restoreModifiedFile(String path, String fileName) {
         fileName= extractText(fileName);
