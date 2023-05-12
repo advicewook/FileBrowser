@@ -6,9 +6,9 @@
 > file browser에 과제에서 요구되는 git gui 기능을 구현했습니다.
 ## How to Execute
 
-개발 및 실행 환경 : IntelliJ IDEA Ultimate
-언어 및 버전 : JAVA, JDK-17
-빌드 툴 및 버전 : gradle 8.0
+**개발 및 실행 환경 : IntelliJ IDEA Ultimate**  
+**언어 및 버전 : JAVA, JDK-17**  
+**빌드 툴 및 버전 : gradle 8.0**  
 
 ### 아래는 프로젝트 실행 방법입니다.
 1. 프로젝트를 클론합니다. `git clone https://github.com/advicewook/FileBrowser.git`
@@ -16,7 +16,7 @@
 3. Load Gradle Project후에 IntelliJ Ultimate IDEA의 인덱싱이 끝날 때까지 기다립니다. 이는 우측 하단의 프로그레스바에서 확인할 수 있습니다.  
 4. 우측 상단 Gradle 탭을 열고 reload합니다.  
    <img src="Screenshots/gradle-refresh.png"/>
-5. File > Settings에서 Intellij의 설정값을 아래와 같이 변경합니다.
+5. File > Settings에서 Intellij의 설정값을 아래와 같이 변경합니다. 아래에서 Gradle user home 경로는 예시입니다.
    <img src="Screenshots/config-settings-gradle.png"/>
    <img src="Screenshots/config-file-encoding.png"/>
 6. File > Project Structure에서 Intellij의 설정값을 아래와 같이 변경합니다.
