@@ -1,10 +1,19 @@
-<img src="src/img/file_browser.png" align="right" height="100" width="100" />
+<img src="src/img/file_browser.png" align="right" height="100" width="100" />   
 
 # FileBrowser - Implementing Git Utilities
+
 ***
-# Project Introduction
-> file browser에 과제에서 요구되는 git gui 기능을 구현했습니다.
-## How to Execute
+## **Project Introduction**
+> 중앙대학교 소프트웨어학부 23-1 오픈소스SW프로젝트 과목 과제 진행을 위한 레퍼지토리 입니다. 과제에서 요구되는 GUI-based git repository management service를 구현했습니다.
+### **Application**
+<img src="Screenshots/Project1-gui.png"/>
+
+
+todo : 제공하는 기능에 대한 간단 설명 추가
+
+</br>  
+
+## **How to Execute**
 
 **개발 및 실행 환경 : IntelliJ IDEA Ultimate**  
 **언어 및 버전 : JAVA, JDK-17**  
@@ -43,15 +52,26 @@
 8. 실행 결과 예시  
    <img src="Screenshots/gradle-config-step2.png"/>   
 
-## Main History
-- 2023-04 : 적절한 오픈소스 탐색 및 프로그래밍 언어 선정  
-- 2023-05-01 : eclipse project를 gradle project로 변경  
-- 2023-05-03 : commit menu ui 추가  
-- 2023-05-03 : create repository 버튼 생성
-- 2023-05-10 : 깃 레포지토리의 영향 범위에 포함된 파일 우클릭 시 git status에 따른 팝업 생성, 선택 시 기능 동작 
-- 2023-05-10 : 커밋 기능 구현
 
-## Details About Implementation
+</br>  
+
+## **Main History**
+
+|날짜|진행 상황|
+|--|--|
+|23-04|적절한 오픈 소스 탐색 및 프로그래밍 언어 선정|
+|23-05-01|eclipse project를 gradle project로 변경|  
+|23-05-03|1. commit menu ui 추가  </br> 2. 커밋 패널 생성 완료 </br> 3. commit menu, repository creation 버튼 기능 구현 완료|
+|23-05-04|1. 커밋 패널 기능 구현 완료 </br> 2. 팝업 메뉴 기능 구현 완료|
+|23-05-05|1. 파일 상태 아이콘 제작 완료 </br> 2. 커밋 패널 기능 개선|
+|23-05-09|중앙 패널, 커밋 메뉴, 커밋 패널 기능 개선|
+|23-05-10|1. 레포지토리 하위 폴더 동작 오류 개선 (status에 따른 팝업 메뉴 생성 및 선택 시 기능 동작)  </br> 2. 커밋 기능 구현 완료 </br> 3. 중앙 패널 안 파일의 상태 표시 아이콘 기능 완성 |
+|23-05-11|팝업 메뉴 오류 개선 및 일부 코드 수정|
+|23-05-12 ~ 05-14| 문서 및 리드미 작성|
+
+</br>  
+
+## **Details About Implementation**
 ### 주요 의존성
 - Jgit : Eclipse Foundation에서 관리하는, git 명령어를 java 메서드로 호출할 수 있도록 지원합니다.
 - Swing : 자바로 작성된 GUI 라이브러리입니다. 자바 기반의 그래픽 인터페이스를 만들 수 있는 클래스를 제공합니다.
@@ -64,9 +84,6 @@
 - FileBrowser : 파일 브라우저를 구현하는 핵심 클래스입니다.
 - CustomJgitUtilities : jgit을 사용한 git 기능 구현을 담당하는 클래스입니다.
 - CustomSwingUtilities : swing을 사용해 gui을 구현하는 클래스입니다.
-
-## Collaboration History
-- TODO
 
 ***
 ## Original Project Introduction
