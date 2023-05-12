@@ -3,19 +3,31 @@ apply plugin: 'eclipse'
 archivesBaseName = 'FileBrowser'
 version = '1.0-SNAPSHOT'
 
+sourceCompatibility = 17
+
 sourceSets.main.java.srcDirs = ['src']
+
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '6.5.0.202303070854-r'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
 }
 
 jar {
     manifest {
         attributes 'Main-Class': 'FileBrowser'
     }
-}
 
-dependencies {
-    // https://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit
-    implementation group: 'org.eclipse.jgit', name: 'org.eclipse.jgit', version: '6.5.0.202303070854-r'
+    from (configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }){
+        exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    }
 }
