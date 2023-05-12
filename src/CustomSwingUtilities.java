@@ -337,9 +337,8 @@ public class CustomSwingUtilities {
                 getJCheckBoxList(tempremovedSet, stagedPanel, "removed");
 
                 unstagedPanel.revalidate();
-                unstagedPanel.repaint();
                 stagedPanel.revalidate();
-                stagedPanel.repaint();
+                fileBrowser.updateShowPanel();
             }
         });
 
