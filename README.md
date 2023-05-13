@@ -68,7 +68,7 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 </br>  
 
 ## **How to Execute**
-
+**타겟 플랫폼 : Windows**  
 **개발 및 실행 환경 : IntelliJ IDEA Ultimate**  
 **언어 및 버전 : JAVA, JDK-17**  
 **빌드 툴 및 버전 : gradle 8.0**  
