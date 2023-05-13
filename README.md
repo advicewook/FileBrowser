@@ -11,7 +11,7 @@
 ### **GUI**
 **1. GUI 구성** 
 
-<img src="Screenshots/gui-내부.png" height="350" width="500"/>   
+<img src="Screenshots/gui-내부.png" height="300" width="500"/>   
 
 (1) 파일 탐색 패널 : 파일 및 폴더를 탐색하는 패널입니다.   
 (2) 중앙 패널 : 선택한 폴더의 내부 요소를 보여줍니다. git 저장소라면 파일의 상태 정보(아이콘)이 함께 제공됩니다.    
@@ -38,17 +38,15 @@
 
 
 **NOTICE:**
-ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니다. commit 버튼을 클릭하면 실시간으로 파일이 staging area에서 벗어나고 상태 아이콘이 사라지는 것을 통해 commited 상태로 변경되었음을 확인할 수 있습니다. 
-
+ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니다. *Commit* 버튼을 클릭하면 실시간으로 파일이 staging area에서 벗어나고 상태 아이콘이 사라지는 것을 통해 commited 상태로 변경되었음을 확인할 수 있습니다. 
 
 ### **프로젝트 주요 기능**
 #### **1. Git repository 생성**
-- GUI 우측 상단의 *Create Repository*버튼을 클릭하여 git 저장소를 생성할 수 있습니다.
-   - 중복으로 repository로 만들 수 없습니다.  
+- GUI 우측 상단의 *Create Repository*버튼을 클릭하여 git 저장소를 생성할 수 있습니다. 단, 중복 생성은 불가능합니다.
 
 #### **2. Version controlliong**
-- 파일 상태별 팝업 메뉴 제공
-   - 마우스 우클릭 시 파일 상태에 따라 서로 다른 git 팝업 메뉴가 나타납니다. 원하는 기능을 선택하면 해당 메뉴에 맞게 실시간으로 파일의 상태가 변하는 것을 확인할 수 있습니다. 
+- **파일 상태별 팝업 메뉴 제공**
+   - 마우스 우클릭 시 파일 상태에 따라 서로 다른 git 팝업 메뉴가 나타납니다. 선택시 해당 메뉴에 맞게 실시간으로 파일의 상태가 변하는 것을 확인할 수 있습니다. 
    - 팝업메뉴 예시(committed 상태)  
    <img src="Screenshots/example-popup-committed.png" height="200" width="200"/>  
 
@@ -60,11 +58,13 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
    |staged|Unstage changes|
    |committed|Untracking</br>Delete file</br>Rename tracked file|
 
-- Staging area 관리 및 Commit 기능 제공
+- **Staging area 관리 및 Commit 기능 제공**
    - GUI 우측 상단의 *Commit Menu* 버튼을 클릭하여 커밋 패널을 열 수 있습니다. 단, git 저장소가 아닌 폴더에서는 열리지 않습니다.
-   - commit 메세지를 작성하고 *commit* 버튼을 클릭하여 파일을 committed(unmodified) 상태로 만들 수 있습니다.
+   - commit 메세지를 작성하고 *Commit* 버튼을 클릭하여 파일을 committed(unmodified) 상태로 만들 수 있습니다.
    - *Stage*, *Unstage* 버튼을 클릭하여 Staging area에 올라온 파일을 Unstaging 하거나 Unstaged 상태의 파일을 Staging area로 올릴 수 있습니다.
 
+
+기능에 대한 보다 자세한 설명은 아래의 문서를 참고하세요. (링크추가예정)  
 </br>  
 
 ## **How to Execute**
@@ -118,7 +118,7 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 |23-05-03|1. commit menu ui 추가  </br> 2. 커밋 패널 생성 완료 </br> 3. commit menu, repository creation 버튼 기능 구현 완료|
 |23-05-04|1. 커밋 패널 기능 구현 완료 </br> 2. 팝업 메뉴 기능 구현 완료|
 |23-05-05|1. 파일 상태 아이콘 제작 완료 </br> 2. 커밋 패널 기능 개선|
-|23-05-09|중앙 패널, 커밋 메뉴, 커밋 패널 기능 개선|
+|23-05-09|1. 중앙 패널 파일 상태 표시 기능 개선 </br> 2. 커밋 메뉴 버튼 동작 개선 </br> 3. 커밋 패널 기능 개선|
 |23-05-10|1. 레포지토리 하위 폴더 동작 오류 개선 (status에 따른 팝업 메뉴 생성 및 선택 시 기능 동작)  </br> 2. 커밋 기능 구현 완료 </br> 3. 중앙 패널 안 파일의 상태 표시 아이콘 기능 완성 |
 |23-05-11|팝업 메뉴 오류 개선 및 일부 코드 수정|
 |23-05-13| 문서 및 리드미 작성|
