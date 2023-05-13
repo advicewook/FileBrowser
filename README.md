@@ -8,8 +8,6 @@
 ## **Application**
 <img src="Screenshots/gui-전체.png" height="400" width="650"/>
 
-</br>
-
 ### **GUI**
 **1. GUI 구성** 
 
@@ -19,8 +17,6 @@
 (2) 중앙 패널 : 선택한 폴더의 내부 요소를 보여줍니다. git 저장소라면 파일의 상태 정보(아이콘)이 함께 제공됩니다.    
 (3) 저장소 버튼 : 저장소를 생성하거나 커밋 패널을 여는 버튼이 존재합니다.     
 (4) 커밋 패널 : staging, unstaging, commit 등 주요 git 기능을 제공하는 패널입니다.      
-
-</br>
 
 **2. 파일 상태 아이콘**  
 **(1) Unstaged**  
@@ -40,12 +36,10 @@
 |<img src="src/img/changed.png" height="50" width="50"/>|Changed|unmodified 상태였던 파일이 수정되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|  
 |<img src="src/img/removed.png" height="50" width="50"/>|Removed|기존 파일이 삭제되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|
 
-</br>
 
 **NOTICE:**
 ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니다. commit 버튼을 클릭하면 실시간으로 파일이 staging area에서 벗어나고 상태 아이콘이 사라지는 것을 통해 commited 상태로 변경되었음을 확인할 수 있습니다. 
 
-</br>
 
 ### **프로젝트 주요 기능**
 #### **1. Git repository 생성**
@@ -58,13 +52,13 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
    - 팝업메뉴 예시(committed 상태)  
    <img src="Screenshots/example-popup-committed.png" height="200" width="200"/>  
 
-      상태별 제공되는 팝업 메뉴의 구성 아래와 같습니다. 
-      |상태|팝업 메뉴|
-      |--|--|
-      |untracked|Add to git|
-      |modified|Add to git</br>Unmodifying|
-      |staged|Unstage changes|
-      |committed|Untracking</br>Delete file</br>Rename tracked file|
+   상태별 제공되는 팝업 메뉴의 구성 아래와 같습니다. 
+   |상태|팝업 메뉴|
+   |--|--|
+   |untracked|Add to git|
+   |modified|Add to git</br>Unmodifying|
+   |staged|Unstage changes|
+   |committed|Untracking</br>Delete file</br>Rename tracked file|
 
 - Staging area 관리 및 Commit 기능 제공
    - GUI 우측 상단의 *Commit Menu* 버튼을 클릭하여 커밋 패널을 열 수 있습니다. 단, git 저장소가 아닌 폴더에서는 열리지 않습니다.
@@ -97,7 +91,7 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 9. 설정이 완료되면 저장 후 Configuration창을 닫습니다. 이후 우측 상단에서 Run 버튼을 눌러 애플리케이션을 실행할 수 있습니다.  
    <img src="Screenshots/config-step3.png"/>  
 10. 실행 결과 예시  
-   <img src="Screenshots/Project1-gui.png" height="300" width="500"/>  
+   <img src="Screenshots/gui-전체.png" height="300" width="500"/>  
 
 ### 아래는 gradle을 이용한 빌드 후 jar파일 실행 방법입니다.  
 1. 프로젝트 실행 방법의 6번까지 완료한 후 7번을 실행합니다.  
