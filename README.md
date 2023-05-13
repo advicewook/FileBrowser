@@ -65,7 +65,7 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 
 
 기능에 대한 보다 자세한 설명은 아래의 문서를 참고하세요.   
-[문서]("./papers/team_20.pdf")
+[문서](./papers/team_20.pdf)
 </br>  
 
 ## **How to Execute**
