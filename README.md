@@ -4,12 +4,72 @@
 
 ***
 ## **Project Introduction**
-> 중앙대학교 소프트웨어학부 23-1 오픈소스SW프로젝트 과목 과제 진행을 위한 레퍼지토리 입니다. 과제에서 요구되는 GUI-based git repository management service를 구현했습니다.
-### **Application**
-<img src="Screenshots/Project1-gui.png" height="300" width="500"/>
+> 중앙대학교 소프트웨어학부 23-1 오픈소스SW프로젝트 과목 과제 진행을 위한 레퍼지토리입니다. 과제에서 요구되는 GUI-based git repository management service를 구현했습니다.
+## **Application**
+<img src="Screenshots/gui-전체.png" height="400" width="650"/>
 
+</br>
 
-todo : 제공하는 기능에 대한 간단 설명 추가, 이미지 크기 조정
+### **GUI**
+**1. GUI 구성** 
+
+<img src="Screenshots/gui-내부.png" height="350" width="500"/>   
+
+(1) 파일 탐색 패널 : 파일 및 폴더를 탐색하는 패널입니다.   
+(2) 중앙 패널 : 선택한 폴더의 내부 요소를 보여줍니다. git 저장소라면 파일의 상태 정보(아이콘)이 함께 제공됩니다.    
+(3) 저장소 버튼 : 저장소를 생성하거나 커밋 패널을 여는 버튼이 존재합니다.     
+(4) 커밋 패널 : staging, unstaging, commit 등 주요 git 기능을 제공하는 패널입니다.      
+
+</br>
+
+**2. 파일 상태 아이콘**  
+**(1) Unstaged**  
+변경된 파일이나 새로 생성한 파일 중 git add 명령을 실행하기 전의 상태입니다.  
+
+|아이콘|상태|설명|
+|:--:|:--:|:--:|
+|<img src="src/img/untracked.png" height="50" width="50"/>|Untracked|새로 생성된 파일로 Git이 추적하지 않는 상태| 
+|<img src="src/img/modified.png" height="50" width="50"/>|Modified|기존 파일이 수정된 상태|  
+||Ignored|Git이 추적하지 않도록 설정한 파일|
+
+**(2) Staged**    
+수정된 파일이나 새로 생성한 파일 중 git add 명령을 실행하여 Git이 추적할 준비가 된 상태입니다.   
+|아이콘|상태|설명|
+|:--:|:--:|:--:|
+|<img src="src/img/added.png" height="50" width="50"/>|Added|새로 생성한 파일이 스테이지 영역에 추가된 상태|  
+|<img src="src/img/changed.png" height="50" width="50"/>|Changed|unmodified 상태였던 파일이 수정되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|  
+|<img src="src/img/removed.png" height="50" width="50"/>|Removed|기존 파일이 삭제되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|
+
+</br>
+
+**NOTICE:**
+ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니다. commit 버튼을 클릭하면 실시간으로 파일이 staging area에서 벗어나고 상태 아이콘이 사라지는 것을 통해 commited 상태로 변경되었음을 확인할 수 있습니다. 
+
+</br>
+
+### **프로젝트 주요 기능**
+#### **1. Git repository 생성**
+- GUI 우측 상단의 *Create Repository*버튼을 클릭하여 git 저장소를 생성할 수 있습니다.
+   - 중복으로 repository로 만들 수 없습니다.  
+
+#### **2. Version controlliong**
+- 파일 상태별 팝업 메뉴 제공
+   - 마우스 우클릭 시 파일 상태에 따라 서로 다른 git 팝업 메뉴가 나타납니다. 원하는 기능을 선택하면 해당 메뉴에 맞게 실시간으로 파일의 상태가 변하는 것을 확인할 수 있습니다. 
+   - 팝업메뉴 예시(committed 상태)  
+   <img src="Screenshots/example-popup-committed.png" height="200" width="200"/>  
+
+      상태별 제공되는 팝업 메뉴의 구성 아래와 같습니다. 
+      |상태|팝업 메뉴|
+      |--|--|
+      |untracked|Add to git|
+      |modified|Add to git</br>Unmodifying|
+      |staged|Unstage changes|
+      |committed|Untracking</br>Delete file</br>Rename tracked file|
+
+- Staging area 관리 및 Commit 기능 제공
+   - GUI 우측 상단의 *Commit Menu* 버튼을 클릭하여 커밋 패널을 열 수 있습니다. 단, git 저장소가 아닌 폴더에서는 열리지 않습니다.
+   - commit 메세지를 작성하고 *commit* 버튼을 클릭하여 파일을 committed(unmodified) 상태로 만들 수 있습니다.
+   - *Stage*, *Unstage* 버튼을 클릭하여 Staging area에 올라온 파일을 Unstaging 하거나 Unstaged 상태의 파일을 Staging area로 올릴 수 있습니다.
 
 </br>  
 
