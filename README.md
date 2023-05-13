@@ -11,7 +11,7 @@
 ### **GUI**
 **1. GUI 구성** 
 
-<img src="Screenshots/gui-내부.png" height="300" width="500"/>   
+<img src="Screenshots/gui-내부.png" height="300" width="500"/>    
 
 (1) 파일 탐색 패널 : 파일 및 폴더를 탐색하는 패널입니다.   
 (2) 중앙 패널 : 선택한 폴더의 내부 요소를 보여줍니다. git 저장소라면 파일의 상태 정보(아이콘)이 함께 제공됩니다.    
@@ -74,20 +74,20 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 **빌드 툴 및 버전 : gradle 8.0**  
 
 ### 아래는 프로젝트 실행 방법입니다.
-1. 프로젝트를 클론합니다. `git clone https://github.com/advicewook/FileBrowser.git`
+1. 프로젝트를 클론합니다. `git clone https://github.com/advicewook/FileBrowser.git`  
 2. IntelliJ Ultimate IDEA로 clone한 프로젝트 폴더를 엽니다.  
 3. Load Gradle Project후에 IntelliJ Ultimate IDEA의 인덱싱이 끝날 때까지 기다립니다. 이는 우측 하단의 프로그레스바에서 확인할 수 있습니다.  
 4. 우측 상단 Gradle 탭을 열고 reload합니다.  
-   <img src="Screenshots/gradle-refresh.png"/>
-5. File > Settings에서 Intellij의 설정값을 아래와 같이 변경합니다. 아래에서 Gradle user home 경로는 예시입니다.
-   <img src="Screenshots/config-settings-gradle.png"/>    
-   <img src="Screenshots/config-file-encoding.png" />
-6. File > Project Structure에서 Intellij의 설정값을 아래와 같이 변경합니다.
-   <img src="Screenshots/config-sdk.png" />
+   <img src="Screenshots/gradle-refresh.png"/>  
+5. File > Settings에서 Intellij의 설정값을 아래와 같이 변경합니다. 아래에서 Gradle user home 경로는 예시입니다.  
+   <img src="Screenshots/config-settings-gradle.png" height="300" width="500" />      
+   <img src="Screenshots/config-file-encoding.png" height="300" width="500" />   
+6. File > Project Structure에서 Intellij의 설정값을 아래와 같이 변경합니다.   
+   <img src="Screenshots/config-sdk.png" height="300" width="500" />   
 7. reload가 끝나면 우측 상단의 Edit Configuration 창을 엽니다.  
-   <img src="Screenshots/config-step1.png"/>  
-8. 아래 이미지를 참고하여 설정값을 변경합니다. JDK17이 없다면 우측 링크에서 다운로드받으실 수 있습니다.(https://www.oracle.com/kr/java/technologies/javase/jdk17-archive-downloads.html)  
-   <img src="Screenshots/config-step2.png" />  
+   <img src="Screenshots/config-step1.png" />  
+8. 아래 이미지를 참고하여 설정값을 변경합니다. JDK17이 없다면 우측 링크에서 다운로드받으실 수 있습니다.(https://www.oracle.com/kr/java/technologies/javase/jdk17-archive-downloads.html)   
+   <img src="Screenshots/config-step2.png" height="300" width="500" />   
 9. 설정이 완료되면 저장 후 Configuration창을 닫습니다. 이후 우측 상단에서 Run 버튼을 눌러 애플리케이션을 실행할 수 있습니다.  
    <img src="Screenshots/config-step3.png"/>  
 10. 실행 결과 예시  
@@ -96,15 +96,15 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
 ### 아래는 gradle을 이용한 빌드 후 jar파일 실행 방법입니다.  
 1. 프로젝트 실행 방법의 6번까지 완료한 후 7번을 실행합니다.  
 2. 아래 이미지를 참고하여 설정값을 변경합니다.  
-   <img src="Screenshots/gradle-config-step1.png"/>  
-3. 설정이 완료되면 저장 후 Configuration창을 닫습니다.
+   <img src="Screenshots/gradle-config-step1.png" height="300" width="500" />  
+3. 설정이 완료되면 저장 후 Configuration창을 닫습니다.  
 4. 설정을 마친 후, 우측 상단에서 Run 버튼을 눌러 gradle 빌드 명령을 실행합니다.  
    <img src="Screenshots/gradle-config-step1half.png" />  
 6. 빌드가 성공적으로 끝났다면 아래와 같은 로그가 출력되고, 빌드 결과물은 /build/libs에 jar파일로 생성됩니다.  
-   <img src="Screenshots/assemble-log.png"/>  
+   <img src="Screenshots/assemble-log.png" height="130" width="500"/>  
 7. 이 결과물은 `java -jar FileBrowser-1.0-SNAPSHOT.jar`으로 실행할 수 있습니다.   
 8. 실행 결과 예시  
-   <img src="Screenshots/gradle-config-step2.png" />   
+   <img src="Screenshots/gradle-config-step2.png" height="250" width="500" />   
 
 
 </br>  
