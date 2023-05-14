@@ -64,11 +64,12 @@ ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니
    - *Stage*, *Unstage* 버튼을 클릭하여 Staging area에 올라온 파일을 Unstaging 하거나 Unstaged 상태의 파일을 Staging area로 올릴 수 있습니다.
 
 
-기능에 대한 보다 자세한 설명은 아래의 문서를 참고하세요. (링크추가예정)  
+기능에 대한 보다 자세한 설명은 아래의 문서를 참고하세요.   
+[문서](./papers/team_20.pdf)
 </br>  
 
 ## **How to Execute**
-
+**타겟 플랫폼 : Windows**  
 **개발 및 실행 환경 : IntelliJ IDEA Ultimate**  
 **언어 및 버전 : JAVA, JDK-17**  
 **빌드 툴 및 버전 : gradle 8.0**  
