@@ -219,7 +219,12 @@ public class CustomSwingUtilities {
                 try {
                     Iterator<String> iter1 = selectedItems1.iterator();
                     while(iter1.hasNext()){
-                        CustomJgitUtilities.addFile(path,iter1.next());
+                        String element = iter1.next();
+                        if(CustomJgitUtilities.isMissing(path, element)){
+                            CustomJgitUtilities.rmFile(path,element);
+                        }else{
+                            CustomJgitUtilities.addFile(path,element);
+                        }
                     }
                 } catch (Exception ex) {
                     // Handle the exception

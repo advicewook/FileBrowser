@@ -158,6 +158,36 @@ public class CustomJgitUtilities {
         }
     }
 
+    public static boolean isMissing(String path, String fileName) throws IOException, GitAPIException {
+        fileName= extractText(fileName);
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = null;
+        repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        try (Git git = new Git(repository)) {
+            Status status = git.status().call();
+            Set<String> missingSet = status.getMissing();
+            Iterator<String> missingSetIterator = missingSet.iterator();
+
+            String replacedString = repository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            fileName = replacedPath + fileName;
+
+            while (missingSetIterator.hasNext()) {
+                if(missingSetIterator.next().equals(fileName)){
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     public static boolean isStaged(String path, String fileName) throws IOException, GitAPIException {
         fileName= extractText(fileName);
         FileRepositoryBuilder builder = new FileRepositoryBuilder();
@@ -254,6 +284,30 @@ public class CustomJgitUtilities {
             String newFileName = replacedPath + fileName;
             Git git = Git.open(new File(replacedString));
             git.add().addFilepattern(newFileName).call();
+        } catch (RuntimeException | IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //git rm
+    public static void rmFile(String path, String fileName) {
+        fileName= extractText(fileName);
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository tempGitRepository;
+        try {
+            tempGitRepository = builder.readEnvironment().findGitDir(new File(path)).build();
+            String replacedString = tempGitRepository.toString().
+                    replace("\\.git","").
+                    replace("Repository[","").
+                    replace("]","");
+            String replacedPath = path.replace(replacedString,"").replaceAll("^\\\\","");
+            if(!replacedPath.equals("")){
+                replacedPath+="/";
+                replacedPath=replacedPath.replace("\\","/");
+            }
+            String newFileName = replacedPath + fileName;
+            Git git = Git.open(new File(replacedString));
+            git.rm().addFilepattern(newFileName).call();
         } catch (RuntimeException | IOException | GitAPIException e) {
             e.printStackTrace();
         }
