@@ -61,7 +61,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private static final long serialVersionUID = 1L;
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
-    public JPanel showPanel, commitPanel;
+    public JPanel showPanel, commitPanel, branchPanel, gitManagePanel;
+
     private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
@@ -79,7 +80,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JPanel barPanel = new JPanel();
 
     private boolean isCommitMenuOpened = false;
-    
+
     Repository currentGitRepository = null;
 
     CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance(this);
@@ -270,9 +271,23 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
                     commitPanel = customSwingUtilities.showCommitMenu(currentFolder, getHeight());
-                    displayPanel.add(commitPanel, BorderLayout.EAST);
-                    displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + commitPanel.getWidth(), getHeight()));
-                    frame.setSize(new Dimension(width + commitPanel.getWidth(), height));
+                    branchPanel = customSwingUtilities.showBranchMenu(currentFolder, commitPanel.getHeight());
+
+                    // todo : ui 수정 - 크기 차지하는 거 수정, 각 세부 패널 경계선
+                    // commit Panel, branch Panel 병합
+                    gitManagePanel = new JPanel();
+                    gitManagePanel.setOpaque(false);
+                    gitManagePanel.setPreferredSize(new Dimension(610, getHeight()));
+                    gitManagePanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
+                    gitManagePanel.setLayout(new BorderLayout(0,0));
+                    gitManagePanel.setBackground(Color.white);
+
+                    gitManagePanel.add(commitPanel, BorderLayout.WEST);
+                    gitManagePanel.add(branchPanel, BorderLayout.EAST);
+
+                    displayPanel.add(gitManagePanel, BorderLayout.EAST);
+                    displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + gitManagePanel.getWidth(), getHeight()));
+                    frame.setSize(new Dimension(width + gitManagePanel.getWidth(), height));
                     revalidate();
                     isCommitMenuOpened=true;
                 }else{
@@ -1084,7 +1099,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     public void removeCommitMenuPanel(){
         if(commitPanel!=null){
-            displayPanel.remove(commitPanel);
+            // displayPanel.remove(commitPanel);
+            displayPanel.remove(gitManagePanel);
             displayPanel.setSize(new Dimension((getWidth() * 7 / 10), getHeight()));
             frame.setSize(new Dimension(width, height));
             revalidate();

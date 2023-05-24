@@ -57,7 +57,8 @@ public class CustomSwingUtilities {
         }
 
     }
-
+    
+    // todo : 브랜치 리스트 반환 함수 제작
     public JPanel showCommitMenu(String path, int height)  {
         
         removeCheckbox(unstagedPanel);
@@ -206,7 +207,7 @@ public class CustomSwingUtilities {
         scrollTextArea.getViewport().setOpaque(false);
         scrollTextArea.getViewport().validate();
         scrollTextArea.setSize(new Dimension(300, 120));
-        // 커밋 패넝 - 하단 병합
+        // 커밋 패널 - 하단 병합
         bottomCommitPanel.add(bottomHeader, BorderLayout.NORTH);
         bottomCommitPanel.add(scrollTextArea, BorderLayout.CENTER);
 
@@ -355,6 +356,42 @@ public class CustomSwingUtilities {
         return commitPanel;
     }
 
+    // 브랜치 패널 오픈
+    public JPanel showBranchMenu(String path, int height) {
+        // 메인 브랜치 패널
+        JPanel branchPanel = new JPanel();
+        branchPanel.setOpaque(false);
+        branchPanel.setLayout(new BorderLayout());
+        branchPanel.setSize(new Dimension(300,250));
+        branchPanel.setBackground(Color.white);
+
+        // 패널 라벨
+        JLabel label = new JLabel();
+        label.setText("Branches");
+        label.setPreferredSize(new Dimension(300,35));
+        label.setSize(label.getPreferredSize());
+        label.setForeground(Color.black);
+
+        // 브랜치 리스트 컨테이너
+        // todo : 현재 path의 브랜치 리스트 가져오기
+        JPanel branchListPanel = new JPanel();
+        branchListPanel.setLayout(new BoxLayout(branchListPanel, BoxLayout.Y_AXIS));
+        branchListPanel.setBackground(Color.white);
+
+        // 스크롤
+        JScrollPane branchScrollPanel = new JScrollPane(branchListPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        branchScrollPanel.setOpaque(false);
+        branchScrollPanel.getViewport().add(branchListPanel);
+        branchScrollPanel.getViewport().setOpaque(false);
+        branchScrollPanel.getViewport().validate();
+        branchScrollPanel.setPreferredSize(new Dimension(300,250));
+
+        // 최종 병합
+        branchPanel.add(label, BorderLayout.NORTH);
+        branchPanel.add(branchScrollPanel, BorderLayout.CENTER);
+
+        return branchPanel;
+    }
     public void getJCheckBoxList(Set<String> statusSet, JPanel container, String status) {
         Iterator<String> statusIterator = statusSet.iterator();
         while (statusIterator.hasNext()) {
@@ -474,6 +511,11 @@ public class CustomSwingUtilities {
         unstagedPanel.repaint();
         stagedPanel.revalidate();
         stagedPanel.repaint();
+    }
+
+    // todo : 브랜치 패널 새로고침
+    public void revalidateBranchMenu(String path){
+        // 브랜치 패널 revalidate 
     }
 
 
