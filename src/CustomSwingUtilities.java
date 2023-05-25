@@ -357,26 +357,40 @@ public class CustomSwingUtilities {
     }
 
     // 브랜치 패널 오픈
-    public JPanel showBranchMenu(String path, int height) {
+    public JPanel showBranchMenu(String path, int height) throws GitAPIException, IOException {
         // 메인 브랜치 패널
         JPanel branchPanel = new JPanel();
         branchPanel.setOpaque(false);
         branchPanel.setLayout(new BorderLayout());
         branchPanel.setSize(new Dimension(300,250));
-        branchPanel.setBackground(Color.white);
+
+        // 패널 헤더
+        JPanel header = new JPanel();
+        header.setOpaque(false);
+        header.setLayout(new FlowLayout(0));
+        header.setSize(new Dimension(300, 35));
 
         // 패널 라벨
         JLabel label = new JLabel();
         label.setText("Branches");
-        label.setPreferredSize(new Dimension(300,35));
+        label.setPreferredSize(new Dimension( 60,30));
         label.setSize(label.getPreferredSize());
         label.setForeground(Color.black);
+        header.add(label);
 
-        // 브랜치 리스트 컨테이너
-        // todo : 현재 path의 브랜치 리스트 가져오기
+        // 머지 버튼
+        JButton mergeButton = new JButton("Merge");
+        mergeButton.setOpaque(false);
+        mergeButton.setBackground(new Color(0, 0, 0, 0));
+        mergeButton.setForeground(Color.black);
+        mergeButton.setFocusable(false);
+        header.add(mergeButton);
+        
+        // 브랜치 리스트 출력
         JPanel branchListPanel = new JPanel();
         branchListPanel.setLayout(new BoxLayout(branchListPanel, BoxLayout.Y_AXIS));
-        branchListPanel.setBackground(Color.white);
+        branchListPanel.setOpaque(false);
+        showBranchListOnPanel(path, branchListPanel);
 
         // 스크롤
         JScrollPane branchScrollPanel = new JScrollPane(branchListPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -387,8 +401,47 @@ public class CustomSwingUtilities {
         branchScrollPanel.setPreferredSize(new Dimension(300,250));
 
         // 최종 병합
-        branchPanel.add(label, BorderLayout.NORTH);
+        branchPanel.add(header, BorderLayout.NORTH);
         branchPanel.add(branchScrollPanel, BorderLayout.CENTER);
+
+        // todo :  merge 창 안에 브랜치 리스트업
+        ButtonGroup buttonGrp = new ButtonGroup(); // branch 중복 선택 방지
+        mergeButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // 1. 새로운 merge 창 오픈
+                JFrame mergeFrame = new JFrame("Merge Window");
+                mergeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                mergeFrame.setSize(300, 250);
+                mergeFrame.setLayout(new BorderLayout());
+
+                // 2. 전체 브랜치 리스트 업
+                List<String> branchList = null;
+                try {
+                    branchList = CustomJgitUtilities.getBranchList(path);
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                } catch (GitAPIException ex) {
+                    throw new RuntimeException(ex);
+                }
+
+                JPanel radioPanel = new JPanel();
+                radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
+                for (String branch : branchList) {
+                    JRadioButton radioButton = new JRadioButton(branch);
+                    radioPanel.add(radioButton);
+                    buttonGrp.add(radioButton);
+                }
+                mergeFrame.add(new JScrollPane(radioPanel), BorderLayout.CENTER);
+
+                // 3. 하단에 merge 버튼 추가
+                JButton mergeButton = new JButton("merge");
+                mergeFrame.add(mergeButton, BorderLayout.SOUTH);
+
+                mergeFrame.setLocationRelativeTo(branchPanel);
+                mergeFrame.setVisible(true);
+            }
+        });
 
         return branchPanel;
     }
@@ -482,7 +535,6 @@ public class CustomSwingUtilities {
             }
         }
     }
-
     public void revalidateCommitMenu(String path){
 
         //1
@@ -513,6 +565,15 @@ public class CustomSwingUtilities {
         stagedPanel.repaint();
     }
 
+    // 브랜치 패널에 리스트업
+    public void showBranchListOnPanel(String path, JPanel container) throws GitAPIException, IOException {
+        // todo : 브랜치 리스트 업
+        List<String> branchList = CustomJgitUtilities.getBranchList(path);
+        for (String branch : branchList) {
+            JLabel label = new JLabel(branch);
+            container.add(label);
+        }
+    }
     // todo : 브랜치 패널 새로고침
     public void revalidateBranchMenu(String path){
         // 브랜치 패널 revalidate 

@@ -29,7 +29,9 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -82,6 +84,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private boolean isCommitMenuOpened = false;
 
     Repository currentGitRepository = null;
+
+    private String currentBranch = "";
 
     CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance(this);
     private void build() {
@@ -271,9 +275,16 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
                     commitPanel = customSwingUtilities.showCommitMenu(currentFolder, getHeight());
-                    branchPanel = customSwingUtilities.showBranchMenu(currentFolder, commitPanel.getHeight());
+                    try {
+                        branchPanel = customSwingUtilities.showBranchMenu(currentFolder, commitPanel.getHeight());
+                    } catch (GitAPIException e) {
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
 
-                    // todo : ui 수정 - 크기 차지하는 거 수정, 각 세부 패널 경계선
+                    // todo : ui 수정  세부 두 패널 사이에 경계선 넣기
+                    // todo : ui 수정 공간 차지하는거 수정
                     // commit Panel, branch Panel 병합
                     gitManagePanel = new JPanel();
                     gitManagePanel.setOpaque(false);
@@ -286,11 +297,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     gitManagePanel.add(branchPanel, BorderLayout.EAST);
 
                     displayPanel.add(gitManagePanel, BorderLayout.EAST);
-                    displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + gitManagePanel.getWidth(), getHeight()));
+                    //displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + gitManagePanel.getWidth(), getHeight()));
+                    displayPanel.setSize(new Dimension((getWidth() * 2) + gitManagePanel.getWidth(), getHeight()));
                     frame.setSize(new Dimension(width + gitManagePanel.getWidth(), height));
                     revalidate();
                     isCommitMenuOpened=true;
-                }else{
+                } else{
                     removeCommitMenuPanel();
                 }
             }
@@ -320,7 +332,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 File file = new File(node.getUserObject().toString());
                 if (file != null) {
                     currentFolder = file.getAbsolutePath();
-                    treeTextField.setText(currentFolder);
+                    // 파일트리에서 파일 클릭시 브랜치명 제공
+                    String txtField = getTreeTextField();
+                    treeTextField.setText(txtField);
+
                 } else {
                     treeTextField.setText("Computer");
                     currentFolder = "";
@@ -842,7 +857,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 } else {
                     currentFolder = sh;
                     OpenFile(new File(currentFolder));
-                    treeTextField.setText(currentFolder);
+                    // 깃 레포 안에서 하위 폴더로 진입시 브랜치명 제공
+                    String txtField = getTreeTextField();
+                    treeTextField.setText(txtField);
                     selectedFolder = null;
                 }
             }
@@ -1106,6 +1123,22 @@ public class FileBrowser extends JPanel implements ComponentListener {
             revalidate();
             isCommitMenuOpened=false;
         }
+    }
+
+    public String getTreeTextField() {
+        String textContent = "";
+        // 깃 레포 검사
+        if (CustomJgitUtilities.isGitRepository(currentFolder) || CustomJgitUtilities.isSubGitRepository(currentFolder)) {
+            currentBranch = CustomJgitUtilities.getCurrentBranchName(currentFolder);
+            //String html = "<p class=\"green\">" + currentBranch+ "</span>";
+            // todo : 브랜치 색상 바꾸기 - 초록색?
+            String html = currentBranch;
+            textContent = html + " "+ currentFolder;
+
+        } else {
+            textContent = currentFolder;
+        }
+        return textContent;
     }
 
     // --------------------- test
