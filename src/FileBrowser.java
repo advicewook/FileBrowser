@@ -4,15 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -32,22 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -119,12 +96,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
         retButton = new JButton(" ");
         retButton.setIcon(new ImageIcon(getImg("img/back.png", 40, 30).getImage()));
         retButton.setBackground(new Color(0, 0, 0, 0));
+        retButton.setForeground(Color.black);
         retButton.setOpaque(false);
         retButton.setFocusable(false);
 
         //git clone
         cloneButton = new JButton("clone");
         cloneButton.setBackground(new Color(0, 0, 0, 0));
+        cloneButton.setForeground(Color.black);
         cloneButton.setOpaque(false);
         cloneButton.setFocusable(false);
 
@@ -396,12 +375,25 @@ public class FileBrowser extends JPanel implements ComponentListener {
             }
         });
 
+        // TODO for clone button
         cloneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String url = JOptionPane.showInputDialog(frame, " Enter the URL of the Repository : ");
+                String url = showURLInputDialog();
+                //check url is not null or empty
                 if (url != null && !url.equals("")) {
-                    CustomJgitUtilities.cloneRepo(url, currentFolder);
+                    try {
+                        Git result = CustomJgitUtilities.cloneRepo(url, currentFolder);
+                        // Check if the clone was successful
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                            // Additional logic or operations can be performed on the cloned repository here
+                        } else {
+                            System.out.println("Git clone failed.");
+                        }
+                    } catch (GitAPIException ex) {
+                        System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                    }
                 }
             }
         });
@@ -1121,6 +1113,54 @@ public class FileBrowser extends JPanel implements ComponentListener {
     }
 
 
+    //make dialog with multiple panel for flexibility and extensibility
+    public String  showURLInputDialog(){
+        JDialog dialog = new JDialog(frame, "Input URL for clone", true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel URLPanel = new JPanel();
+        URLPanel.setOpaque(false);
+        URLPanel.setLayout(new BoxLayout(URLPanel, BoxLayout.Y_AXIS));
+
+        JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JTextField textField = new JTextField(30);
+        textField.setText("Enter URL");
+        textField.setOpaque(false);
+        textField.setForeground(Color.black);
+        textFieldPanel.add(textField);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton okButton = new JButton("OK");
+        okButton.setBackground(new Color(0, 0, 0, 0));
+        okButton.setForeground(Color.black);
+        okButton.setOpaque(false);
+        okButton.setFocusable(false);
+
+        buttonPanel.add(okButton);
+
+        okButton.addActionListener(new ActionListener(){
+           public void actionPerformed(ActionEvent e){
+               String URLString = textField.getText();
+               if(!URLString.isEmpty()){
+                   System.out.println("Enterd URL is : "+ URLString);
+               }else{
+                   System.out.println("NO URL enterd");
+               }
+               dialog.dispose();
+           }
+        });
+
+        URLPanel.add(textFieldPanel);
+        URLPanel.add(Box.createVerticalStrut(10));
+        URLPanel.add(buttonPanel);
+
+        dialog.getContentPane().add(URLPanel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
+
+        return textField.getText();
+    }
 
 
     // --------------------- test
