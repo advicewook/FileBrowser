@@ -468,7 +468,7 @@ public class CustomJgitUtilities {
     }
 
     // 전체 브랜치 리스트 반환
-    public static List<String> getBranchList(String path) throws IOException, GitAPIException {
+    public static List<String> getBranchNameList(String path) throws IOException, GitAPIException {
         List<String> branchList = new ArrayList<String>();
 
         try (Git git = Git.open(new File(path))) {

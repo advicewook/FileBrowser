@@ -58,8 +58,7 @@ public class CustomSwingUtilities {
         }
 
     }
-    
-    // todo : 브랜치 리스트 반환 함수 제작
+
     public JPanel showCommitMenu(String path, int height)  {
         
         removeCheckbox(unstagedPanel);
@@ -357,7 +356,7 @@ public class CustomSwingUtilities {
         return commitPanel;
     }
 
-    // 브랜치 패널 오픈
+    // 브랜치 패널
     public JPanel showBranchMenu(String path, int height) throws GitAPIException, IOException {
         // 메인 브랜치 패널
         JPanel branchPanel = new JPanel();
@@ -418,7 +417,7 @@ public class CustomSwingUtilities {
                 // 2. 전체 브랜치 리스트 업
                 List<String> branchList = null;
                 try {
-                    branchList = CustomJgitUtilities.getBranchList(path);
+                    branchList = CustomJgitUtilities.getBranchNameList(path);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (GitAPIException ex) {
@@ -567,8 +566,7 @@ public class CustomSwingUtilities {
 
     // 브랜치 패널에 리스트업
     public void showBranchListOnPanel(String path, JPanel container) throws GitAPIException, IOException {
-        // todo : 브랜치 리스트 업
-        List<String> branchList = CustomJgitUtilities.getBranchList(path);
+        List<String> branchList = CustomJgitUtilities.getBranchNameList(path);
         for (String branch : branchList) {
             JLabel label = new JLabel(branch);
             container.add(label);

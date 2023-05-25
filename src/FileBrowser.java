@@ -44,7 +44,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JPanel displayPanel = new JPanel();
     public JPanel showPanel, commitPanel, branchPanel ;
     private JSplitPane gitManagePanel;
-
     private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
@@ -523,7 +522,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
             showPanel.removeAll();
             showPanel.setLayout(new FlowLayout(0));
             if (!file.isDirectory()) {
-                footerInfoLabel.setText(" File zise : " + file.length() + " bytes");
+                footerInfoLabel.setText(" File size : " + file.length() + " bytes");
                 footerInfoLabel.setIcon(fileSystemView.getSystemIcon(file));
                 String fileType = "Undetermined";
                 try {
@@ -692,8 +691,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fileButton.setOpaque(false);
             fileButton.addMouseListener(new Mouse(fileButton.getToolTipText()));
             fileButton.setBorder(new LineBorder(Color.BLACK, 0));
+
             showPanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
             showPanel.add(fileButton);
+            // todo : scroll
 
         } catch (Exception e) {
             System.out.println("!! Ereur : " + e);
