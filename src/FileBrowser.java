@@ -1,17 +1,10 @@
+import com.sun.jdi.connect.Connector;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -87,6 +80,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     private String currentBranch = "";
 
+    public JPanel gitTextPanel;
+
     CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance(this);
     private void build() {
 //		width = 950;
@@ -130,6 +125,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
         treeTextField.setOpaque(false);
         treeTextField.setForeground(Color.black);
         treeTextField.setFont(new Font("Tahoma", Font.BOLD, 14));
+        
+        // treeTextField + branch 이름
+        gitTextPanel = new JPanel();
+        gitTextPanel.setOpaque(false);
+        gitTextPanel.setLayout(new BorderLayout(0, 0));
+        gitTextPanel.add(treeTextField,BorderLayout.CENTER);
 
         showPanel = new JPanel();
         showPanel.setOpaque(false);
@@ -187,11 +188,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
         footerPanel.add(footerInfoLabel, BorderLayout.WEST);
         footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
-        // 리턴 버튼 + 파일 위치
+        // 리턴 버튼 + 파일 위치 + 브랜치 명
         barPanel.setOpaque(false);
         barPanel.setLayout(new BorderLayout(0, 0));
         barPanel.add(retButton, BorderLayout.WEST);
-        barPanel.add(treeTextField, BorderLayout.CENTER);
+        barPanel.add(gitTextPanel, BorderLayout.CENTER);
+        //barPanel.add(treeTextField, BorderLayout.CENTER);
 
         // 레포 생성 버튼
         createRepoButton = new JButton("Create Repository");
@@ -333,14 +335,20 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 if (file != null) {
                     currentFolder = file.getAbsolutePath();
                     // 파일트리에서 파일 클릭시 브랜치명 제공
-                    String txtField = getTreeTextField();
-                    treeTextField.setText(txtField);
-
+                    treeTextField.setText(currentFolder);
                 } else {
                     treeTextField.setText("Computer");
                     currentFolder = "";
                 }
                 OpenFile(file);
+                // 파일 트리에서 폴더 클릭시 경로 표시
+                try {
+                    setTextField();
+                } catch (GitAPIException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 selectedFolder = null;
             }
         });
@@ -400,7 +408,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 if (currentFolder != null && !currentFolder.equals("")) {
                     currentFolder = parentFolder;
                     if (currentFolder != null && !currentFolder.equals("")) {
-                        treeTextField.setText(currentFolder);
+                        treeTextField.setText(" "+currentFolder);
                         OpenFile(new File(currentFolder));
                     }
                 }
@@ -615,8 +623,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     public String getStatusImage(String rootPath, String filePath) throws GitAPIException, IOException {
         String status = "";
-        System.out.println("filePath - " + filePath);
-        System.out.println("rootPath - " + rootPath);
+//        System.out.println("filePath - " + filePath);
+//        System.out.println("rootPath - " + rootPath);
         String fileInRepo = filePath.replace(rootPath+"\\","");
         fileInRepo = fileInRepo.replace("\\","/");
         System.out.println("file name : " + fileInRepo);
@@ -857,9 +865,15 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 } else {
                     currentFolder = sh;
                     OpenFile(new File(currentFolder));
-                    // 깃 레포 안에서 하위 폴더로 진입시 브랜치명 제공
-                    String txtField = getTreeTextField();
-                    treeTextField.setText(txtField);
+
+                    // 깃 레포 하위 폴더로 진입시 브랜치명 제공
+                    try {
+                        setTextField();
+                    } catch (GitAPIException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
                     selectedFolder = null;
                 }
             }
@@ -1124,21 +1138,22 @@ public class FileBrowser extends JPanel implements ComponentListener {
             isCommitMenuOpened=false;
         }
     }
-
-    public String getTreeTextField() {
-        String textContent = "";
-        // 깃 레포 검사
+    // 깃 레포 검사 후 브랜치명 표시
+    private void setTextField() throws GitAPIException, IOException {
+        gitTextPanel.removeAll();
+        treeTextField.setText(" "+currentFolder);
+        treeTextField.setBorder(BorderFactory.createEmptyBorder());
         if (CustomJgitUtilities.isGitRepository(currentFolder) || CustomJgitUtilities.isSubGitRepository(currentFolder)) {
             currentBranch = CustomJgitUtilities.getCurrentBranchName(currentFolder);
-            //String html = "<p class=\"green\">" + currentBranch+ "</span>";
-            // todo : 브랜치 색상 바꾸기 - 초록색?
-            String html = currentBranch;
-            textContent = html + " "+ currentFolder;
-
-        } else {
-            textContent = currentFolder;
+            currentBranch = " (" + currentBranch + ") "; // 브랜치명
+            JLabel branchName = new JLabel(currentBranch);
+            branchName.setBackground(new Color(0, 0, 0, 0));
+            branchName.setForeground(Color.green); // 초록색으로 표기
+            branchName.setOpaque(false);
+            gitTextPanel.add(branchName, BorderLayout.WEST);
         }
-        return textContent;
+        gitTextPanel.add(treeTextField, BorderLayout.CENTER);
+        barPanel.add(gitTextPanel,BorderLayout.CENTER);
     }
 
     // --------------------- test

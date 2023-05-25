@@ -494,7 +494,12 @@ public class CustomJgitUtilities {
         return branchList;
     }
 
-    public static String getCurrentBranchName(String path) {
+    public static String getCurrentBranchName(String path) throws GitAPIException, IOException {
+        // 깃 레포 안의 하위 폴더 처리
+        if(!isGitRepository(path) && isSubGitRepository(path)){
+            String root = findRepoPath(new File(path));
+            path = root;
+        }
         try (Repository repository = Git.open(new File(path)).getRepository()) {
             return repository.getBranch();
         } catch (IOException e) {
