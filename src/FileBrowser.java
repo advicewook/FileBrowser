@@ -1112,7 +1112,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
     }
 
-
+    // dialog for input URL
     //make dialog with multiple panel for flexibility and extensibility
     public String  showURLInputDialog(){
         JDialog dialog = new JDialog(frame, "Input URL for clone", true);
