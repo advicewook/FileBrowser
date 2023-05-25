@@ -1,3 +1,4 @@
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
@@ -62,7 +63,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
     public JPanel showPanel, commitPanel;
-    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
+    private JButton renameFileButton, addFileButton, addFolderButton,
+            retButton, cloneButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
     private DefaultTreeModel treeModel;
@@ -119,6 +121,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
         retButton.setBackground(new Color(0, 0, 0, 0));
         retButton.setOpaque(false);
         retButton.setFocusable(false);
+
+        //git clone
+        cloneButton = new JButton("clone");
+        cloneButton.setBackground(new Color(0, 0, 0, 0));
+        cloneButton.setOpaque(false);
+        cloneButton.setFocusable(false);
+
+
 
         treeTextField = new JTextField("=> Computer");
         treeTextField.setEditable(false);
@@ -182,11 +192,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
         footerPanel.add(footerInfoLabel, BorderLayout.WEST);
         footerPanel.add(bttonsFooterPanel, BorderLayout.EAST);
 
-        // 리턴 버튼 + 파일 위치
-        barPanel.setOpaque(false);
-        barPanel.setLayout(new BorderLayout(0, 0));
-        barPanel.add(retButton, BorderLayout.WEST);
-        barPanel.add(treeTextField, BorderLayout.CENTER);
 
         // 레포 생성 버튼
         createRepoButton = new JButton("Create Repository");
@@ -202,12 +207,25 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
 
+        //ret 버튼 + git 버튼 통합
+        JPanel innerBarPanel =new JPanel();
+        innerBarPanel.setOpaque(false);
+        innerBarPanel.setLayout(new BorderLayout(0, 0));
+        innerBarPanel.add(retButton, BorderLayout.WEST);
+        innerBarPanel.add(cloneButton,BorderLayout.CENTER);
+        barPanel.setOpaque(false);
+        barPanel.setLayout(new BorderLayout(0, 0));
+        barPanel.add(innerBarPanel, BorderLayout.WEST); // 리턴 버튼 + 파일 위치 + git clone 버튼
+        barPanel.add(treeTextField, BorderLayout.CENTER);
+
         JPanel gitMenuPanel = new JPanel();
         gitMenuPanel.setOpaque(false);
         gitMenuPanel.setLayout(new BorderLayout(0, 0));
         gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
         gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
         barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
+
+
 
         displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
         displayPanel.setOpaque(false);
@@ -375,6 +393,16 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     }
                 }
                 selectedFolder = null;
+            }
+        });
+
+        cloneButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String url = JOptionPane.showInputDialog(frame, " Enter the URL of the Repository : ");
+                if (url != null && !url.equals("")) {
+                    CustomJgitUtilities.cloneRepo(url, currentFolder);
+                }
             }
         });
 
@@ -1091,6 +1119,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
             isCommitMenuOpened=false;
         }
     }
+
+
+
 
     // --------------------- test
     // ------------------------------------------------------------------

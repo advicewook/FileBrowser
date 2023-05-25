@@ -462,4 +462,19 @@ public class CustomJgitUtilities {
         }
         return extractedText;
     }
+
+    //git clone
+    public static void cloneRepo(String url, String path) {
+        try {
+            CloneCommand cloneCommand = Git.cloneRepository()
+                    .setURI(url)
+                    .setDirectory(new File(path));
+            Git git = cloneCommand.call();
+            System.out.println("Repository cloned successfully.");
+            git.close();
+        } catch (GitAPIException e) {
+            e.printStackTrace();
+            System.out.println("Error cloning repository: " + e.getMessage());
+        }
+    }
 }
