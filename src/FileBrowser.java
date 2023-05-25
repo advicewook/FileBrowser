@@ -694,7 +694,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
             showPanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
             showPanel.add(fileButton);
-            // todo : scroll
 
         } catch (Exception e) {
             System.out.println("!! Ereur : " + e);

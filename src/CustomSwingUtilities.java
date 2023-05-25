@@ -25,6 +25,9 @@ public class CustomSwingUtilities {
     JPanel unstagedPanel = new JPanel();
     // 커밋 패널 - 중단 리스트 컨테이너
     JPanel stagedPanel = new JPanel();
+
+    List<String> branchList = null;
+    String currentBranch = null;
     private static CustomSwingUtilities instance;
 
     private FileBrowser fileBrowser;
@@ -408,6 +411,7 @@ public class CustomSwingUtilities {
         mergeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 // 1. 새로운 merge 창 오픈
                 JFrame mergeFrame = new JFrame("Merge Window");
                 mergeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -415,9 +419,10 @@ public class CustomSwingUtilities {
                 mergeFrame.setLayout(new BorderLayout());
 
                 // 2. 전체 브랜치 리스트 업
-                List<String> branchList = null;
                 try {
                     branchList = CustomJgitUtilities.getBranchNameList(path);
+                    currentBranch = CustomJgitUtilities.getCurrentBranchName(path);
+
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 } catch (GitAPIException ex) {
@@ -428,6 +433,10 @@ public class CustomSwingUtilities {
                 radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
                 ButtonGroup buttonGrp = new ButtonGroup(); // branch 중복 선택 방지
                 for (String branch : branchList) {
+                    if (branch.contains(currentBranch)){
+                        // 현재 브랜치는 머지 대상에서 제외
+                        continue;
+                    }
                     JRadioButton radioButton = new JRadioButton(branch);
                     radioPanel.add(radioButton);
                     buttonGrp.add(radioButton);
