@@ -6,6 +6,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -75,19 +76,19 @@ public class CustomSwingUtilities {
         // 커밋 패널 부모 컨테이너
         JPanel commitPanel = new JPanel();
         commitPanel.setOpaque(false);
-        commitPanel.setSize(new Dimension(300, height));
+        commitPanel.setSize(new Dimension(250, height));
         commitPanel.setLayout(new BorderLayout());
 
         // 커밋 패널 - 상단 컨테이너
         JPanel topCommitPanel = new JPanel();
         topCommitPanel.setOpaque(false);
         topCommitPanel.setLayout(new BorderLayout());
-        topCommitPanel.setSize(new Dimension(300, 250));
+        topCommitPanel.setSize(new Dimension(250, 250));
         // 커밋 패널 - 상단 헤더
         JPanel topHeader = new JPanel();
         topHeader.setOpaque(false);
         topHeader.setLayout(new FlowLayout(0));
-        topHeader.setSize(new Dimension(300, 35));
+        topHeader.setSize(new Dimension(250, 35));
         // 커밋 패널 - 상단 텍스트
         JLabel unstagedLabel = new JLabel();
         unstagedLabel.setText("Unstaged");
@@ -116,7 +117,7 @@ public class CustomSwingUtilities {
         unstagedScrollPanel.getViewport().add(unstagedPanel);
         unstagedScrollPanel.getViewport().setOpaque(false);
         unstagedScrollPanel.getViewport().validate();
-        unstagedScrollPanel.setPreferredSize(new Dimension(300, 215));
+        unstagedScrollPanel.setPreferredSize(new Dimension(250, 215));
         // 커밋 패넝 - 상단 병합
         topCommitPanel.add(topHeader, BorderLayout.NORTH);
         topCommitPanel.add(unstagedScrollPanel, BorderLayout.CENTER);
@@ -125,12 +126,12 @@ public class CustomSwingUtilities {
         JPanel middleCommitPanel = new JPanel();
         middleCommitPanel.setOpaque(false);
         middleCommitPanel.setLayout(new BorderLayout());
-        middleCommitPanel.setSize(new Dimension(300, 250));
+        middleCommitPanel.setSize(new Dimension(250, 250));
         // 커밋 패널 - 중단 헤더
         JPanel middleHeader = new JPanel();
         middleHeader.setOpaque(false);
         middleHeader.setLayout(new FlowLayout(0));
-        middleHeader.setSize(new Dimension(300, 35));
+        middleHeader.setSize(new Dimension(250, 35));
         // 커밋 패널 - 중단 텍스트
         JLabel stagedLabel = new JLabel();
         stagedLabel.setText("Staged");
@@ -162,7 +163,7 @@ public class CustomSwingUtilities {
         stagedScrollPanel.getViewport().add(stagedPanel);
         stagedScrollPanel.getViewport().setOpaque(false);
         stagedScrollPanel.getViewport().validate();
-        stagedScrollPanel.setSize(new Dimension(300, 215));
+        stagedScrollPanel.setSize(new Dimension(250, 215));
         // 커밋 패넝 - 중단 병합
         middleCommitPanel.add(middleHeader, BorderLayout.NORTH);
         middleCommitPanel.add(stagedScrollPanel, BorderLayout.CENTER);
@@ -171,12 +172,12 @@ public class CustomSwingUtilities {
         JPanel bottomCommitPanel = new JPanel();
         bottomCommitPanel.setOpaque(false);
         bottomCommitPanel.setLayout(new BorderLayout());
-        bottomCommitPanel.setSize(new Dimension(300, 200));
+        bottomCommitPanel.setSize(new Dimension(250, 200));
         // 커밋 패널 - 하단 헤더
         JPanel bottomHeader = new JPanel();
         bottomHeader.setOpaque(false);
         bottomHeader.setLayout(new FlowLayout(0));
-        bottomHeader.setSize(new Dimension(300, 35));
+        bottomHeader.setSize(new Dimension(250, 35));
         // 커밋 패널 - 하단 텍스트
         JLabel commitLabel = new JLabel();
         commitLabel.setText("Commit Message");
@@ -206,7 +207,7 @@ public class CustomSwingUtilities {
         scrollTextArea.getViewport().add(textArea);
         scrollTextArea.getViewport().setOpaque(false);
         scrollTextArea.getViewport().validate();
-        scrollTextArea.setSize(new Dimension(300, 120));
+        scrollTextArea.setSize(new Dimension(250, 120));
         // 커밋 패널 - 하단 병합
         bottomCommitPanel.add(bottomHeader, BorderLayout.NORTH);
         bottomCommitPanel.add(scrollTextArea, BorderLayout.CENTER);
@@ -362,13 +363,13 @@ public class CustomSwingUtilities {
         JPanel branchPanel = new JPanel();
         branchPanel.setOpaque(false);
         branchPanel.setLayout(new BorderLayout());
-        branchPanel.setSize(new Dimension(300,250));
+        branchPanel.setSize(new Dimension(250,250));
 
         // 패널 헤더
         JPanel header = new JPanel();
         header.setOpaque(false);
         header.setLayout(new FlowLayout(0));
-        header.setSize(new Dimension(300, 35));
+        header.setSize(new Dimension(250, 35));
 
         // 패널 라벨
         JLabel label = new JLabel();
@@ -380,8 +381,7 @@ public class CustomSwingUtilities {
 
         // 머지 버튼
         JButton mergeButton = new JButton("Merge");
-        mergeButton.setOpaque(false);
-        mergeButton.setBackground(new Color(0, 0, 0, 0));
+        mergeButton.setBackground(Color.white);
         mergeButton.setForeground(Color.black);
         mergeButton.setFocusable(false);
         header.add(mergeButton);
@@ -389,7 +389,9 @@ public class CustomSwingUtilities {
         // 브랜치 리스트 출력
         JPanel branchListPanel = new JPanel();
         branchListPanel.setLayout(new BoxLayout(branchListPanel, BoxLayout.Y_AXIS));
-        branchListPanel.setOpaque(false);
+        EmptyBorder paddingBorder = new EmptyBorder(0, 5,0, 5); // 여백 생성
+        branchListPanel.setBorder(paddingBorder); // 패널에 여백 적용
+        branchListPanel.setBackground(Color.white);
         showBranchListOnPanel(path, branchListPanel);
 
         // 스크롤
@@ -398,14 +400,12 @@ public class CustomSwingUtilities {
         branchScrollPanel.getViewport().add(branchListPanel);
         branchScrollPanel.getViewport().setOpaque(false);
         branchScrollPanel.getViewport().validate();
-        branchScrollPanel.setPreferredSize(new Dimension(300,250));
+        branchScrollPanel.setPreferredSize(new Dimension(250,250));
 
         // 최종 병합
         branchPanel.add(header, BorderLayout.NORTH);
         branchPanel.add(branchScrollPanel, BorderLayout.CENTER);
 
-        // todo :  merge 창 안에 브랜치 리스트업
-        ButtonGroup buttonGrp = new ButtonGroup(); // branch 중복 선택 방지
         mergeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -427,6 +427,7 @@ public class CustomSwingUtilities {
 
                 JPanel radioPanel = new JPanel();
                 radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
+                ButtonGroup buttonGrp = new ButtonGroup(); // branch 중복 선택 방지
                 for (String branch : branchList) {
                     JRadioButton radioButton = new JRadioButton(branch);
                     radioPanel.add(radioButton);
@@ -437,7 +438,7 @@ public class CustomSwingUtilities {
                 // 3. 하단에 merge 버튼 추가
                 JButton mergeButton = new JButton("merge");
                 mergeFrame.add(mergeButton, BorderLayout.SOUTH);
-
+                // todo : merge 버튼 기능 구현
                 mergeFrame.setLocationRelativeTo(branchPanel);
                 mergeFrame.setVisible(true);
             }
@@ -536,7 +537,6 @@ public class CustomSwingUtilities {
         }
     }
     public void revalidateCommitMenu(String path){
-
         //1
         removeCheckbox(unstagedPanel);
         removeCheckbox(stagedPanel);
@@ -574,6 +574,7 @@ public class CustomSwingUtilities {
             container.add(label);
         }
     }
+
     // todo : 브랜치 패널 새로고침
     public void revalidateBranchMenu(String path){
         // 브랜치 패널 revalidate 

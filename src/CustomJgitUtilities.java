@@ -467,12 +467,11 @@ public class CustomJgitUtilities {
         return extractedText;
     }
 
-    // 전체 브랜치 리스트 출력
+    // 전체 브랜치 리스트 반환
     public static List<String> getBranchList(String path) throws IOException, GitAPIException {
         List<String> branchList = new ArrayList<String>();
-        String repoURL = path;
 
-        try (Git git = Git.open(new File(repoURL))) {
+        try (Git git = Git.open(new File(path))) {
             List<Ref> call = git
                             .branchList()
                             .setListMode(ListMode.ALL)
@@ -488,7 +487,6 @@ public class CustomJgitUtilities {
                     temp = temp.replace("refs/remotes/","");
                 }
                 branchList.add(temp);
-                System.out.println(ref.getName());
             }
         }
         return branchList;

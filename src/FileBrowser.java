@@ -26,22 +26,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -56,7 +42,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private static final long serialVersionUID = 1L;
     private JFrame frame;
     private JPanel displayPanel = new JPanel();
-    public JPanel showPanel, commitPanel, branchPanel, gitManagePanel;
+    public JPanel showPanel, commitPanel, branchPanel ;
+    private JSplitPane gitManagePanel;
 
     private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
@@ -126,7 +113,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         treeTextField.setForeground(Color.black);
         treeTextField.setFont(new Font("Tahoma", Font.BOLD, 14));
         
-        // treeTextField + branch 이름
+        // treeTextField + branch 이름 표기 패널
         gitTextPanel = new JPanel();
         gitTextPanel.setOpaque(false);
         gitTextPanel.setLayout(new BorderLayout(0, 0));
@@ -285,23 +272,16 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         throw new RuntimeException(e);
                     }
 
-                    // todo : ui 수정  세부 두 패널 사이에 경계선 넣기
-                    // todo : ui 수정 공간 차지하는거 수정
                     // commit Panel, branch Panel 병합
-                    gitManagePanel = new JPanel();
-                    gitManagePanel.setOpaque(false);
-                    gitManagePanel.setPreferredSize(new Dimension(610, getHeight()));
+                    gitManagePanel = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, commitPanel, branchPanel);
+                    gitManagePanel.setPreferredSize(new Dimension(515, getHeight()));
                     gitManagePanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
-                    gitManagePanel.setLayout(new BorderLayout(0,0));
-                    gitManagePanel.setBackground(Color.white);
-
-                    gitManagePanel.add(commitPanel, BorderLayout.WEST);
-                    gitManagePanel.add(branchPanel, BorderLayout.EAST);
+                    gitManagePanel.setBackground(Color.WHITE);
 
                     displayPanel.add(gitManagePanel, BorderLayout.EAST);
-                    //displayPanel.setSize(new Dimension((getWidth() * 7 / 10) + gitManagePanel.getWidth(), getHeight()));
+
                     displayPanel.setSize(new Dimension((getWidth() * 2) + gitManagePanel.getWidth(), getHeight()));
-                    frame.setSize(new Dimension(width + gitManagePanel.getWidth(), height));
+                    frame.setSize(new Dimension(width + 250, height));
                     revalidate();
                     isCommitMenuOpened=true;
                 } else{
@@ -334,14 +314,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 File file = new File(node.getUserObject().toString());
                 if (file != null) {
                     currentFolder = file.getAbsolutePath();
-                    // 파일트리에서 파일 클릭시 브랜치명 제공
-                    treeTextField.setText(currentFolder);
+//                    treeTextField.setText(currentFolder);
                 } else {
                     treeTextField.setText("Computer");
                     currentFolder = "";
                 }
                 OpenFile(file);
-                // 파일 트리에서 폴더 클릭시 경로 표시
+                
+                // 파일 트리에서 폴더 클릭시 - 경로 및 브랜치 표시
                 try {
                     setTextField();
                 } catch (GitAPIException e) {
@@ -709,11 +689,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
             fileButton.setSize(fileButton.getPreferredSize());
             fileButton.setBackground(Color.white);
             fileButton.setForeground(Color.black);
-            fileButton.setForeground(Color.black);
             fileButton.setOpaque(false);
             fileButton.addMouseListener(new Mouse(fileButton.getToolTipText()));
             fileButton.setBorder(new LineBorder(Color.BLACK, 0));
+            showPanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
             showPanel.add(fileButton);
+
         } catch (Exception e) {
             System.out.println("!! Ereur : " + e);
 //			e.getStackTrace();
@@ -1143,6 +1124,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         gitTextPanel.removeAll();
         treeTextField.setText(" "+currentFolder);
         treeTextField.setBorder(BorderFactory.createEmptyBorder());
+
         if (CustomJgitUtilities.isGitRepository(currentFolder) || CustomJgitUtilities.isSubGitRepository(currentFolder)) {
             currentBranch = CustomJgitUtilities.getCurrentBranchName(currentFolder);
             currentBranch = " (" + currentBranch + ") "; // 브랜치명
