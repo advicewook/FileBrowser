@@ -1138,13 +1138,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
         JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JTextField textField = new JTextField(30);
         textField.setText("Enter URL");
-        textField.setOpaque(false);
+        textField.setOpaque(true);
+        textField.setBackground(Color.white);
         textField.setForeground(Color.black);
         textFieldPanel.add(textField);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton okButton = new JButton("OK");
-        okButton.setBackground(new Color(0, 0, 0, 0));
+
         okButton.setForeground(Color.black);
         okButton.setOpaque(false);
         okButton.setFocusable(false);
