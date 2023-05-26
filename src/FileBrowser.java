@@ -249,6 +249,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                    }
                }
                updateShowPanel();
+               updateBarPanel();
            }
            });
 
@@ -307,6 +308,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     treeTextField.setText("Computer");
                     currentFolder = "";
                 }
+                updateBarPanel();
                 OpenFile(file);
                 selectedFolder = null;
             }
@@ -356,10 +358,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     tempGitRepository = builder.readEnvironment().findGitDir(new File(parentFolder)).build();
                     if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
                         removeCommitMenuPanel();
+
                     }
                 } catch (RuntimeException | IOException ex) {
                     if(tempGitRepository==null){
                         removeCommitMenuPanel();
+
                     }
                 }
                 currentGitRepository = tempGitRepository;
@@ -368,6 +372,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     currentFolder = parentFolder;
                     if (currentFolder != null && !currentFolder.equals("")) {
                         treeTextField.setText(currentFolder);
+                        updateBarPanel();
                         OpenFile(new File(currentFolder));
                     }
                 }
@@ -387,6 +392,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         // Check if the clone was successful
                         if (result != null) {
                             System.out.println("Git clone was successful.");
+
                             // Additional logic or operations can be performed on the cloned repository here
                         } else {
                             System.out.println("Git clone failed.");
@@ -394,6 +400,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     } catch (GitAPIException ex) {
                         System.out.println("An error occurred during Git clone: " + ex.getMessage());
                     }
+                    updateShowPanel();
+                    updateBarPanel();
                 }
             }
         });
@@ -446,6 +454,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         else
                             file.renameTo(new File(selectedFolder + ".txt"));
                         OpenFile(new File(currentFolder));
+                        updateBarPanel();
                         treeTextField.setText(currentFolder);
                     }
                     selectedFolder = null;
@@ -833,10 +842,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 tempGitRepository = builder.readEnvironment().findGitDir(new File(currentFolder)).build();
                 if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
                     removeCommitMenuPanel();
+                    updateBarPanel();
                 }
             } catch (RuntimeException | IOException ex) {
                 if(tempGitRepository==null){
                     removeCommitMenuPanel();
+                    updateBarPanel();
                 }
             }
             currentGitRepository = tempGitRepository;
@@ -848,6 +859,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     currentFolder = sh;
                     OpenFile(new File(currentFolder));
                     treeTextField.setText(currentFolder);
+                    updateBarPanel();
                     selectedFolder = null;
                 }
             }
@@ -957,6 +969,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                                     customSwingUtilities.revalidateCommitMenu(currentFolder);
                                 }
                                 updateShowPanel();
+                                updateBarPanel();
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
@@ -1162,6 +1175,19 @@ public class FileBrowser extends JPanel implements ComponentListener {
         return textField.getText();
     }
 
+    //update barpanel
+    //if the current folder is a git repository, then make invisible clone button
+    //if the current folder is not a git repository, then make visible clone button
+    public void updateBarPanel(){
+        if(CustomJgitUtilities.isSubGitRepository(currentFolder)){
+            cloneButton.setVisible(false);
+        }else{
+            cloneButton.setVisible(true);
+        }
+
+        barPanel.revalidate();
+        barPanel.repaint();
+    }
 
     // --------------------- test
     // ------------------------------------------------------------------
