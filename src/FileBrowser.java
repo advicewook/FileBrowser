@@ -842,12 +842,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 tempGitRepository = builder.readEnvironment().findGitDir(new File(currentFolder)).build();
                 if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
                     removeCommitMenuPanel();
-                    updateBarPanel();
+
                 }
             } catch (RuntimeException | IOException ex) {
                 if(tempGitRepository==null){
                     removeCommitMenuPanel();
-                    updateBarPanel();
+
                 }
             }
             currentGitRepository = tempGitRepository;
