@@ -1,4 +1,5 @@
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
@@ -6,6 +7,7 @@ import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -322,6 +324,26 @@ public class CustomJgitUtilities {
             git.commit()
                     .setMessage(commitMsg)
                     .call();
+        } catch (IOException | GitAPIException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void mergeBranch(String path, String branchName, String commitMsg) {
+        try (Git git = Git.open(new File(path))) {
+            System.out.println(branchName + "  "  + commitMsg + "   " + path);
+            ObjectId mergeBase = git.getRepository().resolve(branchName);
+            System.out.println(mergeBase);
+            MergeResult merge = git.merge()
+                            .include(mergeBase)
+                            .setCommit(true)
+                            .setMessage(commitMsg)
+                            .call();
+            if(!merge.getMergeStatus().isSuccessful()) {
+                git.reset().setMode(ResetCommand.ResetType.MERGE).call();
+                JOptionPane aa= new JOptionPane();
+                aa.showMessageDialog(null, "Conflict!");
+            }
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
         }
