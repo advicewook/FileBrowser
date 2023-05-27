@@ -60,6 +60,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     private JPanel barPanel = new JPanel();
 
+    private UserInfoForGit userInfoForGit;
     private boolean isCommitMenuOpened = false;
     
     Repository currentGitRepository = null;
@@ -390,13 +391,13 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 List<String> stringFromDialog = showURLInputDialog();
                 String url = stringFromDialog.get(0);
                 String id = stringFromDialog.get(1);
-                String pw = stringFromDialog.get(2);
+                String token = stringFromDialog.get(2);
 
                 Git result;
                 //check url is not null or empty
                 if (url != null && !url.equals("")) {
                     try{
-                          result = CustomJgitUtilities.cloneRepo(url, id, pw, currentFolder);
+                          result = CustomJgitUtilities.cloneRepo(url, id, token, currentFolder);
                         // Check if the clone was successful
                         if (result != null) {
                             System.out.println("Git clone was successful.");
@@ -1240,6 +1241,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
         result.add(url);
         result.add(id);
         result.add(token);
+
+        userInfoForGit = new UserInfoForGit(id, token);
+
 
         return result;
     }
