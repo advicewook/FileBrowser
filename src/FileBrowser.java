@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,6 +23,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.*;
@@ -384,11 +387,16 @@ public class FileBrowser extends JPanel implements ComponentListener {
         cloneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String url = showURLInputDialog();
+                List<String> stringFromDialog = showURLInputDialog();
+                String url = stringFromDialog.get(0);
+                String id = stringFromDialog.get(1);
+                String pw = stringFromDialog.get(2);
+
+                Git result;
                 //check url is not null or empty
                 if (url != null && !url.equals("")) {
-                    try {
-                        Git result = CustomJgitUtilities.cloneRepo(url, currentFolder);
+                    try{
+                          result = CustomJgitUtilities.cloneRepo(url, id, pw, currentFolder);
                         // Check if the clone was successful
                         if (result != null) {
                             System.out.println("Git clone was successful.");
@@ -399,7 +407,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         }
                     } catch (GitAPIException ex) {
                         System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                        JOptionPane.showMessageDialog(frame, ex.getMessage());
                     }
+
                     updateShowPanel();
                     updateBarPanel();
                 }
@@ -1127,53 +1137,111 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     // dialog for input URL
     //make dialog with multiple panel for flexibility and extensibility
-    public String  showURLInputDialog(){
-        JDialog dialog = new JDialog(frame, "Input URL for clone", true);
+    public List<String>  showURLInputDialog(){
+        JDialog dialog = new JDialog(frame, "Repository clone", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        JPanel URLPanel = new JPanel();
-        URLPanel.setOpaque(false);
-        URLPanel.setLayout(new BoxLayout(URLPanel, BoxLayout.Y_AXIS));
+        JPanel notationPanel = new JPanel();
+        JLabel notationLabel = new JLabel("Note: input id and toke if the repository is private");
+        notationPanel.add(notationLabel);
 
-        JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        JTextField textField = new JTextField(30);
-        textField.setText("Enter URL");
-        textField.setOpaque(true);
-        textField.setBackground(Color.white);
-        textField.setForeground(Color.black);
-        textFieldPanel.add(textField);
+        JPanel inputPanel = new JPanel(new GridLayout(5,1));
+        inputPanel.setOpaque(false);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel panel1 = new JPanel(new FlowLayout());
+        JLabel urlLabel = new JLabel("URL:");
+        urlLabel.setPreferredSize(new Dimension(50,35));
+        urlLabel.setHorizontalAlignment(JLabel.RIGHT);
+        panel1.add(urlLabel,BorderLayout.WEST);
+
+        JTextField urlTextField = new JTextField();
+        urlTextField.setPreferredSize(new Dimension(200,35));
+        urlTextField.setOpaque(true);
+        urlTextField.setBackground(Color.white);
+        urlTextField.setForeground(Color.black);
+
+        panel1.add(urlTextField,BorderLayout.CENTER);
+
+
+        JPanel panel2 = new JPanel(new FlowLayout());
+        JLabel idLabel = new JLabel("ID:");
+        idLabel.setPreferredSize(new Dimension(50,35));
+        idLabel.setHorizontalAlignment(JLabel.RIGHT);
+        panel2.add(idLabel,BorderLayout.WEST);
+
+        JTextField idTextField = new JTextField();
+        idTextField.setPreferredSize(new Dimension(200,35));
+        idTextField.setOpaque(true);
+        idTextField.setBackground(Color.white);
+        idTextField.setForeground(Color.black);
+
+        panel2.add(idTextField, BorderLayout.CENTER);
+
+
+        JPanel panel3 = new JPanel(new FlowLayout());
+        JLabel tokenLabel = new JLabel("Token:");
+        tokenLabel.setPreferredSize(new Dimension(50,35));
+        tokenLabel.setHorizontalAlignment(JLabel.RIGHT);
+        panel3.add(tokenLabel,BorderLayout.WEST);
+
+        JPasswordField tokenPasswordField = new JPasswordField();
+        tokenPasswordField.setPreferredSize(new Dimension(200,35));
+        tokenPasswordField.setOpaque(true);
+        tokenPasswordField.setBackground(Color.white);
+        tokenPasswordField.setForeground(Color.black);
+
+        panel3.add(tokenPasswordField, BorderLayout.CENTER);
+
+        inputPanel.add(panel1);
+        inputPanel.add(panel2);
+        inputPanel.add(panel3);
+        inputPanel.setPreferredSize(new Dimension(300, 130));
+
+        JPanel panel4 = new JPanel();
         JButton okButton = new JButton("OK");
-
         okButton.setForeground(Color.black);
         okButton.setOpaque(false);
         okButton.setFocusable(false);
 
-        buttonPanel.add(okButton);
+        panel4.add(okButton);
+        panel4.setPreferredSize(new Dimension(100, 50));
+
+
 
         okButton.addActionListener(new ActionListener(){
+            @Override
            public void actionPerformed(ActionEvent e){
-               String URLString = textField.getText();
-               if(!URLString.isEmpty()){
-                   System.out.println("Enterd URL is : "+ URLString);
-               }else{
-                   System.out.println("NO URL enterd");
-               }
-               dialog.dispose();
+                String url = urlTextField.getText();
+
+                if (!url.isEmpty()) {
+                    dialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please enter the URL.");
+                }
+                dialog.dispose();
            }
         });
 
-        URLPanel.add(textFieldPanel);
-        URLPanel.add(Box.createVerticalStrut(10));
-        URLPanel.add(buttonPanel);
 
-        dialog.getContentPane().add(URLPanel);
+        dialog.getContentPane().add(notationPanel, BorderLayout.NORTH);
+        dialog.getContentPane().add(inputPanel, BorderLayout.CENTER);
+        dialog.getContentPane().add(panel4, BorderLayout.SOUTH);
+
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
 
-        return textField.getText();
+        String url = urlTextField.getText();
+        String id = idTextField.getText();
+        String token = new String(tokenPasswordField.getPassword());
+
+        java.util.List<String> result = new ArrayList<>();
+
+        result.add(url);
+        result.add(id);
+        result.add(token);
+
+        return result;
     }
 
     //update barpanel

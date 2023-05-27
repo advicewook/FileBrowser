@@ -3,6 +3,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
@@ -464,11 +465,24 @@ public class CustomJgitUtilities {
     }
 
     //git clone
-    public static Git cloneRepo(String url, String path) throws GitAPIException{
+    public static Git cloneRepo(String url, String username, String password, String path) throws GitAPIException{
             CloneCommand cloneCommand = Git.cloneRepository()
                     .setURI(url)
                     .setDirectory(new File(path));
+
+            if(!username.isEmpty() && !password.isEmpty()){
+                cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+
+            }
            return cloneCommand.call();
 
     }
+
+//    public static Git clonePublicRepo(String url,String path) throws GitAPIException{
+//        CloneCommand cloneCommand = Git.cloneRepository()
+//                .setURI(url)
+//                .setDirectory(new File(path));
+//
+//        return cloneCommand.call();
+//    }
 }
