@@ -340,9 +340,15 @@ public class CustomJgitUtilities {
                             .setMessage(commitMsg)
                             .call();
             if(!merge.getMergeStatus().isSuccessful()) {
-                git.reset().setMode(ResetCommand.ResetType.MERGE).call();
+                git.getRepository().writeMergeCommitMsg(null);
+                git.getRepository().writeMergeHeads(null);
+
+                git.wrap(git.getRepository()).reset().setMode(ResetCommand.ResetType.HARD).call();
                 JOptionPane aa= new JOptionPane();
-                aa.showMessageDialog(null, "Conflict!");
+                aa.showMessageDialog(null, "error");
+            } else {
+                JOptionPane aa= new JOptionPane();
+                aa.showMessageDialog(null, "Success");
             }
         } catch (IOException | GitAPIException e) {
             e.printStackTrace();
