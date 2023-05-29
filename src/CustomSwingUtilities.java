@@ -620,7 +620,10 @@ public class CustomSwingUtilities {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        String branchName = JOptionPane.showInputDialog(label, "Enter the branch name : ");
+                        String branchName = JOptionPane.showInputDialog(label, "Write branch name to create : ");
+                        if(branchName==null){
+                            return;
+                        }
                         CustomJgitUtilities.createBranch(path,branch,branchName);
                         revalidateBranchMenu(path);
                     } catch (IOException ex) {
@@ -659,7 +662,10 @@ public class CustomSwingUtilities {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        String branchName = JOptionPane.showInputDialog(label, "Enter the branch name : ");
+                        String branchName = JOptionPane.showInputDialog(label, "Write branch name to rename : ");
+                        if(branchName==null){
+                            return;
+                        }
                         CustomJgitUtilities.renameBranch(path,branch,branchName);
                         revalidateBranchMenu(path);
                     } catch (IOException ex) {
