@@ -276,10 +276,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     gitManagePanel.setPreferredSize(new Dimension(515, getHeight()));
                     gitManagePanel.setBorder(BorderFactory.createBevelBorder(0, Color.black, Color.black));
                     gitManagePanel.setBackground(Color.WHITE);
-
                     displayPanel.add(gitManagePanel, BorderLayout.EAST);
-
-                    displayPanel.setSize(new Dimension((getWidth() * 2) + gitManagePanel.getWidth(), getHeight()));
+                    displayPanel.setSize(new Dimension(getWidth() + gitManagePanel.getWidth(), getHeight()));
                     frame.setSize(new Dimension(width + 250, height));
                     revalidate();
                     isCommitMenuOpened=true;
@@ -469,7 +467,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         //주 패널 정보 출력 - 파일 트리 정보 + 파일들
         JScrollPane displayScroll = new JScrollPane(showPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         displayScroll.setOpaque(false);
         displayScroll.getViewport().add(showPanel);
         displayScroll.getViewport().setOpaque(false);
