@@ -1,8 +1,10 @@
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 
@@ -504,5 +506,37 @@ public class CustomJgitUtilities {
             e.printStackTrace();
         }
         return "";
+    }
+
+    // 브랜치 생성
+    public static void createBranch(String path, String existingBranchName , String newBranchName) throws GitAPIException, IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        Git git = new Git(repository);
+        git.branchCreate().setName(newBranchName).setStartPoint(existingBranchName).call();
+    }
+
+    // 브랜치 삭제
+    public static void deleteBranch(String path, String branchName) throws GitAPIException, IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        Git git = new Git(repository);
+        git.branchDelete().setBranchNames(branchName).call();
+    }
+
+    // 브랜치 리네임
+    public static void renameBranch(String path, String oldBranchName, String newBranchName) throws GitAPIException, IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        Git git = new Git(repository);
+        git.branchRename().setOldName(oldBranchName).setNewName(newBranchName).call();
+    }
+
+    // 브랜치 체크아웃
+    public static void checkoutBranch(String path, String branchName) throws GitAPIException, IOException {
+        FileRepositoryBuilder builder = new FileRepositoryBuilder();
+        Repository repository = builder.readEnvironment().findGitDir(new File(path)).build();
+        Git git = new Git(repository);
+        git.checkout().setName(branchName).call();
     }
 }

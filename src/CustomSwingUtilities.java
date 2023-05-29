@@ -25,6 +25,8 @@ public class CustomSwingUtilities {
     JPanel unstagedPanel = new JPanel();
     // 커밋 패널 - 중단 리스트 컨테이너
     JPanel stagedPanel = new JPanel();
+    // 메인 브랜치 패널
+    JPanel branchPanel = new JPanel();
 
     List<String> branchList = null;
     String currentBranch = null;
@@ -362,7 +364,6 @@ public class CustomSwingUtilities {
     // 브랜치 패널
     public JPanel showBranchMenu(String path, int height) throws GitAPIException, IOException {
         // 메인 브랜치 패널
-        JPanel branchPanel = new JPanel();
         branchPanel.setOpaque(false);
         branchPanel.setLayout(new BorderLayout());
         branchPanel.setSize(new Dimension(250,250));
@@ -576,16 +577,132 @@ public class CustomSwingUtilities {
     // 브랜치 패널에 리스트업
     public void showBranchListOnPanel(String path, JPanel container) throws GitAPIException, IOException {
         List<String> branchList = CustomJgitUtilities.getBranchNameList(path);
+        String currentBranch = CustomJgitUtilities.getCurrentBranchName(path);
         for (String branch : branchList) {
             JLabel label = new JLabel(branch);
+            JPopupMenu popupMenu = new JPopupMenu();
+            boolean isCurrentBranch = currentBranch.equals(branch);
+            JMenuItem menuItem1 = new JMenuItem("Create Branch");
+            JMenuItem menuItem2 = new JMenuItem("Delete Branch");
+            JMenuItem menuItem3 = new JMenuItem("Rename Branch");
+            JMenuItem menuItem4 = new JMenuItem("Checkout Branch");
+            if(isCurrentBranch){
+                popupMenu.add(menuItem1);
+                popupMenu.add(menuItem3);
+                popupMenu.add(menuItem4);
+                label.setBackground(new Color(0, 0, 0, 0));
+                label.setForeground(Color.green);
+            }else{
+                popupMenu.add(menuItem1);
+                popupMenu.add(menuItem2);
+                popupMenu.add(menuItem3);
+                popupMenu.add(menuItem4);
+            }
             container.add(label);
+            label.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    showPopupMenu(e);
+                }
+                @Override
+                public void mouseReleased(MouseEvent e) {
+                    showPopupMenu(e);
+                }
+                private void showPopupMenu(MouseEvent e) {
+                    if (e.isPopupTrigger()) {
+                        // 마우스 오른쪽 버튼 클릭 시 팝업 메뉴 띄우기
+                        popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                    }
+                }
+            });
+
+            menuItem1.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        String branchName = JOptionPane.showInputDialog(label, "Enter the branch name : ");
+                        CustomJgitUtilities.createBranch(path,branch,branchName);
+                        revalidateBranchMenu(path);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Make sure your file path is correct");
+                    } catch (GitAPIException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "A Git Error has occurred. Your command has not executed.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Your command may not be executed.");
+                    }
+                }
+            });
+
+            menuItem2.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        CustomJgitUtilities.deleteBranch(path,branch);
+                        revalidateBranchMenu(path);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Make sure your file path is correct");
+                    } catch (GitAPIException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "A Git Error has occurred. Your command has not executed.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Your command may not be executed.");
+                    }
+                }
+            });
+
+            menuItem3.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        String branchName = JOptionPane.showInputDialog(label, "Enter the branch name : ");
+                        CustomJgitUtilities.renameBranch(path,branch,branchName);
+                        revalidateBranchMenu(path);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Make sure your file path is correct");
+                    } catch (GitAPIException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "A Git Error has occurred. Your command has not executed.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Your command may not be executed.");
+                    }
+                }
+            });
+
+            menuItem4.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        CustomJgitUtilities.checkoutBranch(path,branch);
+                        revalidateBranchMenu(path);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Make sure your file path is correct");
+                    } catch (GitAPIException ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "A Git Error has occurred. Your command has not executed.");
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(label, "An Error has occurred. Your command may not be executed.");
+                    }
+                }
+            });
         }
     }
 
-    // todo : 브랜치 패널 새로고침
     public void revalidateBranchMenu(String path){
-        // 브랜치 패널 revalidate 
+        try{
+            branchPanel.removeAll();
+            showBranchMenu(path, 100);
+            branchPanel.revalidate();
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
-
-
 }
