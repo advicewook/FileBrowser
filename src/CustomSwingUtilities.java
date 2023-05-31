@@ -707,6 +707,7 @@ public class CustomSwingUtilities {
             branchPanel.removeAll();
             showBranchMenu(path, 100);
             branchPanel.revalidate();
+            fileBrowser.setTextField();
         }catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -1118,7 +1118,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
     }
     // 깃 레포 검사 후 브랜치명 표시
-    private void setTextField() throws GitAPIException, IOException {
+    public void setTextField() throws GitAPIException, IOException {
         gitTextPanel.removeAll();
         treeTextField.setText(" "+currentFolder);
         treeTextField.setBorder(BorderFactory.createEmptyBorder());
@@ -1126,6 +1126,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         if (CustomJgitUtilities.isGitRepository(currentFolder) || CustomJgitUtilities.isSubGitRepository(currentFolder)) {
             currentBranch = CustomJgitUtilities.getCurrentBranchName(currentFolder);
             currentBranch = " (" + currentBranch + ") "; // 브랜치명
+            //System.out.println(currentBranch);
             JLabel branchName = new JLabel(currentBranch);
             branchName.setBackground(new Color(0, 0, 0, 0));
             branchName.setForeground(Color.green); // 초록색으로 표기
@@ -1134,6 +1135,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
         }
         gitTextPanel.add(treeTextField, BorderLayout.CENTER);
         barPanel.add(gitTextPanel,BorderLayout.CENTER);
+        barPanel.updateUI();
     }
 
     // --------------------- test
