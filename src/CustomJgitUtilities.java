@@ -12,11 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -469,7 +465,7 @@ public class CustomJgitUtilities {
         return extractedText;
     }
 
-    // 전체 브랜치 리스트 반환
+    // 전체 브랜치 이름 리스트 반환
     public static List<String> getBranchNameList(String path) throws IOException, GitAPIException {
         List<String> branchList = new ArrayList<String>();
 
@@ -488,24 +484,70 @@ public class CustomJgitUtilities {
                 else if(temp.contains("refs/remotes/")){
                     temp = temp.replace("refs/remotes/","");
                 }
-                branchList.add(temp);
+                if (!temp.contains("HEAD")){
+                    branchList.add(temp);
+                }
+                System.out.println(temp);
             }
         }
         return branchList;
     }
 
+    // <브랜치 이름 : 체크썸> 형태로 해시 맵 반환
+    public static Map<String, String> getAllBranchChecksums(String path) throws IOException, GitAPIException {
+        if (!isGitRepository(path) && isSubGitRepository(path)) {
+            String root = findRepoPath(new File(path));
+            path = root;
+        }
+        Map<String, String> branchChecksums = new HashMap<>();
+        try (Repository repository = FileRepositoryBuilder.create(new File(path, ".git"))) {
+            List<Ref> branches = Git.wrap(repository).branchList()
+                    .setListMode(ListBranchCommand.ListMode.ALL)
+                    .call();
+
+            for (Ref branch : branches) {
+                String branchName = branch.getName();
+                ObjectId objectId = branch.getObjectId();
+                String checksum = objectId.getName();
+
+                branchChecksums.put(branchName, checksum);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return branchChecksums;
+    }
+
     public static String getCurrentBranchName(String path) throws GitAPIException, IOException {
+        String currentBranch = null;
         // 깃 레포 안의 하위 폴더 처리
         if(!isGitRepository(path) && isSubGitRepository(path)){
             String root = findRepoPath(new File(path));
             path = root;
         }
         try (Repository repository = Git.open(new File(path)).getRepository()) {
-            return repository.getBranch();
+            Map<String, String> branchChecksums = getAllBranchChecksums(path);
+            ObjectId headId = repository.resolve("HEAD");
+            if (headId != null){
+                String currentChecksum = headId.getName(); // 현재 작업 중인 브랜치의 checksum
+                for (Map.Entry<String, String> entry : branchChecksums.entrySet()) {
+                    String key = entry.getKey(); // 브랜치 이름
+                    String value = entry.getValue(); // checksum
+                    if (value.equals(currentChecksum) && !key.contains("HEAD")){
+                        // 브랜치 명 파싱
+                        if (key.contains("refs/heads/")){
+                            currentBranch = key.replace("refs/heads/","");
+                        }
+                        else if(key.contains("refs/remotes/")){
+                            currentBranch = key.replace("refs/remotes/","");
+                        }
+                    }
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return currentBranch;
     }
 
     // 브랜치 생성

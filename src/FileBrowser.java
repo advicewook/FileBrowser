@@ -240,7 +240,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
                    try {
                        Repository r = CustomJgitUtilities.createNewRepository(currentFolder);
                        System.out.println("Having repository: " + r.getDirectory());
-                   } catch (IOException e) {
+                       setTextField();
+
+                   } catch (IOException | GitAPIException e) {
                        throw new RuntimeException(e);
                    }
                }
@@ -848,9 +850,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     // 깃 레포 하위 폴더로 진입시 브랜치명 제공
                     try {
                         setTextField();
-                    } catch (GitAPIException ex) {
-                        throw new RuntimeException(ex);
-                    } catch (IOException ex) {
+                    } catch (GitAPIException | IOException ex) {
                         throw new RuntimeException(ex);
                     }
                     selectedFolder = null;
@@ -1125,8 +1125,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         if (CustomJgitUtilities.isGitRepository(currentFolder) || CustomJgitUtilities.isSubGitRepository(currentFolder)) {
             currentBranch = CustomJgitUtilities.getCurrentBranchName(currentFolder);
-            currentBranch = " (" + currentBranch + ") "; // 브랜치명
-            //System.out.println(currentBranch);
+            currentBranch = " " + currentBranch + " "; // 브랜치명
             JLabel branchName = new JLabel(currentBranch);
             branchName.setBackground(new Color(0, 0, 0, 0));
             branchName.setForeground(Color.green); // 초록색으로 표기

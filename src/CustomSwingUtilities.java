@@ -350,6 +350,7 @@ public class CustomSwingUtilities {
                 unstagedPanel.revalidate();
                 stagedPanel.revalidate();
                 fileBrowser.updateShowPanel();
+                revalidateBranchMenu(path);
             }
         });
 
@@ -363,6 +364,7 @@ public class CustomSwingUtilities {
 
     // 브랜치 패널
     public JPanel showBranchMenu(String path, int height) throws GitAPIException, IOException {
+        branchPanel.removeAll();
         // 메인 브랜치 패널
         branchPanel.setOpaque(false);
         branchPanel.setLayout(new BorderLayout());
@@ -424,9 +426,7 @@ public class CustomSwingUtilities {
                     branchList = CustomJgitUtilities.getBranchNameList(path);
                     currentBranch = CustomJgitUtilities.getCurrentBranchName(path);
 
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                } catch (GitAPIException ex) {
+                } catch (IOException | GitAPIException ex) {
                     throw new RuntimeException(ex);
                 }
 
@@ -708,6 +708,7 @@ public class CustomSwingUtilities {
             showBranchMenu(path, 100);
             branchPanel.revalidate();
             fileBrowser.setTextField();
+            fileBrowser.updateShowPanel();
         }catch (Exception ex) {
             ex.printStackTrace();
         }
