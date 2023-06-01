@@ -465,7 +465,7 @@ public class CustomJgitUtilities {
     }
 
     //git clone
-    public static Git cloneRepo(String url, String username, String password, String path) throws GitAPIException{
+    public static Git clonePrivateRepo(String url, String username, String password, String path) throws GitAPIException{
             CloneCommand cloneCommand = Git.cloneRepository()
                     .setURI(url)
                     .setDirectory(new File(path));
@@ -478,11 +478,11 @@ public class CustomJgitUtilities {
 
     }
 
-//    public static Git clonePublicRepo(String url,String path) throws GitAPIException{
-//        CloneCommand cloneCommand = Git.cloneRepository()
-//                .setURI(url)
-//                .setDirectory(new File(path));
-//
-//        return cloneCommand.call();
-//    }
+    public static Git cloneRepo(String url,String path) throws GitAPIException{
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(url)
+                .setDirectory(new File(path));
+
+        return cloneCommand.call();
+    }
 }

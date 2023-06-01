@@ -388,32 +388,60 @@ public class FileBrowser extends JPanel implements ComponentListener {
         cloneButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                List<String> stringFromDialog = showURLInputDialog();
-                String url = stringFromDialog.get(0);
-                String id = stringFromDialog.get(1);
-                String token = stringFromDialog.get(2);
+                List<String> stringFromDialog = new ArrayList<>();
 
-                Git result;
-                //check url is not null or empty
-                if (url != null && !url.equals("")) {
-                    try{
-                          result = CustomJgitUtilities.cloneRepo(url, id, token, currentFolder);
+                Git result = null;
+                try {
+                    String url = showURLInputDialog().trim();
+                    stringFromDialog.add(url);
+                    result = CustomJgitUtilities.cloneRepo(url, currentFolder);
+
+                    if (result != null) {
+                        System.out.println("Git clone was successful.");
+
+                    } else if(url.isEmpty()){
+                        System.out.println("Git clone failed.");
+                        return;
+
+                    } else if(result==null){
+                        System.out.println("Git clone failed.");
+                    }
+
+                }
+                catch (GitAPIException ex){
+                    List<String> idAndToken = showAuthDialog();
+                    String url = stringFromDialog.get(0).trim();
+
+                    stringFromDialog.add(idAndToken.get(0));
+                    stringFromDialog.add(idAndToken.get(1));
+
+                    String id = stringFromDialog.get(1).trim();
+                    String token = stringFromDialog.get(2).trim();
+
+                    System.out.println("url  = " + url);
+                    System.out.println(" = " + id   );
+                    System.out.println("token = " + token);
+
+                    try {
+                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
+
                         // Check if the clone was successful
                         if (result != null) {
                             System.out.println("Git clone was successful.");
 
-                            // Additional logic or operations can be performed on the cloned repository here
                         } else {
                             System.out.println("Git clone failed.");
                         }
-                    } catch (GitAPIException ex) {
-                        System.out.println("An error occurred during Git clone: " + ex.getMessage());
-                        JOptionPane.showMessageDialog(frame, ex.getMessage());
-                    }
 
-                    updateShowPanel();
-                    updateBarPanel();
+                    } catch (GitAPIException exc) {
+                        System.out.println("An error occurred during Git clone: " + exc.getMessage());
+                        JOptionPane.showMessageDialog(frame, exc.getMessage());
+                    }
                 }
+
+                updateShowPanel();
+                updateBarPanel();
+
             }
         });
 
@@ -1138,81 +1166,33 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
     // dialog for input URL
     //make dialog with multiple panel for flexibility and extensibility
-    public List<String>  showURLInputDialog(){
+    public String showURLInputDialog(){
         JDialog dialog = new JDialog(frame, "Repository clone", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        JPanel notationPanel = new JPanel();
-        JLabel notationLabel = new JLabel("Note: input id and toke if the repository is private");
-        notationPanel.add(notationLabel);
+       JPanel URLPanel = new JPanel();
+       URLPanel.setOpaque(false);
+       URLPanel.setLayout(new BoxLayout(URLPanel, BoxLayout.Y_AXIS));
 
-        JPanel inputPanel = new JPanel(new GridLayout(5,1));
-        inputPanel.setOpaque(false);
+       JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+       JTextField textField = new JTextField("Enter URL",30);
+       textField.setOpaque(true);
+       textField.setBackground(Color.WHITE);
+       textField.setForeground(Color.BLACK);
+       textFieldPanel.add(textField);
 
-        JPanel panel1 = new JPanel(new FlowLayout());
-        JLabel urlLabel = new JLabel("URL:");
-        urlLabel.setPreferredSize(new Dimension(50,35));
-        urlLabel.setHorizontalAlignment(JLabel.RIGHT);
-        panel1.add(urlLabel,BorderLayout.WEST);
-
-        JTextField urlTextField = new JTextField();
-        urlTextField.setPreferredSize(new Dimension(200,35));
-        urlTextField.setOpaque(true);
-        urlTextField.setBackground(Color.white);
-        urlTextField.setForeground(Color.black);
-
-        panel1.add(urlTextField,BorderLayout.CENTER);
-
-
-        JPanel panel2 = new JPanel(new FlowLayout());
-        JLabel idLabel = new JLabel("ID:");
-        idLabel.setPreferredSize(new Dimension(50,35));
-        idLabel.setHorizontalAlignment(JLabel.RIGHT);
-        panel2.add(idLabel,BorderLayout.WEST);
-
-        JTextField idTextField = new JTextField();
-        idTextField.setPreferredSize(new Dimension(200,35));
-        idTextField.setOpaque(true);
-        idTextField.setBackground(Color.white);
-        idTextField.setForeground(Color.black);
-
-        panel2.add(idTextField, BorderLayout.CENTER);
-
-
-        JPanel panel3 = new JPanel(new FlowLayout());
-        JLabel tokenLabel = new JLabel("Token:");
-        tokenLabel.setPreferredSize(new Dimension(50,35));
-        tokenLabel.setHorizontalAlignment(JLabel.RIGHT);
-        panel3.add(tokenLabel,BorderLayout.WEST);
-
-        JPasswordField tokenPasswordField = new JPasswordField();
-        tokenPasswordField.setPreferredSize(new Dimension(200,35));
-        tokenPasswordField.setOpaque(true);
-        tokenPasswordField.setBackground(Color.white);
-        tokenPasswordField.setForeground(Color.black);
-
-        panel3.add(tokenPasswordField, BorderLayout.CENTER);
-
-        inputPanel.add(panel1);
-        inputPanel.add(panel2);
-        inputPanel.add(panel3);
-        inputPanel.setPreferredSize(new Dimension(300, 130));
-
-        JPanel panel4 = new JPanel();
+         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         JButton okButton = new JButton("OK");
-        okButton.setForeground(Color.black);
-        okButton.setOpaque(false);
+        setOpaque(false);
+        okButton.setForeground(Color.BLACK);
         okButton.setFocusable(false);
 
-        panel4.add(okButton);
-        panel4.setPreferredSize(new Dimension(100, 50));
-
-
+        buttonPanel.add(okButton);
 
         okButton.addActionListener(new ActionListener(){
             @Override
            public void actionPerformed(ActionEvent e){
-                String url = urlTextField.getText();
+                String url = textField.getText();
 
                 if (!url.isEmpty()) {
                     dialog.dispose();
@@ -1224,29 +1204,97 @@ public class FileBrowser extends JPanel implements ComponentListener {
         });
 
 
-        dialog.getContentPane().add(notationPanel, BorderLayout.NORTH);
-        dialog.getContentPane().add(inputPanel, BorderLayout.CENTER);
-        dialog.getContentPane().add(panel4, BorderLayout.SOUTH);
+        URLPanel.add(textFieldPanel);
+        URLPanel.add(Box.createVerticalStrut(10));
+        URLPanel.add(buttonPanel);
 
+        dialog.getContentPane().add(URLPanel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
         dialog.setVisible(true);
 
-        String url = urlTextField.getText();
-        String id = idTextField.getText();
-        String token = new String(tokenPasswordField.getPassword());
+        return textField.getText();
 
-        java.util.List<String> result = new ArrayList<>();
+    }
 
-        result.add(url);
-        result.add(id);
+
+    // dialog for input username and token
+    public List<String> showAuthDialog(){
+        JDialog dialog = new JDialog(frame, "Authentication", true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel authPanel = new JPanel();
+        authPanel.setOpaque(false);
+        authPanel.setLayout(new BoxLayout(authPanel, BoxLayout.Y_AXIS));
+
+        JPanel idPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel idLabel = new JLabel("Username: ");
+        JTextField idField = new JTextField(30);
+        idField.setOpaque(true);
+        idField.setBackground(Color.WHITE);
+        idField.setForeground(Color.BLACK);
+        idPanel.add(idLabel);
+        idPanel.add(idField);
+
+        JPanel tokenPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel tokenLabel = new JLabel("Token:         ");
+        JPasswordField tokenField = new JPasswordField(30);
+        tokenField.setOpaque(true);
+        tokenField.setBackground(Color.WHITE);
+        tokenField.setForeground(Color.BLACK);
+        tokenPanel.add(tokenLabel);
+        tokenPanel.add(tokenField);
+
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton okButton = new JButton("OK");
+        okButton.setForeground(Color.BLACK);
+        setOpaque(false);
+        okButton.setFocusable(false);
+        buttonPanel.add(okButton);
+
+        okButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String username = idField.getText();
+                String token = new String(tokenField.getPassword());
+
+
+                if (!username.isEmpty() && !token.isEmpty()) {
+                    dialog.dispose();
+
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please enter the username and token.");
+                }
+            }
+        });
+
+
+        authPanel.add(idPanel);
+        authPanel.add(Box.createVerticalStrut(3));
+        authPanel.add(tokenPanel);
+        authPanel.add(Box.createVerticalStrut(3));
+        authPanel.add(buttonPanel);
+
+        dialog.getContentPane().add(authPanel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
+
+        String username = idField.getText();
+        String token = new String(tokenField.getPassword());
+
+        List<String> result = new ArrayList<>();
+        result.add(username);
         result.add(token);
-
-        userInfoForGit = new UserInfoForGit(id, token);
 
 
         return result;
+
+
     }
+
+
 
     //update barpanel
     //if the current folder is a git repository, then make invisible clone button
