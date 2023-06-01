@@ -436,7 +436,7 @@ public class CustomSwingUtilities {
                 radioPanel.setLayout(new BoxLayout(radioPanel, BoxLayout.Y_AXIS));
                 ButtonGroup buttonGrp = new ButtonGroup(); // branch 중복 선택 방지
                 for (String branch : branchList) {
-                    if (branch.contains(currentBranch)){
+                    if (branch.equals(currentBranch)){
                         // 현재 브랜치는 머지 대상에서 제외
                         continue;
                     }
@@ -468,7 +468,6 @@ public class CustomSwingUtilities {
                     }
                 });
                 mergeFrame.add(mergeButton, BorderLayout.SOUTH);
-                // todo : merge 버튼 기능 구현
                 mergeFrame.setLocationRelativeTo(branchPanel);
                 mergeFrame.setVisible(true);
             }

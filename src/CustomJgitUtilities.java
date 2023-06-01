@@ -342,7 +342,7 @@ public class CustomJgitUtilities {
 
                 git.wrap(git.getRepository()).reset().setMode(ResetCommand.ResetType.HARD).call();
                 JOptionPane aa= new JOptionPane();
-                aa.showMessageDialog(null, "error");
+                aa.showMessageDialog(null, "error : " + merge.getMergeStatus().toString());
             } else {
                 JOptionPane aa= new JOptionPane();
                 aa.showMessageDialog(null, "Success");
@@ -585,7 +585,7 @@ public class CustomJgitUtilities {
 
     // 현재 브랜치 이름 반환
     public static String getCurrentBranchName(String path) throws GitAPIException, IOException {
-        String currentBranch = "";
+        String currentBranch = "master";
         // 깃 레포 안의 하위 폴더 처리
         if(!isGitRepository(path) && isSubGitRepository(path)){
             String root = findRepoPath(new File(path));
