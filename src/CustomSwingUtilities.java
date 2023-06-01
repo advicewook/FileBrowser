@@ -2,6 +2,7 @@
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -447,6 +448,25 @@ public class CustomSwingUtilities {
 
                 // 3. 하단에 merge 버튼 추가
                 JButton mergeButton = new JButton("merge");
+                mergeButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String commitMsg = JOptionPane.showInputDialog(branchPanel, " Enter the commit msg : ");
+                        String mergedBranch = getSelectedButtonText(buttonGrp);
+                        CustomJgitUtilities.mergeBranch(path, mergedBranch, commitMsg);
+                        mergeFrame.dispose();
+                    }
+                    public String getSelectedButtonText(ButtonGroup buttonGroup) {
+                        for (Enumeration<AbstractButton> buttons = buttonGroup.getElements(); buttons.hasMoreElements();) {
+                            AbstractButton button = buttons.nextElement();
+
+                            if (button.isSelected()) {
+                                return button.getText();
+                            }
+                        }
+                        return null;
+                    }
+                });
                 mergeFrame.add(mergeButton, BorderLayout.SOUTH);
                 // todo : merge 버튼 기능 구현
                 mergeFrame.setLocationRelativeTo(branchPanel);
