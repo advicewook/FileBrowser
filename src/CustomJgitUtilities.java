@@ -465,7 +465,12 @@ public class CustomJgitUtilities {
         return extractedText;
     }
 
-    // 전체 브랜치 이름 리스트 반환
+    /*
+    메서드 getBranch(), getName() 등이 브랜치 명을 반환하는 형식
+    로컬 브랜치 - refs/heads/브랜치명
+    리모트 브랜치 - refs/remotes/리모트명/브랜치명
+     */
+    // 전체 브랜치 명 반환
     public static List<String> getBranchNameList(String path) throws IOException, GitAPIException {
         List<String> branchList = new ArrayList<String>();
 
@@ -474,43 +479,46 @@ public class CustomJgitUtilities {
                             .branchList()
                             .setListMode(ListMode.ALL)
                             .call();
-
             for (Ref ref : call){
                 String temp = ref.getName();
                 // 브랜치 명 파싱
-                if (temp.contains("refs/heads/")){
+                if (temp.contains("refs/heads/")){ // local branch
                     temp = temp.replace("refs/heads/","");
                 }
-                else if(temp.contains("refs/remotes/")){
+                else if(temp.contains("refs/remotes/")){ // remote branch
                     temp = temp.replace("refs/remotes/","");
                 }
                 if (!temp.contains("HEAD")){
                     branchList.add(temp);
                 }
-                System.out.println(temp);
             }
         }
         return branchList;
     }
 
-    // <브랜치 이름 : 체크썸> 형태로 해시 맵 반환
-    public static Map<String, String> getAllBranchChecksums(String path) throws IOException, GitAPIException {
+    // 로컬 브랜치 <브랜치 명 : 체크썸> 반환
+    public static Map<String, String> getLocalBranchList(String path) throws IOException, GitAPIException {
         if (!isGitRepository(path) && isSubGitRepository(path)) {
             String root = findRepoPath(new File(path));
             path = root;
         }
+
         Map<String, String> branchChecksums = new HashMap<>();
         try (Repository repository = FileRepositoryBuilder.create(new File(path, ".git"))) {
+            ObjectId headId = repository.resolve("HEAD");
             List<Ref> branches = Git.wrap(repository).branchList()
-                    .setListMode(ListBranchCommand.ListMode.ALL)
                     .call();
 
-            for (Ref branch : branches) {
-                String branchName = branch.getName();
-                ObjectId objectId = branch.getObjectId();
-                String checksum = objectId.getName();
-
-                branchChecksums.put(branchName, checksum);
+            if (headId != null){
+                for (Ref branch : branches) {
+                    String branchName = branch.getName();
+                    if (branchName.contains("refs/heads/")){ // local branch
+                        branchName = branchName.replace("refs/heads/","");
+                    }
+                    ObjectId objectId = branch.getObjectId();
+                    String checksum = objectId.getName();
+                    branchChecksums.put(branchName, checksum); // 브랜치명 : 체크섬
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -518,29 +526,72 @@ public class CustomJgitUtilities {
         return branchChecksums;
     }
 
+    // 리모트 브랜치 <브랜치 명 : 체크썸>  반환
+    public static Map<String, String> getRemoteBranchList(String path) throws IOException, GitAPIException {
+        if (!isGitRepository(path) && isSubGitRepository(path)) {
+            String root = findRepoPath(new File(path));
+            path = root;
+        }
+        Map<String, String> branchChecksums = new HashMap<>();
+        try (Repository repository = FileRepositoryBuilder.create(new File(path, ".git"))) {
+            ObjectId headId = repository.resolve("HEAD");
+            List<Ref> branches = Git.wrap(repository).branchList()
+                    .setListMode(ListMode.REMOTE)
+                    .call();
+
+            if (headId != null ){
+                for (Ref branch : branches) {
+                    String branchName = branch.getName();
+                    if(branchName.contains("refs/remotes/")){ // remote branch
+                        branchName = branchName.replace("refs/remotes/","");
+                    }
+                    ObjectId objectId = branch.getObjectId();
+                    String checksum = objectId.getName();
+                    branchChecksums.put(branchName, checksum); // 브랜치명 : 체크섬
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return branchChecksums;
+    }
+
+    // 현재 브랜치 이름 반환
     public static String getCurrentBranchName(String path) throws GitAPIException, IOException {
-        String currentBranch = null;
+        String currentBranch = "";
         // 깃 레포 안의 하위 폴더 처리
         if(!isGitRepository(path) && isSubGitRepository(path)){
             String root = findRepoPath(new File(path));
             path = root;
         }
         try (Repository repository = Git.open(new File(path)).getRepository()) {
-            Map<String, String> branchChecksums = getAllBranchChecksums(path);
             ObjectId headId = repository.resolve("HEAD");
             if (headId != null){
-                String currentChecksum = headId.getName(); // 현재 작업 중인 브랜치의 checksum
-                for (Map.Entry<String, String> entry : branchChecksums.entrySet()) {
+//                System.out.println(">>> head checksum : "+headId.getName());
+//                System.out.println(">>> repository.getBranch() : "+ repository.getBranch());
+                Map<String, String> localChecksums = getLocalBranchList(path);
+                Map<String, String> remoteChecksums = getRemoteBranchList(path);
+
+                for (Map.Entry<String, String> localEntry : localChecksums.entrySet()) {
+                    String localKey = localEntry.getKey(); // 브랜치 이름
+                    String localValue = localEntry.getValue(); // checksum
+                    //System.out.println("" + localKey + "" + " " + localValue);
+
+                    // 로컬 브랜치에 있으면 그대로 반환
+                    if (localKey.equals(repository.getBranch())&&!localKey.contains("HEAD")) {
+                        currentBranch = localKey;
+                        return currentBranch;
+                    }
+                }
+                // 로컬 브랜치가 아니라면 원격 브랜치 탐색
+                for (Map.Entry<String, String> entry : remoteChecksums.entrySet()) {
                     String key = entry.getKey(); // 브랜치 이름
                     String value = entry.getValue(); // checksum
-                    if (value.equals(currentChecksum) && !key.contains("HEAD")){
-                        // 브랜치 명 파싱
-                        if (key.contains("refs/heads/")){
-                            currentBranch = key.replace("refs/heads/","");
-                        }
-                        else if(key.contains("refs/remotes/")){
-                            currentBranch = key.replace("refs/remotes/","");
-                        }
+                    //System.out.println("" + key + "" + " " + value);
+
+                    if (value.equals(repository.getBranch())&&!key.contains("HEAD")){
+                        currentBranch = key;
+                        return currentBranch;
                     }
                 }
             }

@@ -410,6 +410,7 @@ public class CustomSwingUtilities {
         // 최종 병합
         branchPanel.add(header, BorderLayout.NORTH);
         branchPanel.add(branchScrollPanel, BorderLayout.CENTER);
+        branchPanel.updateUI();
 
         mergeButton.addActionListener(new ActionListener() {
             @Override
@@ -578,6 +579,7 @@ public class CustomSwingUtilities {
     public void showBranchListOnPanel(String path, JPanel container) throws GitAPIException, IOException {
         List<String> branchList = CustomJgitUtilities.getBranchNameList(path);
         String currentBranch = CustomJgitUtilities.getCurrentBranchName(path);
+
         for (String branch : branchList) {
             JLabel label = new JLabel(branch);
             JPopupMenu popupMenu = new JPopupMenu();
