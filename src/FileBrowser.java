@@ -396,14 +396,14 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     stringFromDialog.add(url);
                     result = CustomJgitUtilities.cloneRepo(url, currentFolder);
 
+                    if(url.isEmpty()) {
+                        return;
+                    }
+
                     if (result != null) {
                         System.out.println("Git clone was successful.");
 
-                    } else if(url.isEmpty()){
-                        System.out.println("Git clone failed.");
-                        return;
-
-                    } else if(result==null){
+                    }  else if(result==null){
                         System.out.println("Git clone failed.");
                     }
 
@@ -1196,9 +1196,10 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
                 if (!url.isEmpty()) {
                     dialog.dispose();
-                } else {
+                } else if (url.isEmpty()) {
                     JOptionPane.showMessageDialog(frame, "Please enter the URL.");
                 }
+
                 dialog.dispose();
            }
         });
