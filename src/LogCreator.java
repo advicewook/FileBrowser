@@ -12,6 +12,9 @@ import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+
 /**
  *
  * @author Chris
@@ -76,6 +79,20 @@ public class LogCreator {
         if (walk != null) {
             commitGraphPane.getCommitList().source(walk);
             commitGraphPane.getCommitList().fillTo(Integer.MAX_VALUE);
+            commitGraphPane.setRowSelectionAllowed(true);
+
+            commitGraphPane.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                @Override
+                public void valueChanged(ListSelectionEvent event) {
+                    if (!event.getValueIsAdjusting()) {
+                        // 번호 출력
+                        int selectedRow = commitGraphPane.getSelectedRow();
+                        // 번호 사용
+                        commitGraphPane.getValueAt(selectedRow,0);
+                        System.out.println("출력");
+                    }
+                }
+            });
         }
         return commitGraphPane;
     }
