@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -14,11 +15,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -57,12 +53,13 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private FileSystemView fileSystemView;
     private JTextArea textArea;
     private JPanel bttonsFooterPanel = new JPanel();
-
     private JPanel barPanel = new JPanel();
-
-    private UserInfoForGit userInfoForGit;
     private boolean isCommitMenuOpened = false;
-    
+
+    private String filePathForAuth;
+    private UserInfoForGit userInfoForGit;
+    private boolean hasInfoForGit = false;
+
     Repository currentGitRepository = null;
 
     CustomSwingUtilities customSwingUtilities = CustomSwingUtilities.getInstance(this);
@@ -223,6 +220,19 @@ public class FileBrowser extends JPanel implements ComponentListener {
         // TODO Bismi allah ^_^
         fileSystemView = FileSystemView.getFileSystemView();
         build();
+
+        //filepath for authentication
+        userInfoForGit = new UserInfoForGit();
+        filePathForAuth = "src\\"+"/Authentication/auth.txt";
+        UserInfoForGit.readAuthFile(userInfoForGit, filePathForAuth);
+        hasInfoForGit = userInfoForGit.isHasInfo();
+
+        if(!hasInfoForGit){
+            System.out.println("No info for git");
+        }else{
+            System.out.println("Has info for git");
+        }
+
 
         computer = new DefaultMutableTreeNode("");
         DefaultMutableTreeNode node1 = null;
@@ -399,45 +409,58 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     }
 
                     stringFromDialog.add(url);
-                    result = CustomJgitUtilities.cloneRepo(url, currentFolder);
+                    boolean isPrivate = CustomJgitUtilities.isPrivateRepo(url);
 
-                    if (result != null) {
-                        System.out.println("Git clone was successful.");
+                    if(!isPrivate){
+                        result = CustomJgitUtilities.cloneRepo(url, currentFolder);
 
-                    }  else if(result==null){
-                        System.out.println("Git clone failed.");
-                    }
-
-                }
-                catch (GitAPIException ex){
-                    List<String> idAndToken = showAuthDialog();
-                    String url = stringFromDialog.get(0).trim();
-
-                    stringFromDialog.add(idAndToken.get(0));
-                    stringFromDialog.add(idAndToken.get(1));
-
-                    String id = stringFromDialog.get(1).trim();
-                    String token = stringFromDialog.get(2).trim();
-
-                    System.out.println("url  = " + url);
-                    System.out.println(" = " + id   );
-                    System.out.println("token = " + token);
-
-                    try {
-                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
-
-                        // Check if the clone was successful
                         if (result != null) {
                             System.out.println("Git clone was successful.");
+                        }  else {
+                            System.out.println("Git clone failed.");
+                        }
+                    }
+
+                    else if (isPrivate && hasInfoForGit){
+                        String id = userInfoForGit.getID();
+                        String token = userInfoForGit.getToken();
+
+                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
+
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                        } else {
+                            System.out.println("Invalid id and token.");
+                        }
+
+                    }
+                    else if (isPrivate && !hasInfoForGit){
+                        List<String> idAndToken = showAuthDialog();
+                        String id = idAndToken.get(0).trim();
+                        String token = idAndToken.get(1).trim();
+
+                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
+
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                            userInfoForGit = new UserInfoForGit(id, token);
+                            UserInfoForGit.writeAuthFile(userInfoForGit, filePathForAuth);
 
                         } else {
                             System.out.println("Git clone failed.");
                         }
 
-                    } catch (GitAPIException exc) {
-                        System.out.println("An error occurred during Git clone: " + exc.getMessage());
-                        JOptionPane.showMessageDialog(frame, exc.getMessage());
                     }
+                    else {
+                        System.out.println("Git clone failed.");
+                    }
+                }catch (GitAPIException ex){
+                        System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                        JOptionPane.showMessageDialog(frame, ex.getMessage());
+                }
+                catch (Exception ex){
+                    System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(frame, ex.getMessage());
                 }
 
                 updateShowPanel();
@@ -1287,6 +1310,9 @@ public class FileBrowser extends JPanel implements ComponentListener {
         String token = new String(tokenField.getPassword());
 
         List<String> result = new ArrayList<>();
+
+        userInfoForGit = new UserInfoForGit(username, token);
+
         result.add(username);
         result.add(token);
 

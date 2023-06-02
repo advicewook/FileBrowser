@@ -7,6 +7,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashSet;
@@ -484,5 +486,22 @@ public class CustomJgitUtilities {
                 .setDirectory(new File(path));
 
         return cloneCommand.call();
+    }
+
+    //return true if the repo is private, else return false
+    public static boolean isPrivateRepo(String url) {
+        try {
+            URL repoUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) repoUrl.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.connect();
+
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }
