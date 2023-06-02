@@ -393,12 +393,13 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 Git result = null;
                 try {
                     String url = showURLInputDialog().trim();
-                    stringFromDialog.add(url);
-                    result = CustomJgitUtilities.cloneRepo(url, currentFolder);
 
-                    if(url.isEmpty()) {
+                    if(url.equals("Enter URL") || url.isEmpty()) {
                         return;
                     }
+
+                    stringFromDialog.add(url);
+                    result = CustomJgitUtilities.cloneRepo(url, currentFolder);
 
                     if (result != null) {
                         System.out.println("Git clone was successful.");
