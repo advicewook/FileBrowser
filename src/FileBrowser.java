@@ -275,7 +275,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     JScrollPane graphScroll = new JScrollPane(commitGraphPane);
                     JFrame newFrame = new JFrame("Commit History");
                     logCreator.getFrame(newFrame);
-                    newFrame.setSize(500, 500);
+                    newFrame.setSize(800, 500);
                     newFrame.setLocationRelativeTo(null);
                     newFrame.setVisible(true);
                     newFrame.add(graphScroll, BorderLayout.CENTER);

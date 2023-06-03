@@ -28,6 +28,7 @@ public class LogCreator {
     private Repository repo;
     private Boolean isCommitSelected;
     private JTextArea diffContentArea;
+    private JScrollPane scrollPane;
     private JFrame frame;
 
     public CommitGraphPane commitGraphPane;
@@ -104,10 +105,11 @@ public class LogCreator {
 
                         if(!isCommitSelected) {
                             diffContentArea = new JTextArea();
+                            scrollPane = new JScrollPane(diffContentArea);
                             diffContentArea.setPreferredSize(new Dimension(frame.getWidth(), 200));
 
                             getDiffs(commit);
-                            frame.add(diffContentArea, BorderLayout.SOUTH);
+                            frame.add(scrollPane, BorderLayout.SOUTH);
                             frame.setSize(new Dimension(frame.getWidth(), frame.getHeight()+200));
                             isCommitSelected = true;
                         } else {

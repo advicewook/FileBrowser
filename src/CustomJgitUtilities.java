@@ -479,21 +479,20 @@ public class CustomJgitUtilities {
         List<String> changedFiles = new ArrayList<>();
         RevCommit parentCommit;
 
-        if(commit.getParentCount() > 1) {
-
-        } else {
-            parentCommit = commit.getParent(0);
+        for(int i = 0; i < commit.getParentCount(); i++) {
+            parentCommit = commit.getParent(i);
             try {
                 List<DiffEntry> diffs = git.diff()
                         .setOldTree(prepareTreeParser(repo, parentCommit.getId().getName()))
                         .setNewTree(prepareTreeParser(repo, commit.getId().getName()))
                         .call();
-
+                changedFiles.add("---In comparison with \"" + parentCommit.getShortMessage() + "\" Commit---\n");
                 changedFiles.add("Found: " + diffs.size() + " differences\n");
-                for(DiffEntry diff : diffs) {
+                for (DiffEntry diff : diffs) {
                     changedFiles.add(diff.getChangeType() + ": " +
                             (diff.getOldPath().equals(diff.getNewPath()) ? diff.getNewPath() : diff.getOldPath() + " -> " + diff.getNewPath()) + "\n");
                 }
+                changedFiles.add("\n");
             } catch (IOException | GitAPIException e) {
                 e.printStackTrace();
             }
