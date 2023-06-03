@@ -5,8 +5,14 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.treewalk.AbstractTreeIterator;
+import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.diff.DiffEntry;
+import org.eclipse.jgit.lib.ObjectReader;
+import org.eclipse.jgit.revwalk.RevTree;
 
 import java.io.File;
 import java.io.IOException;
@@ -468,6 +474,52 @@ public class CustomJgitUtilities {
         }
         return extractedText;
     }
+
+    public static List<String> listDiff(Git git, Repository repo, RevCommit commit) {
+        List<String> changedFiles = new ArrayList<>();
+        RevCommit parentCommit;
+
+        if(commit.getParentCount() > 1) {
+
+        } else {
+            parentCommit = commit.getParent(0);
+            try {
+                List<DiffEntry> diffs = git.diff()
+                        .setOldTree(prepareTreeParser(repo, parentCommit.getId().getName()))
+                        .setNewTree(prepareTreeParser(repo, commit.getId().getName()))
+                        .call();
+
+                changedFiles.add("Found: " + diffs.size() + " differences\n");
+                for(DiffEntry diff : diffs) {
+                    changedFiles.add(diff.getChangeType() + ": " +
+                            (diff.getOldPath().equals(diff.getNewPath()) ? diff.getNewPath() : diff.getOldPath() + " -> " + diff.getNewPath()) + "\n");
+                }
+            } catch (IOException | GitAPIException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return changedFiles;
+    }
+
+    private static AbstractTreeIterator prepareTreeParser(Repository repository, String objectId) throws IOException {
+        // from the commit we can build the tree which allows us to construct the TreeParser
+        //noinspection Duplicates
+        try (RevWalk walk = new RevWalk(repository)) {
+            RevCommit commit = walk.parseCommit(repository.resolve(objectId));
+            RevTree tree = walk.parseTree(commit.getTree().getId());
+
+            CanonicalTreeParser treeParser = new CanonicalTreeParser();
+            try (ObjectReader reader = repository.newObjectReader()) {
+                treeParser.reset(reader, tree.getId());
+            }
+
+            walk.dispose();
+
+            return treeParser;
+        }
+    }
+
 
     // 전체 브랜치 리스트 반환
     public static List<String> getBranchNameList(String path) throws IOException, GitAPIException {

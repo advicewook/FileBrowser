@@ -1,8 +1,10 @@
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.awtui.CommitGraphPane;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.*;
@@ -12,6 +14,7 @@ import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -23,6 +26,10 @@ public class LogCreator {
 
     private final List<RevCommit> commits = new ArrayList<>();
     private Repository repo;
+    private Boolean isCommitSelected;
+    private JTextArea diffContentArea;
+    private JFrame frame;
+
     public CommitGraphPane commitGraphPane;
 
     private void createCommitList(RevWalk walk, RevWalk argWalk) throws IOException {
@@ -59,6 +66,10 @@ public class LogCreator {
         }
     }
 
+    public void getFrame(JFrame frame) {
+        this.frame = frame;
+    }
+
     public String repoName() {
         final File gitDir = repo.getDirectory();
         if (gitDir == null) {
@@ -74,6 +85,7 @@ public class LogCreator {
     }
 
     public CommitGraphPane createCommitGraphPane(String path) throws IOException {
+        isCommitSelected = false;
         commitGraphPane = new CommitGraphPane();
         RevWalk walk = createWalk(path);
         if (walk != null) {
@@ -88,8 +100,28 @@ public class LogCreator {
                         // 번호 출력
                         int selectedRow = commitGraphPane.getSelectedRow();
                         // 번호 사용
-                        commitGraphPane.getValueAt(selectedRow,0);
+                        RevCommit commit = (RevCommit)commitGraphPane.getValueAt(selectedRow,0);
+
+                        if(!isCommitSelected) {
+                            diffContentArea = new JTextArea();
+                            diffContentArea.setPreferredSize(new Dimension(frame.getWidth(), 200));
+
+                            getDiffs(commit);
+                            frame.add(diffContentArea, BorderLayout.SOUTH);
+                            frame.setSize(new Dimension(frame.getWidth(), frame.getHeight()+200));
+                            isCommitSelected = true;
+                        } else {
+                            diffContentArea.setText("");
+                            getDiffs(commit);
+                        }
                         System.out.println("출력");
+                    }
+                }
+
+                public void getDiffs(RevCommit commit) {
+                    List<String> changed = CustomJgitUtilities.listDiff(new Git(repo), repo, commit);
+                    for(String str : changed) {
+                        diffContentArea.append(str);
                     }
                 }
             });
