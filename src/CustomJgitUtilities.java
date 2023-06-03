@@ -553,21 +553,21 @@ public class CustomJgitUtilities {
                             if (edit.getType() == Edit.Type.INSERT) {
                                 for (int i = edit.getBeginB(); i < edit.getEndB(); i++) {
                                     RawText rawText = new RawText(repository.open(diff.getNewId().toObjectId()).getBytes());
-                                    difference = difference + "+ " + i + "   " + rawText.getString(i)+"\n";
+                                    difference = difference + "+ " + (i+1) + "   " + rawText.getString(i)+"\n";
                                 }
                             } else if (edit.getType() == Edit.Type.DELETE) {
                                 for (int i = edit.getBeginA(); i < edit.getEndA(); i++) {
                                     RawText rawText = new RawText(repository.open(diff.getOldId().toObjectId()).getBytes());
-                                    difference = difference + "-  " + i + "   " + rawText.getString(i)+"\n";
+                                    difference = difference + "-  " + (i+1) + "   " + rawText.getString(i)+"\n";
                                 }
                             } else if (edit.getType() == Edit.Type.REPLACE) {
                                 for (int i = edit.getBeginB(); i < edit.getEndB(); i++) {
                                     RawText rawText = new RawText(repository.open(diff.getNewId().toObjectId()).getBytes());
-                                    difference = difference + "+ " + i + "   " + rawText.getString(i)+"\n";
+                                    difference = difference + "+ " + (i+1) + "   " + rawText.getString(i)+"\n";
                                 }
                                 for (int i = edit.getBeginA(); i < edit.getEndA(); i++) {
                                     RawText rawText = new RawText(repository.open(diff.getOldId().toObjectId()).getBytes());
-                                    difference = difference + "-  " + i + "   " + rawText.getString(i)+"\n";
+                                    difference = difference + "-  " + (i+1) + "   " + rawText.getString(i)+"\n";
                                 }
                             }
                         }
