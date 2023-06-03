@@ -263,8 +263,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 }
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
-
-                    LogCreator logCreator = new LogCreator();
+                    JFrame newFrame = new JFrame("Commit History");
+                    LogCreator logCreator = new LogCreator(newFrame);
                     CommitGraphPane commitGraphPane = null;
                     try {
                         commitGraphPane = logCreator.createCommitGraphPane(currentFolder);
@@ -273,9 +273,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     }
 
                     JScrollPane graphScroll = new JScrollPane(commitGraphPane);
-                    JFrame newFrame = new JFrame("Commit History");
-                    logCreator.getFrame(newFrame);
-                    newFrame.setSize(800, 500);
+                    newFrame.setSize(800, 700);
                     newFrame.setLocationRelativeTo(null);
                     newFrame.setVisible(true);
                     newFrame.add(graphScroll, BorderLayout.CENTER);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.awtui.CommitGraphPane;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.lib.*;
@@ -27,12 +28,15 @@ public class LogCreator {
     private final List<RevCommit> commits = new ArrayList<>();
     private Repository repo;
     private Boolean isCommitSelected;
-    private JTextArea diffContentArea;
+    private JTextArea diffContentArea = new JTextArea();;
     private JScrollPane scrollPane;
     private JFrame frame;
 
     public CommitGraphPane commitGraphPane;
 
+    public LogCreator(JFrame frame){
+        this.frame = frame;
+    }
     private void createCommitList(RevWalk walk, RevWalk argWalk) throws IOException {
         commits.removeAll(commits);
         for (Ref a : repo.getRefDatabase().getRefs()) {
@@ -67,10 +71,6 @@ public class LogCreator {
         }
     }
 
-    public void getFrame(JFrame frame) {
-        this.frame = frame;
-    }
-
     public String repoName() {
         final File gitDir = repo.getDirectory();
         if (gitDir == null) {
@@ -94,6 +94,11 @@ public class LogCreator {
             commitGraphPane.getCommitList().fillTo(Integer.MAX_VALUE);
             commitGraphPane.setRowSelectionAllowed(true);
 
+            // 커밋 변경 사항 패널
+            scrollPane = new JScrollPane(diffContentArea);
+            scrollPane.setPreferredSize(new Dimension(frame.getWidth(), 330));
+            frame.add(scrollPane, BorderLayout.SOUTH);
+            frame.setVisible(true);
             commitGraphPane.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
                 @Override
                 public void valueChanged(ListSelectionEvent event) {
@@ -103,20 +108,16 @@ public class LogCreator {
                         // 번호 사용
                         RevCommit commit = (RevCommit)commitGraphPane.getValueAt(selectedRow,0);
 
-                        if(!isCommitSelected) {
-                            diffContentArea = new JTextArea();
-                            scrollPane = new JScrollPane(diffContentArea);
-                            diffContentArea.setPreferredSize(new Dimension(frame.getWidth(), 200));
-
-                            getDiffs(commit);
-                            frame.add(scrollPane, BorderLayout.SOUTH);
-                            frame.setSize(new Dimension(frame.getWidth(), frame.getHeight()+200));
-                            isCommitSelected = true;
-                        } else {
-                            diffContentArea.setText("");
-                            getDiffs(commit);
+                        diffContentArea.setText("");
+                        try {
+                            String difference = CustomJgitUtilities.getCodeDifferences(repo, commit);
+                            diffContentArea.append(difference);
+                            diffContentArea.setCaretPosition(0);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        } catch (GitAPIException e) {
+                            throw new RuntimeException(e);
                         }
-                        System.out.println("출력");
                     }
                 }
 

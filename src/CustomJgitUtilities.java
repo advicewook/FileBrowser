@@ -1,18 +1,21 @@
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.diff.*;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
+import org.eclipse.jgit.patch.FileHeader;
+import org.eclipse.jgit.patch.HunkHeader;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
-import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 import java.io.File;
 import java.io.IOException;
@@ -519,6 +522,61 @@ public class CustomJgitUtilities {
         }
     }
 
+    public static String getCodeDifferences(Repository repository, RevCommit commit) throws IOException, GitAPIException {
+        String difference = "";
+        if (commit.getParentCount() > 0) {
+            RevCommit parent = commit.getParent(0);
+
+            try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+                diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+                diffFormatter.setRepository(repository);
+                ObjectId parentTree = parent.getTree();
+                ObjectId commitTree = commit.getTree();
+                List<DiffEntry> diffs = diffFormatter.scan(parentTree, commitTree);
+                int diffsIndex = 0;
+                for (DiffEntry diff : diffs) {
+                    if(diffsIndex>0){
+                        difference+="\n\n";
+                    } else {
+                        difference+="Found: " + diffs.size() + " differences\n\n";
+                    }
+                    diffsIndex += 1;
+                    difference = difference + "Path: " + diff.getNewPath() +"\n";
+                    difference = difference + "Change Type: " + diff.getChangeType()+"\n";
+                    difference = difference + "Changes:"+"\n";
+
+                    FileHeader fileHeader = diffFormatter.toFileHeader(diff);
+                    List<? extends HunkHeader> hunks = fileHeader.getHunks();
+                    for (HunkHeader hunk : hunks) {
+                        EditList editList = hunk.toEditList();
+                        for (Edit edit : editList) {
+                            if (edit.getType() == Edit.Type.INSERT) {
+                                for (int i = edit.getBeginB(); i < edit.getEndB(); i++) {
+                                    RawText rawText = new RawText(repository.open(diff.getNewId().toObjectId()).getBytes());
+                                    difference = difference + "+ " + i + "   " + rawText.getString(i)+"\n";
+                                }
+                            } else if (edit.getType() == Edit.Type.DELETE) {
+                                for (int i = edit.getBeginA(); i < edit.getEndA(); i++) {
+                                    RawText rawText = new RawText(repository.open(diff.getOldId().toObjectId()).getBytes());
+                                    difference = difference + "-  " + i + "   " + rawText.getString(i)+"\n";
+                                }
+                            } else if (edit.getType() == Edit.Type.REPLACE) {
+                                for (int i = edit.getBeginB(); i < edit.getEndB(); i++) {
+                                    RawText rawText = new RawText(repository.open(diff.getNewId().toObjectId()).getBytes());
+                                    difference = difference + "+ " + i + "   " + rawText.getString(i)+"\n";
+                                }
+                                for (int i = edit.getBeginA(); i < edit.getEndA(); i++) {
+                                    RawText rawText = new RawText(repository.open(diff.getOldId().toObjectId()).getBytes());
+                                    difference = difference + "-  " + i + "   " + rawText.getString(i)+"\n";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return difference;
+    }
 
     // 전체 브랜치 리스트 반환
     public static List<String> getBranchNameList(String path) throws IOException, GitAPIException {
