@@ -541,7 +541,11 @@ public class CustomJgitUtilities {
                         difference+="Found: " + diffs.size() + " differences\n\n";
                     }
                     diffsIndex += 1;
-                    difference = difference + "Path: " + diff.getNewPath() +"\n";
+                    if(diff.getChangeType().equals(DiffEntry.ChangeType.DELETE)){
+                        difference = difference + "Path: " + diff.getOldPath() +"\n";
+                    }else{
+                        difference = difference + "Path: " + diff.getNewPath() +"\n";
+                    }
                     difference = difference + "Change Type: " + diff.getChangeType()+"\n";
                     difference = difference + "Changes:"+"\n";
 
