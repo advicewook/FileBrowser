@@ -16,6 +16,12 @@ public class UserInfoForGit {
         this.token = token;
     }
 
+    public UserInfoForGit(String ID, String token, String filePath){
+        this.ID = ID;
+        this.token = token;
+        this.filePath = filePath;
+    }
+
     public static void readAuthFile(UserInfoForGit info,String filePath) {
 
         info.setFilePath(filePath);

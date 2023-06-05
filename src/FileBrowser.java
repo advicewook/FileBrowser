@@ -223,8 +223,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         //filepath for authentication
         userInfoForGit = new UserInfoForGit();
-//        filePathForAuth = System.getProperty("user.dir") + File.separator + "FileBrowser\\src\\Authentication\\auth.txt";
-        filePathForAuth = "src\\" + "/Authentication/auth.txt";
+        filePathForAuth = System.getProperty("user.dir") + File.separator + "FileBrowser\\src\\Authentication\\auth.txt";
         UserInfoForGit.readAuthFile(userInfoForGit, filePathForAuth);
         hasInfoForGit = userInfoForGit.isHasInfo();
 
@@ -443,17 +442,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         String id = idAndToken.get(0).trim();
                         String token = idAndToken.get(1).trim();
 
+                        stringFromDialog.add(id);
+                        stringFromDialog.add(token);
+
                         result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
 
                         if (result != null) {
                             System.out.println("Git clone was successful.");
-                            userInfoForGit = new UserInfoForGit(id, token);
+                            userInfoForGit = new UserInfoForGit(id, token, filePathForAuth);
                             UserInfoForGit.writeAuthFile(userInfoForGit, filePathForAuth);
-
                         } else {
                             System.out.println("Git clone failed.");
                         }
-
                     }
                     else {
                         System.out.println("Git clone failed.");
@@ -1314,8 +1314,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
         String token = new String(tokenField.getPassword());
 
         List<String> result = new ArrayList<>();
-
-        userInfoForGit = new UserInfoForGit(username, token);
 
         result.add(username);
         result.add(token);
