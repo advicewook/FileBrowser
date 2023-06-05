@@ -1,4 +1,5 @@
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.dircache.DirCache;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -6,6 +7,7 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 import javax.swing.*;
 import java.io.File;
@@ -339,13 +341,21 @@ public class CustomJgitUtilities {
                             .setCommit(true)
                             .setMessage(commitMsg)
                             .call();
+
             if(!merge.getMergeStatus().isSuccessful()) {
+                String str = "Unmerged paths:\n";
+                Set<String> unmergedPaths = git.status().call().getConflicting();
+                if(!unmergedPaths.isEmpty()) {
+                    for(String unMergedPath : unmergedPaths) {
+                        str = str + unMergedPath + "\n";
+                    }
+                }
                 git.getRepository().writeMergeCommitMsg(null);
                 git.getRepository().writeMergeHeads(null);
 
                 git.wrap(git.getRepository()).reset().setMode(ResetCommand.ResetType.HARD).call();
                 JOptionPane aa= new JOptionPane();
-                aa.showMessageDialog(null, "error");
+                aa.showMessageDialog(null, str, "error", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane aa= new JOptionPane();
                 aa.showMessageDialog(null, "Success");
