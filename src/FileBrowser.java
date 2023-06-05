@@ -1,3 +1,4 @@
+import com.sun.tools.javac.Main;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -5,6 +6,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
 import java.io.*;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -223,11 +226,19 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         //filepath for authentication
         userInfoForGit = new UserInfoForGit();
-        filePathForAuth = System.getProperty("user.dir") + File.separator + "FileBrowser\\src\\Authentication\\auth.txt";
+
+        String path = System.getProperty("user.dir");
+        String filePathForAuth= path + File.separator + "auth.txt";
+
+//        filePathForAuth = "Authentication\\auth.txt";
+        // System.getProperty("user.dir") + File.separator +
+//        filePathForAuth = System.getProperty("java.class.path") + File.separator + "Authentication\\auth.txt";
         UserInfoForGit.readAuthFile(userInfoForGit, filePathForAuth);
         hasInfoForGit = userInfoForGit.isHasInfo();
 
         System.out.println(" = " + filePathForAuth  );
+        System.out.println("userInfoForGit.getID() = " + userInfoForGit.getID());
+        System.out.println("userInfoForGit.getPW() = " + userInfoForGit.getToken());
 
         if(!hasInfoForGit){
             System.out.println("No info for git");
@@ -427,6 +438,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     else if (isPrivate && hasInfoForGit){
                         String id = userInfoForGit.getID();
                         String token = userInfoForGit.getToken();
+
 
                         result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
 
