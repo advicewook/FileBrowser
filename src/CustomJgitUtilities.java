@@ -16,10 +16,14 @@ import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import javax.swing.*;
+
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -774,4 +778,45 @@ public class CustomJgitUtilities {
         Git git = new Git(repository);
         git.checkout().setName(branchName).call();
     }
+
+    //git clone
+    public static Git clonePrivateRepo(String url, String username, String password, String path) throws GitAPIException{
+            CloneCommand cloneCommand = Git.cloneRepository()
+                    .setURI(url)
+                    .setDirectory(new File(path));
+
+            if(!username.isEmpty() && !password.isEmpty()){
+                cloneCommand.setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, password));
+
+            }
+           return cloneCommand.call();
+
+    }
+
+    public static Git cloneRepo(String url,String path) throws GitAPIException{
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(url)
+                .setDirectory(new File(path));
+
+        return cloneCommand.call();
+    }
+
+    //return true if the repo is private, else return false
+    public static boolean isPrivateRepo(String gitUrl) {
+        try {
+            URL url = new URL(gitUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            int responseCode = connection.getResponseCode();
+            if (responseCode == 404) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

@@ -1,10 +1,12 @@
-import com.sun.jdi.connect.Connector;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.awtui.CommitGraphPane;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
+import java.io.*;
+import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,21 +16,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Set;
+
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
@@ -45,7 +41,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private JPanel displayPanel = new JPanel();
     public JPanel showPanel, commitPanel, branchPanel ;
     private JSplitPane gitManagePanel;
-    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, commitMenuButton, createRepoButton;
+    private JButton renameFileButton, addFileButton, addFolderButton, retButton, saveFileButton, cloneButton, commitMenuButton, createRepoButton;
     private JLabel footerInfoLabel; //파일 주소 출력
     private DefaultMutableTreeNode computer, root;
     private DefaultTreeModel treeModel;
@@ -58,10 +54,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
     private FileSystemView fileSystemView;
     private JTextArea textArea;
     private JPanel bttonsFooterPanel = new JPanel();
-
     private JPanel barPanel = new JPanel();
-
     private boolean isCommitMenuOpened = false;
+
+    private String filePathForAuth;
+    private UserInfoForGit userInfoForGit;
+    private boolean hasInfoForGit = false;
 
     Repository currentGitRepository = null;
 
@@ -104,8 +102,18 @@ public class FileBrowser extends JPanel implements ComponentListener {
         retButton = new JButton(" ");
         retButton.setIcon(new ImageIcon(getImg("img/back.png", 40, 30).getImage()));
         retButton.setBackground(new Color(0, 0, 0, 0));
+        retButton.setForeground(Color.black);
         retButton.setOpaque(false);
         retButton.setFocusable(false);
+
+        //git clone
+        cloneButton = new JButton("clone");
+        cloneButton.setBackground(new Color(0, 0, 0, 0));
+        cloneButton.setForeground(Color.black);
+        cloneButton.setOpaque(false);
+        cloneButton.setFocusable(false);
+
+
 
         treeTextField = new JTextField("=> Computer");
         treeTextField.setEditable(false);
@@ -196,12 +204,25 @@ public class FileBrowser extends JPanel implements ComponentListener {
         commitMenuButton.setForeground(Color.black);
         commitMenuButton.setFocusable(false);
 
+        //ret 버튼 + git 버튼 통합
+        JPanel innerBarPanel =new JPanel();
+        innerBarPanel.setOpaque(false);
+        innerBarPanel.setLayout(new BorderLayout(0, 0));
+        innerBarPanel.add(retButton, BorderLayout.WEST);
+        innerBarPanel.add(cloneButton,BorderLayout.CENTER);
+        barPanel.setOpaque(false);
+        barPanel.setLayout(new BorderLayout(0, 0));
+        barPanel.add(innerBarPanel, BorderLayout.WEST); // 리턴 버튼 + 파일 위치 + git clone 버튼
+        barPanel.add(treeTextField, BorderLayout.CENTER);
+
         JPanel gitMenuPanel = new JPanel();
         gitMenuPanel.setOpaque(false);
         gitMenuPanel.setLayout(new BorderLayout(0, 0));
         gitMenuPanel.add(createRepoButton, BorderLayout.WEST);
         gitMenuPanel.add(commitMenuButton, BorderLayout.EAST);
         barPanel.add(gitMenuPanel, BorderLayout.EAST); // 커밋 메뉴 + 레포 생성 버튼
+
+
 
         displayPanel.setPreferredSize(new Dimension(getWidth() * 7 / 10, getHeight()));
         displayPanel.setOpaque(false);
@@ -216,6 +237,29 @@ public class FileBrowser extends JPanel implements ComponentListener {
         // TODO Bismi allah ^_^
         fileSystemView = FileSystemView.getFileSystemView();
         build();
+
+        //filepath for authentication
+        userInfoForGit = new UserInfoForGit();
+
+        String path = System.getProperty("user.dir");
+        String filePathForAuth= path + File.separator + "auth.txt";
+
+//        filePathForAuth = "Authentication\\auth.txt";
+        // System.getProperty("user.dir") + File.separator +
+//        filePathForAuth = System.getProperty("java.class.path") + File.separator + "Authentication\\auth.txt";
+        UserInfoForGit.readAuthFile(userInfoForGit, filePathForAuth);
+        hasInfoForGit = userInfoForGit.isHasInfo();
+
+        System.out.println(" = " + filePathForAuth  );
+        System.out.println("userInfoForGit.getID() = " + userInfoForGit.getID());
+        System.out.println("userInfoForGit.getPW() = " + userInfoForGit.getToken());
+
+        if(!hasInfoForGit){
+            System.out.println("No info for git");
+        }else{
+            System.out.println("Has info for git");
+        }
+
 
         computer = new DefaultMutableTreeNode("");
         DefaultMutableTreeNode node1 = null;
@@ -248,6 +292,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                    }
                }
                updateShowPanel();
+               updateBarPanel();
            }
            });
 
@@ -334,6 +379,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     treeTextField.setText("Computer");
                     currentFolder = "";
                 }
+                updateBarPanel();
                 OpenFile(file);
                 
                 // 파일 트리에서 폴더 클릭시 - 경로 및 브랜치 표시
@@ -375,7 +421,6 @@ public class FileBrowser extends JPanel implements ComponentListener {
         });
         tree.expandRow(1);
 
-        ///// >>>>>>>>>>>>>>>>>>
         treeScroll = new JScrollPane(tree);
         treeScroll.setPreferredSize(new Dimension(250, (int) getHeight()));
         treeScroll.setOpaque(false);
@@ -392,10 +437,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     tempGitRepository = builder.readEnvironment().findGitDir(new File(parentFolder)).build();
                     if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
                         removeCommitMenuPanel();
+
                     }
                 } catch (RuntimeException | IOException ex) {
                     if(tempGitRepository==null){
                         removeCommitMenuPanel();
+
                     }
                 }
                 currentGitRepository = tempGitRepository;
@@ -404,10 +451,89 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     currentFolder = parentFolder;
                     if (currentFolder != null && !currentFolder.equals("")) {
                         treeTextField.setText(" "+currentFolder);
+                        updateBarPanel();
                         OpenFile(new File(currentFolder));
                     }
                 }
                 selectedFolder = null;
+            }
+        });
+
+        // TODO for clone button
+        cloneButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<String> stringFromDialog = new ArrayList<>();
+
+                Git result = null;
+                try {
+                    String url = showURLInputDialog().trim();
+
+                    if(url.equals("Enter URL") || url.isEmpty()) {
+                        return;
+                    }
+
+                    stringFromDialog.add(url);
+                    boolean isPrivate = CustomJgitUtilities.isPrivateRepo(url);
+                    System.out.println("isPrivate = " + isPrivate);
+                    
+                    if(!isPrivate){
+                        result = CustomJgitUtilities.cloneRepo(url, currentFolder);
+
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                        }  else {
+                            System.out.println("Git clone failed.");
+                        }
+                    }
+
+                    else if (isPrivate && hasInfoForGit){
+                        String id = userInfoForGit.getID();
+                        String token = userInfoForGit.getToken();
+
+
+                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
+
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                        } else {
+                            System.out.println("Invalid id and token.");
+                        }
+
+                    }
+                    else if (isPrivate && !hasInfoForGit){
+                        List<String> idAndToken = showAuthDialog();
+                        String id = idAndToken.get(0).trim();
+                        String token = idAndToken.get(1).trim();
+
+                        stringFromDialog.add(id);
+                        stringFromDialog.add(token);
+
+                        result = CustomJgitUtilities.clonePrivateRepo(url, id, token, currentFolder);
+
+                        if (result != null) {
+                            System.out.println("Git clone was successful.");
+                            userInfoForGit = new UserInfoForGit(id, token, filePathForAuth);
+                            UserInfoForGit.writeAuthFile(userInfoForGit, filePathForAuth);
+                        } else {
+                            System.out.println("Git clone failed.");
+                        }
+                    }
+                    else {
+                        System.out.println("Git clone failed.");
+                    }
+                }catch (GitAPIException ex){
+                        System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                        JOptionPane.showMessageDialog(frame, ex.getMessage());
+                }
+                catch (Exception ex){
+                    System.out.println("An error occurred during Git clone: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(frame, ex.getMessage());
+                }
+
+                updateShowPanel();
+                updateBarPanel();
+
             }
         });
 
@@ -459,6 +585,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                         else
                             file.renameTo(new File(selectedFolder + ".txt"));
                         OpenFile(new File(currentFolder));
+                        updateBarPanel();
                         treeTextField.setText(currentFolder);
                     }
                     selectedFolder = null;
@@ -848,10 +975,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 tempGitRepository = builder.readEnvironment().findGitDir(new File(currentFolder)).build();
                 if(tempGitRepository==null || !currentGitRepository.toString().equals(tempGitRepository.toString())){
                     removeCommitMenuPanel();
+
                 }
             } catch (RuntimeException | IOException ex) {
                 if(tempGitRepository==null){
                     removeCommitMenuPanel();
+
                 }
             }
             currentGitRepository = tempGitRepository;
@@ -869,6 +998,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
                     } catch (GitAPIException | IOException ex) {
                         throw new RuntimeException(ex);
                     }
+                    treeTextField.setText(currentFolder);
+                    updateBarPanel();
                     selectedFolder = null;
                 }
             }
@@ -978,6 +1109,7 @@ public class FileBrowser extends JPanel implements ComponentListener {
                                     customSwingUtilities.revalidateCommitMenu(currentFolder);
                                 }
                                 updateShowPanel();
+                                updateBarPanel();
                             } catch (Exception ex) {
                                 ex.printStackTrace();
                             }
@@ -1151,6 +1283,154 @@ public class FileBrowser extends JPanel implements ComponentListener {
         gitTextPanel.add(treeTextField, BorderLayout.CENTER);
         barPanel.add(gitTextPanel,BorderLayout.CENTER);
         barPanel.updateUI();
+    }
+
+    // dialog for input URL
+    //make dialog with multiple panel for flexibility and extensibility
+    public String showURLInputDialog(){
+        JDialog dialog = new JDialog(frame, "Repository clone", true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+       JPanel URLPanel = new JPanel();
+       URLPanel.setOpaque(false);
+       URLPanel.setLayout(new BoxLayout(URLPanel, BoxLayout.Y_AXIS));
+
+       JPanel textFieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+       JTextField textField = new JTextField("Enter URL",30);
+       textField.setOpaque(true);
+       textField.setBackground(Color.WHITE);
+       textField.setForeground(Color.BLACK);
+       textFieldPanel.add(textField);
+
+         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton okButton = new JButton("OK");
+        setOpaque(false);
+        okButton.setForeground(Color.BLACK);
+        okButton.setFocusable(false);
+
+        buttonPanel.add(okButton);
+
+        okButton.addActionListener(new ActionListener(){
+            @Override
+           public void actionPerformed(ActionEvent e){
+                String url = textField.getText();
+
+                if (!url.isEmpty()) {
+                    dialog.dispose();
+                } else if (url.isEmpty()) {
+                    JOptionPane.showMessageDialog(frame, "Please enter the URL.");
+                }
+
+                dialog.dispose();
+           }
+        });
+
+
+        URLPanel.add(textFieldPanel);
+        URLPanel.add(Box.createVerticalStrut(10));
+        URLPanel.add(buttonPanel);
+
+        dialog.getContentPane().add(URLPanel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
+
+        return textField.getText();
+
+    }
+
+
+    // dialog for input username and token
+    public List<String> showAuthDialog(){
+        JDialog dialog = new JDialog(frame, "Authentication", true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        JPanel authPanel = new JPanel();
+        authPanel.setOpaque(false);
+        authPanel.setLayout(new BoxLayout(authPanel, BoxLayout.Y_AXIS));
+
+        JPanel idPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel idLabel = new JLabel("Username: ");
+        JTextField idField = new JTextField(30);
+        idField.setOpaque(true);
+        idField.setBackground(Color.WHITE);
+        idField.setForeground(Color.BLACK);
+        idPanel.add(idLabel);
+        idPanel.add(idField);
+
+        JPanel tokenPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JLabel tokenLabel = new JLabel("Token:         ");
+        JPasswordField tokenField = new JPasswordField(30);
+        tokenField.setOpaque(true);
+        tokenField.setBackground(Color.WHITE);
+        tokenField.setForeground(Color.BLACK);
+        tokenPanel.add(tokenLabel);
+        tokenPanel.add(tokenField);
+
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton okButton = new JButton("OK");
+        okButton.setForeground(Color.BLACK);
+        setOpaque(false);
+        okButton.setFocusable(false);
+        buttonPanel.add(okButton);
+
+        okButton.addActionListener(new ActionListener(){
+            @Override
+            public void actionPerformed(ActionEvent e){
+                String username = idField.getText();
+                String token = new String(tokenField.getPassword());
+
+
+                if (!username.isEmpty() && !token.isEmpty()) {
+                    dialog.dispose();
+
+                } else {
+                    JOptionPane.showMessageDialog(frame, "Please enter the username and token.");
+                }
+            }
+        });
+
+
+        authPanel.add(idPanel);
+        authPanel.add(Box.createVerticalStrut(3));
+        authPanel.add(tokenPanel);
+        authPanel.add(Box.createVerticalStrut(3));
+        authPanel.add(buttonPanel);
+
+        dialog.getContentPane().add(authPanel);
+        dialog.pack();
+        dialog.setLocationRelativeTo(frame);
+        dialog.setVisible(true);
+
+        String username = idField.getText();
+        String token = new String(tokenField.getPassword());
+
+        List<String> result = new ArrayList<>();
+
+        result.add(username);
+        result.add(token);
+
+
+        return result;
+
+
+    }
+
+
+
+    //update barpanel
+    //if the current folder is a git repository, then make invisible clone button
+    //if the current folder is not a git repository, then make visible clone button
+    public void updateBarPanel(){
+        if(CustomJgitUtilities.isSubGitRepository(currentFolder)){
+            cloneButton.setVisible(false);
+        }else{
+            cloneButton.setVisible(true);
+        }
+
+        barPanel.revalidate();
+        barPanel.repaint();
     }
 
     // --------------------- test
