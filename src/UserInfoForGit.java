@@ -1,5 +1,7 @@
 import java.io.*;
+import java.nio.Buffer;
 import java.util.List;
+import java.util.Objects;
 
 public class UserInfoForGit {
     private String ID;
@@ -17,11 +19,9 @@ public class UserInfoForGit {
     public static void readAuthFile(UserInfoForGit info,String filePath) {
 
         info.setFilePath(filePath);
-
-        try (FileInputStream fis = new FileInputStream(filePath);
-             InputStreamReader isr = new InputStreamReader(fis);
-             BufferedReader reader = new BufferedReader(isr)){
-
+        BufferedReader reader = null;
+        try {
+            reader = new BufferedReader(new FileReader(filePath));
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("ID=")) {
@@ -31,9 +31,10 @@ public class UserInfoForGit {
                 }
             }
 
+            reader.close();
+
             if(!info.getID().isEmpty() && !info.getToken().isEmpty()) {
                 info.hasInfo = true;
-                return;
             }
             else {
                 info.hasInfo = false;
@@ -44,12 +45,9 @@ public class UserInfoForGit {
         } catch (IOException e){
             e.printStackTrace();
         }
-
-        return;
     }
 
-    public static void writeAuthFile(UserInfoForGit info, String filePath){
-
+    public static void writeAuthFile(UserInfoForGit info, String filePath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, false))) {
             writer.write("ID=" + info.getID());
             writer.newLine();
@@ -57,8 +55,6 @@ public class UserInfoForGit {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return;
     }
     public String getID() {
         return ID;

@@ -223,9 +223,12 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
         //filepath for authentication
         userInfoForGit = new UserInfoForGit();
-        filePathForAuth = "src\\"+"/Authentication/auth.txt";
+//        filePathForAuth = System.getProperty("user.dir") + File.separator + "FileBrowser\\src\\Authentication\\auth.txt";
+        filePathForAuth = "src\\" + "/Authentication/auth.txt";
         UserInfoForGit.readAuthFile(userInfoForGit, filePathForAuth);
         hasInfoForGit = userInfoForGit.isHasInfo();
+
+        System.out.println(" = " + filePathForAuth  );
 
         if(!hasInfoForGit){
             System.out.println("No info for git");
@@ -410,7 +413,8 @@ public class FileBrowser extends JPanel implements ComponentListener {
 
                     stringFromDialog.add(url);
                     boolean isPrivate = CustomJgitUtilities.isPrivateRepo(url);
-
+                    System.out.println("isPrivate = " + isPrivate);
+                    
                     if(!isPrivate){
                         result = CustomJgitUtilities.cloneRepo(url, currentFolder);
 
