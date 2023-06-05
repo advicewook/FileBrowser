@@ -1,6 +1,7 @@
 import com.sun.jdi.connect.Connector;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.awtui.CommitGraphPane;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -264,6 +265,21 @@ public class FileBrowser extends JPanel implements ComponentListener {
                 }
                 // 깃 레포 체크
                 if (CustomJgitUtilities.isGitRepository(currentFolder) && !isCommitMenuOpened) {
+                    JFrame newFrame = new JFrame("Commit History");
+                    LogCreator logCreator = new LogCreator(newFrame);
+                    CommitGraphPane commitGraphPane = null;
+                    try {
+                        commitGraphPane = logCreator.createCommitGraphPane(currentFolder);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    JScrollPane graphScroll = new JScrollPane(commitGraphPane);
+                    newFrame.setSize(800, 700);
+                    newFrame.setLocationRelativeTo(null);
+                    newFrame.setVisible(true);
+                    newFrame.add(graphScroll, BorderLayout.CENTER);
+
                     commitPanel = customSwingUtilities.showCommitMenu(currentFolder, getHeight());
                     try {
                         branchPanel = customSwingUtilities.showBranchMenu(currentFolder, commitPanel.getHeight());
