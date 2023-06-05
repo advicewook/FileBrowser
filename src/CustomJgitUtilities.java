@@ -345,13 +345,21 @@ public class CustomJgitUtilities {
                             .setCommit(true)
                             .setMessage(commitMsg)
                             .call();
+
             if(!merge.getMergeStatus().isSuccessful()) {
+                String str = "Unmerged paths:\n";
+                Set<String> unmergedPaths = git.status().call().getConflicting();
+                if(!unmergedPaths.isEmpty()) {
+                    for(String unMergedPath : unmergedPaths) {
+                        str = str + unMergedPath + "\n";
+                    }
+                }
                 git.getRepository().writeMergeCommitMsg(null);
                 git.getRepository().writeMergeHeads(null);
 
                 git.wrap(git.getRepository()).reset().setMode(ResetCommand.ResetType.HARD).call();
                 JOptionPane aa= new JOptionPane();
-                aa.showMessageDialog(null, "error : " + merge.getMergeStatus().toString());
+                aa.showMessageDialog(null, str, "error", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane aa= new JOptionPane();
                 aa.showMessageDialog(null, "Success");

@@ -453,7 +453,9 @@ public class CustomSwingUtilities {
                     public void actionPerformed(ActionEvent e) {
                         String commitMsg = JOptionPane.showInputDialog(branchPanel, " Enter the commit msg : ");
                         String mergedBranch = getSelectedButtonText(buttonGrp);
-                        CustomJgitUtilities.mergeBranch(path, mergedBranch, commitMsg);
+                        if(commitMsg != null) {
+                            CustomJgitUtilities.mergeBranch(path, mergedBranch, commitMsg);
+                        }
                         mergeFrame.dispose();
                     }
                     public String getSelectedButtonText(ButtonGroup buttonGroup) {
