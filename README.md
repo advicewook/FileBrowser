@@ -73,12 +73,12 @@ No status information is provided for ignored or committed (unmodified) files. C
    - Use the *Stage* and *Unstage* buttons to move files between the staging area and the unstaged state. This allows you to stage files that are currently unstaged or unstage files that are currently in the staging area.
 
 #### **3. Branch Management**
-- **branch management**
+- **Branch Management**
    - Various menus can be accessed by right-clicking on the branch panel.  
    - Provides options for *creating, deleting, renaming, and checking out* branches.  
    - And the menu of deleting branch doesn't appear in current branch.  
 
-- **branch merge**
+- **Branch Merge**
    - Clicking the *merge* button within the branch panel allows you to view a list of mergeable branches and perform the desired merge with the selected branch.
    - Upon successful merge, a success message is displayed. In case of failure, an error message and unmerged paths are provided, and the merge process is automatically aborted.
 
@@ -106,7 +106,7 @@ To ensure a smooth cloning process, **don't forget to specify the access scope w
 </br>
 
 For more detailed explanations of the features, please refer to the
-[document](./papers/team_20_project1.pdf)  (The document is written in Korean.)   
+[document1](./docs/team_20_project1.pdf), [document2](./docs/team_20_project2.pdf)  (The document is written in Korean.)   
 </br>  
 
 ## **How to Execute**
