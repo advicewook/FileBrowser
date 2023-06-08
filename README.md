@@ -3,7 +3,7 @@
 # FileBrowser - Implementing Git Utilities
 ***
 ## **Project Introduction**
-This repository contains source codes which used for Open Source Software Project Course assignment in the Department of Software at Chung-Ang University. We implemented a **GUI-based git repository management service**. 
+This repository contains source codes which used for Open Source Software Project Course assignment in the Department of Computer Science and Engineering at Chung-Ang University. We implemented a **GUI-based git repository management service**. 
 ## **Application**
 <img src="Screenshots/전체GUI.png" height="400" width="650"/>
 
@@ -142,7 +142,7 @@ For more detailed explanations of the features, please refer to the
 6. If the build is successful, you will see the following log, and the build output will be generated as a jar file in /build/libs.    
    <img src="Screenshots/assemble-log.png" height="130" width="500"/>  
 7. You can execute the generated jar file using `java -jar FileBrowser-1.0-SNAPSHOT.jar`.    
-8. Example of the execution result
+8. Example of the execution result  
    <img src="Screenshots/gradle-config-step2.png" height="250" width="500" />   
 
 </br>  
