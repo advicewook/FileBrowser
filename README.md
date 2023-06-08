@@ -86,7 +86,7 @@ No status information is provided for ignored or committed (unmodified) files. C
 - Clicking the *Commit Menu* button opens a popup window displaying the commit history.
 - Information such as commit message, author, and creation date is available for each commit.
 - By clicking on a commit object in the graph, you can view the changes stored in that object. Changes are categorized as ADD, MODIFY, or DELETE. If there are additions in the current code compared to the previous commit (ADD), deleted code files (DELETE), or modifications in the code content (MODIFY), information regarding these changes is provided.
-- Commit histoy example  
+- Commit history example  
 <img src="Screenshots/commitDiff.png" height="300" width="400"/>  
 
 
