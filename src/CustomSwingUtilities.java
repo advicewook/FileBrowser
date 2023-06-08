@@ -2,7 +2,6 @@
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -15,7 +14,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.List;
 
@@ -398,7 +396,8 @@ public class CustomSwingUtilities {
         EmptyBorder paddingBorder = new EmptyBorder(0, 5,0, 5); // 여백 생성
         branchListPanel.setBorder(paddingBorder); // 패널에 여백 적용
         branchListPanel.setBackground(Color.white);
-        showBranchListOnPanel(path, branchListPanel);
+        List<String> remoteRepoNicknameList = CustomJgitUtilities.getRepoName(path);
+        showBranchListOnPanel(path, branchListPanel, remoteRepoNicknameList);
 
         // 스크롤
         JScrollPane branchScrollPanel = new JScrollPane(branchListPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -597,7 +596,7 @@ public class CustomSwingUtilities {
     }
 
     // 브랜치 패널에 리스트업
-    public void showBranchListOnPanel(String path, JPanel container) throws GitAPIException, IOException {
+    public void showBranchListOnPanel(String path, JPanel container, List<String> remoteRepoNicknameList) throws GitAPIException, IOException {
         List<String> branchList = CustomJgitUtilities.getBranchNameList(path);
         String currentBranch = CustomJgitUtilities.getCurrentBranchName(path);
 
@@ -605,20 +604,27 @@ public class CustomSwingUtilities {
             JLabel label = new JLabel(branch);
             JPopupMenu popupMenu = new JPopupMenu();
             boolean isCurrentBranch = currentBranch.equals(branch);
+            boolean isBranchInRemoteRepository = checkRemoteBranch(branch, remoteRepoNicknameList);
             JMenuItem menuItem1 = new JMenuItem("Create Branch");
             JMenuItem menuItem2 = new JMenuItem("Delete Branch");
             JMenuItem menuItem3 = new JMenuItem("Rename Branch");
             JMenuItem menuItem4 = new JMenuItem("Checkout Branch");
             if(isCurrentBranch){
                 popupMenu.add(menuItem1);
-                popupMenu.add(menuItem3);
+                if(!isBranchInRemoteRepository) {
+                    popupMenu.add(menuItem3);
+                }else{
+                    popupMenu.add(menuItem2);
+                }
                 popupMenu.add(menuItem4);
                 label.setBackground(new Color(0, 0, 0, 0));
                 label.setForeground(Color.green);
             }else{
                 popupMenu.add(menuItem1);
                 popupMenu.add(menuItem2);
-                popupMenu.add(menuItem3);
+                if(!isBranchInRemoteRepository) {
+                    popupMenu.add(menuItem3);
+                }
                 popupMenu.add(menuItem4);
             }
             container.add(label);
@@ -735,5 +741,14 @@ public class CustomSwingUtilities {
         }catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public boolean checkRemoteBranch(String branch, List<String> remoteRepoNicknameList){
+        for(String remoteRepoNickname : remoteRepoNicknameList){
+            if(branch.startsWith(remoteRepoNickname+"/")){
+                return true;
+            }
+        }
+        return false;
     }
 }
