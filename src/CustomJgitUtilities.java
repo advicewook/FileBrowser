@@ -1,7 +1,9 @@
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.diff.*;
-import org.eclipse.jgit.lib.*;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.patch.FileHeader;
 import org.eclipse.jgit.patch.HunkHeader;
@@ -11,6 +13,7 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.api.ListBranchCommand.ListMode;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -816,39 +819,4 @@ public class CustomJgitUtilities {
         return false;
     }
 
-    public static List<String> getRepoName(String path) throws IOException {
-        FileRepositoryBuilder builder = new FileRepositoryBuilder();
-        Repository repository = builder.readEnvironment().findGitDir(new File(path)).build();
-
-        // 원격 저장소 닉네임 가져오기
-        StoredConfig config = repository.getConfig();
-        Set<String> remoteNames = config.getSubsections("remote");
-
-        List<String> remoteNicknameList = new ArrayList<>();
-        for (String remoteName : remoteNames) {
-            if (config.getString("remote", remoteName, "url") != null) {
-                remoteNicknameList.add(remoteName);
-                System.out.println("Remote Repository Nickname: " + remoteName);
-            }
-        }
-
-        if (remoteNicknameList.size()==0) {
-            System.out.println("The Git repository does not have a remote repository.");
-        }
-        // Repository 객체 정리
-        repository.close();
-
-        return remoteNicknameList;
-    }
-
-    private static String extractRepositoryName(String remoteUrl) {
-        String[] parts = remoteUrl.split("/");
-        String lastPart = parts[parts.length - 1];
-        int dotIndex = lastPart.lastIndexOf('.');
-        if (dotIndex != -1) {
-            return lastPart.substring(0, dotIndex);
-        } else {
-            return lastPart;
-        }
-    }
 }
