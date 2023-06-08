@@ -3,7 +3,7 @@
 # FileBrowser - Implementing Git Utilities
 ***
 ## **Project Introduction**
-This repository contains source codes which used for **"Open Source Software Project" course assignment** in the Department of Software at Chung-Ang University. We implemented a **GUI-based git repository management service**. 
+This repository contains source codes which used for Open Source Software Project Course assignment in the Department of Software at Chung-Ang University. We implemented a **GUI-based git repository management service**. 
 ## **Application**
 <img src="Screenshots/전체GUI.png" height="400" width="650"/>
 
@@ -86,7 +86,7 @@ No status information is provided for ignored or committed (unmodified) files. C
 - Information such as commit message, author, and creation date is available for each commit.
 - By clicking on a commit object in the graph, you can view the changes stored in that object. Changes are categorized as ADD, MODIFY, or DELETE. If there are additions in the current code compared to the previous commit (ADD), deleted code files (DELETE), or modifications in the code content (MODIFY), information regarding these changes is provided.
 - Commit histoty example  
-<img src="Screenshots/commitDiff.png" height="250" width="300"/>  
+<img src="Screenshots/commitDiff.png" height="300" width="400"/>  
 
 
 #### **5. Repository Clone**
@@ -95,9 +95,10 @@ No status information is provided for ignored or committed (unmodified) files. C
 - Upon successful cloning of a private repository, an auth.txt file containing your ID and token will be automatically generated in the project folder.  
 </br>
 
-**WARNING**
+**WARNING**    
 To ensure a smooth cloning process, **don't forget to specify the access scope when generating your token!** (Refer to the image below)  
 <img src="Screenshots/tokenCreationWarning.png" height="300" width="400"/>  
+
 
 </br>
 
