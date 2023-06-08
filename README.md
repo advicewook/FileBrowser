@@ -74,8 +74,9 @@ No status information is provided for ignored or committed (unmodified) files. C
 
 #### **3. Branch Management**
 - **branch management**
-   - Various menus can be accessed by right-clicking on the branch panel.
-   - Provides options for *creating, deleting, renaming, and checking out* branches. 
+   - Various menus can be accessed by right-clicking on the branch panel.  
+   - Provides options for *creating, deleting, renaming, and checking out* branches.  
+   - And the menu of deleting branch doesn't appear in current branch.  
 
 - **branch merge**
    - Clicking the *merge* button within the branch panel allows you to view a list of mergeable branches and perform the desired merge with the selected branch.
@@ -91,8 +92,10 @@ No status information is provided for ignored or committed (unmodified) files. C
 
 #### **5. Repository Clone**
 - You can clone a repository within a remote repository by using the *clone* button. 
-- To clone a repository, you need the address of the repository. If it is a private repository, you will also need to provide your user ID and token.
+- To clone a repository, you need the address of the repository. If it is a private repository, you will also need to provide your user ID and token.  
+- If you don't have a valid token, you have to create an access token in 'Github > Settings > Developer settings > Personal access token'.
 - Upon successful cloning of a private repository, an auth.txt file containing your ID and token will be automatically generated in the project folder.  
+- And auth.txt will be used when the program restarts.
 </br>
 
 **WARNING**    
