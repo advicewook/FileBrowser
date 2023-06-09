@@ -1,151 +1,201 @@
 <img src="src/img/file_browser.png" align="right" height="100" width="100" />   
 
 # FileBrowser - Implementing Git Utilities
-
 ***
 ## **Project Introduction**
-> 중앙대학교 소프트웨어학부 23-1 오픈소스SW프로젝트 과목 과제 진행을 위한 레퍼지토리입니다. 과제에서 요구되는 GUI-based git repository management service를 구현했습니다.
+This repository contains source codes which used for Open Source Software Project Course assignment in the Department of Computer Science and Engineering at Chung-Ang University. We implemented a **GUI-based git repository management service**. 
 ## **Application**
-<img src="Screenshots/gui-전체.png" height="400" width="650"/>
+<img src="Screenshots/전체GUI.png" height="400" width="650"/>
+
+</br>  
 
 ### **GUI**
-**1. GUI 구성** 
+  
+**1. GUI Composition** 
 
-<img src="Screenshots/gui-내부.png" height="300" width="500"/>    
+<img src="Screenshots/GUI 내부 구성.png" height="300" width="500"/>    
 
-(1) 파일 탐색 패널 : 파일 및 폴더를 탐색하는 패널입니다.   
-(2) 중앙 패널 : 선택한 폴더의 내부 요소를 보여줍니다. git 저장소라면 파일의 상태 정보(아이콘)이 함께 제공됩니다.    
-(3) 저장소 버튼 : 저장소를 생성하거나 커밋 패널을 여는 버튼이 존재합니다.     
-(4) 커밋 패널 : staging, unstaging, commit 등 주요 git 기능을 제공하는 패널입니다.      
+(1) **File Explorer Panel**: A panel for navigating files and folders.  
+(2) **File Text Panel**: Displays the file path and, in the case of a git repository, provides the current branch name. If it's not a git repository, a *"git clone"* button is provided.  
+(3) **Central Panel**: Shows the contents of the selected folder. If it's a git repository, it also provides file status information(icons).  
+(4) **Commit Panel**: A panel that offers key git functions such as staging, unstaging, and committing.  
+(5) **Repository Button**: Allows creating a repository or opening the commit panel and branch panel.  
+(6) **Branch Panel**: Displays a list of branches. In this panel, you can choose options like *create, delete, rename, and checkout*.  
+   
+</br>
 
-**2. 파일 상태 아이콘**  
+**2. File Status Icon**  
 **(1) Unstaged**  
-변경된 파일이나 새로 생성한 파일 중 git add 명령을 실행하기 전의 상태입니다.  
+This is the state of modified or newly created files before executing the *git add* command.
 
-|아이콘|상태|설명|
+|Icon|Status|Description|
 |:--:|:--:|:--:|
-|<img src="src/img/untracked.png" height="50" width="50"/>|Untracked|새로 생성된 파일로 Git이 추적하지 않는 상태| 
-|<img src="src/img/modified.png" height="50" width="50"/>|Modified|기존 파일이 수정된 상태|  
-||Ignored|Git이 추적하지 않도록 설정한 파일|
+|<img src="src/img/untracked.png" height="50" width="50"/>|Untracked|State of newly created files not tracked by Git| 
+|<img src="src/img/modified.png" height="50" width="50"/>|Modified|State of existing files that have been modified|  
+||Ignored|Files set to be ignored by Git tracking|
 
 **(2) Staged**    
-수정된 파일이나 새로 생성한 파일 중 git add 명령을 실행하여 Git이 추적할 준비가 된 상태입니다.   
-|아이콘|상태|설명|
+State of modified or newly created files ready to be tracked by Git after executing the *git add* command.
+
+|Icon|Status|Description|
 |:--:|:--:|:--:|
-|<img src="src/img/added.png" height="50" width="50"/>|Added|새로 생성한 파일이 스테이지 영역에 추가된 상태|  
-|<img src="src/img/changed.png" height="50" width="50"/>|Changed|unmodified 상태였던 파일이 수정되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|  
-|<img src="src/img/removed.png" height="50" width="50"/>|Removed|기존 파일이 삭제되고 git add 명령을 실행하여 스테이지 영역에 추가된 상태|
+|<img src="src/img/added.png" height="50" width="50"/>|Added|State of newly created files added to the staging area|  
+|<img src="src/img/changed.png" height="50" width="50"/>|Changed|State of previously unmodified files that have been modified and added to the staging area using the *git add* command|  
+|<img src="src/img/removed.png" height="50" width="50"/>|Removed|State of existing files that have been deleted and added to the staging area using the *git add* command|
 
 
-**NOTICE:**
-ignored, committed(unmodified)에 대한 상태 정보는 제공하지 않습니다. *Commit* 버튼을 클릭하면 실시간으로 파일이 staging area에서 벗어나고 상태 아이콘이 사라지는 것을 통해 commited 상태로 변경되었음을 확인할 수 있습니다. 
+**NOTICE**   
+No status information is provided for ignored or committed (unmodified) files. Clicking the *Commit* button will instantly remove the files from the staging area and the status icon will disappear, indicating that they have transitioned to the committed state.
 
-### **프로젝트 주요 기능**
-#### **1. Git repository 생성**
-- GUI 우측 상단의 *Create Repository*버튼을 클릭하여 git 저장소를 생성할 수 있습니다. 단, 중복 생성은 불가능합니다.
+</br>
 
-#### **2. Version controlliong**
-- **파일 상태별 팝업 메뉴 제공**
-   - 마우스 우클릭 시 파일 상태에 따라 서로 다른 git 팝업 메뉴가 나타납니다. 선택시 해당 메뉴에 맞게 실시간으로 파일의 상태가 변하는 것을 확인할 수 있습니다. 
-   - 팝업메뉴 예시(committed 상태)  
+### **Key Project Features**
+#### **1. Git Repository Creation**
+- Click the *Create Repository* button located in the top right corner of the GUI to create a git repository. Duplicate creation is not allowed.
+
+#### **2. Version Controlliong**
+- **Popup Menu Based on File Status**
+   - When right-clicking on a file, a git popup menu specific to its status will appear. You can observe real-time changes in the file's status based on the selected menu option.
+   - Popup Menu Example (committed state)    
    <img src="Screenshots/example-popup-committed.png" height="200" width="200"/>  
 
-   상태별 제공되는 팝업 메뉴의 구성 아래와 같습니다. 
-   |상태|팝업 메뉴|
+   The configuration of the popup menu provided for each status is as follows: 
+   |Status|Popup Menu|
    |--|--|
    |untracked|Add to git|
    |modified|Add to git</br>Unmodifying|
    |staged|Unstage changes|
    |committed|Untracking</br>Delete file</br>Rename tracked file|
 
-- **Staging area 관리 및 Commit 기능 제공**
-   - GUI 우측 상단의 *Commit Menu* 버튼을 클릭하여 커밋 패널을 열 수 있습니다. 단, git 저장소가 아닌 폴더에서는 열리지 않습니다.
-   - commit 메세지를 작성하고 *Commit* 버튼을 클릭하여 파일을 committed(unmodified) 상태로 만들 수 있습니다.
-   - *Stage*, *Unstage* 버튼을 클릭하여 Staging area에 올라온 파일을 Unstaging 하거나 Unstaged 상태의 파일을 Staging area로 올릴 수 있습니다.
+- **Staging Area Management and Commit**
+   - Click the *Commit Menu* button located in the top right corner of the GUI to open the commit panel. However, it won't open if the current folder is not a git repository..
+   - Write a commit message and click the *Commit* button to transition the files to the committed (unmodified) state.
+   - Use the *Stage* and *Unstage* buttons to move files between the staging area and the unstaged state. This allows you to stage files that are currently unstaged or unstage files that are currently in the staging area.
+
+#### **3. Branch Management**
+- **Branch Management**
+   - Various menus can be accessed by right-clicking on the branch panel.  
+   - Provides options for *creating, deleting, renaming, and checking out* branches.  
+   - And the menu of deleting branch doesn't appear in current branch.  
+
+- **Branch Merge**
+   - Clicking the *merge* button within the branch panel allows you to view a list of mergeable branches and perform the desired merge with the selected branch.
+   - Upon successful merge, a success message is displayed. In case of failure, an error message and unmerged paths are provided, and the merge process is automatically aborted.
+
+#### **4. Show Commit History**
+- Clicking the *Commit Menu* button opens a popup window displaying the commit history.
+- Information such as commit message, author, and creation date is available for each commit.
+- By clicking on a commit object in the graph, you can view the changes stored in that object. Changes are categorized as ADD, MODIFY, or DELETE. If there are additions in the current code compared to the previous commit (ADD), deleted code files (DELETE), or modifications in the code content (MODIFY), information regarding these changes is provided.
+- Commit history example  
+<img src="Screenshots/commitDiff.png" height="300" width="400"/>  
 
 
-기능에 대한 보다 자세한 설명은 아래의 문서를 참고하세요.   
-[문서](./papers/team_20.pdf)
+#### **5. Repository Clone**
+- You can clone a repository within a remote repository by using the *clone* button. 
+- To clone a repository, you need the address of the repository. If it is a private repository, you will also need to provide your user ID and token.  
+- If you don't have a valid token, you have to create an access token in 'Github > Settings > Developer settings > Personal access token'.
+- Upon successful cloning of a private repository, an auth.txt file containing your ID and token will be automatically generated in the project folder.  
+- And auth.txt will be used when the program restarts.
+</br>
+
+**WARNING**    
+To ensure a smooth cloning process, **don't forget to specify the access scope when generating your token!** (Refer to the image below)  
+<img src="Screenshots/tokenCreationWarning.png" height="300" width="400"/>  
+
+
+</br>
+
+For more detailed explanations of the features, please refer to the
+[document1](./docs/team_20_project1.pdf), [document2](./docs/team_20_project2.pdf)  (The document is written in Korean.)   
 </br>  
 
 ## **How to Execute**
-**타겟 플랫폼 : Windows**  
-**개발 및 실행 환경 : IntelliJ IDEA Ultimate**  
-**언어 및 버전 : JAVA, JDK-17**  
-**빌드 툴 및 버전 : gradle 8.0**  
+**Target platform : Windows**  
+**Development and Execution Environmen : IntelliJ IDEA Ultimate**  
+**Language and Version : JAVA, JDK-17**  
+**Build Tool and Version : gradle 8.0**  
 
-### 아래는 프로젝트 실행 방법입니다.
-1. 프로젝트를 클론합니다. `git clone https://github.com/advicewook/FileBrowser.git`  
-2. IntelliJ Ultimate IDEA로 clone한 프로젝트 폴더를 엽니다.  
-3. Load Gradle Project후에 IntelliJ Ultimate IDEA의 인덱싱이 끝날 때까지 기다립니다. 이는 우측 하단의 프로그레스바에서 확인할 수 있습니다.  
-4. 우측 상단 Gradle 탭을 열고 reload합니다.  
+### Below are the steps to run the project.  
+1. Clone the project. `git clone https://github.com/advicewook/FileBrowser.git`  
+2. Open the cloned project folder with IntelliJ IDEA Ultimate.    
+3. Wait for IntelliJ IDEA's indexing to complete after loading the Gradle project. You can check the progress in the progress bar at the bottom right.  
+4. Open the Gradle tab in the upper right corner and click "Reload".    
    <img src="Screenshots/gradle-refresh.png"/>  
-5. File > Settings에서 Intellij의 설정값을 아래와 같이 변경합니다. 아래에서 Gradle user home 경로는 예시입니다.  
+5. Change the IntelliJ settings as follows in File > Settings. The Gradle user home path below is an example.    
    <img src="Screenshots/config-settings-gradle.png" height="300" width="500" />      
    <img src="Screenshots/config-file-encoding.png" height="300" width="500" />   
-6. File > Project Structure에서 Intellij의 설정값을 아래와 같이 변경합니다.   
+6. Change the IntelliJ settings in File > Project Structure as follows.     
    <img src="Screenshots/config-sdk.png" height="300" width="500" />   
-7. reload가 끝나면 우측 상단의 Edit Configuration 창을 엽니다.  
+7. Once the reload is complete, open the Edit Configuration window in the upper right corner.    
    <img src="Screenshots/config-step1.png" />  
-8. 아래 이미지를 참고하여 설정값을 변경합니다. JDK17이 없다면 우측 링크에서 다운로드받으실 수 있습니다.(https://www.oracle.com/kr/java/technologies/javase/jdk17-archive-downloads.html)   
+8. Modify the configuration values as shown in the image below. If you don't have JDK 17, you can download it from the link on the right (https://www.oracle.com/kr/java/technologies/javase/jdk17-archive-downloads.html)   
    <img src="Screenshots/config-step2.png" height="300" width="500" />   
-9. 설정이 완료되면 저장 후 Configuration창을 닫습니다. 이후 우측 상단에서 Run 버튼을 눌러 애플리케이션을 실행할 수 있습니다.  
+9. After completing the configuration, save and close the Configuration window. Then, click the Run button in the upper right corner to run the application.  
    <img src="Screenshots/config-step3.png"/>  
-10. 실행 결과 예시  
-   <img src="Screenshots/gui-전체.png" height="300" width="500"/>  
+10. Example of the execution result  
+   <img src="Screenshots/전체GUI.png" height="300" width="500"/>  
 
-### 아래는 gradle을 이용한 빌드 후 jar파일 실행 방법입니다.  
-1. 프로젝트 실행 방법의 6번까지 완료한 후 7번을 실행합니다.  
-2. 아래 이미지를 참고하여 설정값을 변경합니다.  
+### Below are the steps to build with Gradle and execute the jar file.  
+1. Complete steps 1 to 6 of the above project execution method. 
+2. Modify the configuration values as shown in the image below.  
    <img src="Screenshots/gradle-config-step1.png" height="300" width="500" />  
-3. 설정이 완료되면 저장 후 Configuration창을 닫습니다.  
-4. 설정을 마친 후, 우측 상단에서 Run 버튼을 눌러 gradle 빌드 명령을 실행합니다.  
+3. Save and close the Configuration window.   
+4. After completing the settings, click the Run button in the upper right corner to execute the Gradle build command.    
    <img src="Screenshots/gradle-config-step1half.png" />  
-6. 빌드가 성공적으로 끝났다면 아래와 같은 로그가 출력되고, 빌드 결과물은 /build/libs에 jar파일로 생성됩니다.  
+6. If the build is successful, you will see the following log, and the build output will be generated as a jar file in /build/libs.    
    <img src="Screenshots/assemble-log.png" height="130" width="500"/>  
-7. 이 결과물은 `java -jar FileBrowser-1.0-SNAPSHOT.jar`으로 실행할 수 있습니다.   
-8. 실행 결과 예시  
+7. You can execute the generated jar file using `java -jar FileBrowser-1.0-SNAPSHOT.jar`.    
+8. Example of the execution result  
    <img src="Screenshots/gradle-config-step2.png" height="250" width="500" />   
-
 
 </br>  
 
-## **Main History**
+## **Development History**
 
-|날짜|진행 상황|
+|Date|Progress|
 |--|--|
-|23-04|적절한 오픈 소스 탐색 및 프로그래밍 언어 선정|
-|23-05-01|eclipse project를 gradle project로 변경|  
-|23-05-03|1. commit menu ui 추가  </br> 2. 커밋 패널 생성 완료 </br> 3. commit menu, repository creation 버튼 기능 구현 완료|
-|23-05-04|1. 커밋 패널 기능 구현 완료 </br> 2. 팝업 메뉴 기능 구현 완료|
-|23-05-05|1. 파일 상태 아이콘 제작 완료 </br> 2. 커밋 패널 기능 개선|
-|23-05-09|1. 중앙 패널 파일 상태 표시 기능 개선 </br> 2. 커밋 메뉴 버튼 동작 개선 </br> 3. 커밋 패널 기능 개선|
-|23-05-10|1. 레포지토리 하위 폴더 동작 오류 개선 (status에 따른 팝업 메뉴 생성 및 선택 시 기능 동작)  </br> 2. 커밋 기능 구현 완료 </br> 3. 중앙 패널 안 파일의 상태 표시 아이콘 기능 완성 |
-|23-05-11|팝업 메뉴 오류 개선 및 일부 코드 수정|
-|23-05-13| 문서 및 리드미 작성|
+|23-04|Exploration of suitable open-source projects and selection of programming languages|
+|23-05-01|Changed Eclipse project to Gradle project|  
+|23-05-03|1. Added commit menu UI </br> 2. Completed commit panel creation  </br> 3. Implemented commit menu and repository creation button functionality|
+|23-05-04|1. Completed commit panel functionality </br> 2. Completed popup menu functionality|
+|23-05-05|1. Created file status icons </br> 2. Improved commit panel functionality|
+|23-05-09|1. Improved file status display in the central panel </br> 2. Improved commit menu button behavior  </br> 3. Improved commit panel functionality|
+|23-05-10|1. Fixed issues with subfolders under repositories (popup menu creation and functionality based on status) </br> 2. Implemented commit functionality </br> 3. Completed file status icon functionality in the central panel|
+|23-05-11|Fixed popup menu issues and made some code modifications|
+|23-05-13|Created project1 document and readme|
+|23-05-26|1. Completed branch panel UI </br> 2. Implemented repository clone functionality|
+|23-05-27|Improved repository clone functionality - private repository clone|
+|23-05-29|1. Implemented branch merge functionality </br> 2. Implemented branch create, delete, rename, checkout functionality|
+|23-05-31|Drafted commit history graph functionality|
+|23-06-01|	1. Consolidated and improved branch panel functionality </br> 2. Improved repository clone functionality - token handling|
+|23-06-03|Added additional UI for commit history graph|
+|23-06-03|Added commit history graph functionality|
+|23-06-05|1. Fixed issues with branch merge - providing conflicting file path information and adding cancel button functionality </br> 2. Improved repository clone functionality - creation of user ID and token information file (auth.txt)|
+|23-06-08|Created project2 document and readme|
 
 </br>  
 
 ## **Details**
-### 주요 의존성
-- Jgit : Eclipse Foundation에서 관리하는, git 명령어를 java 메서드로 호출할 수 있도록 지원합니다.
-- Swing : 자바로 작성된 GUI 라이브러리입니다. 자바 기반의 그래픽 인터페이스를 만들 수 있는 클래스를 제공합니다.
+### Main Dependencies
+- Jgit: Managed by Eclipse Foundation, it provides support for invoking git commands as Java methods.
+- Swing : A Java-based GUI library that provides classes for creating Java-based graphical interfaces.
 
-### 참고 리포지토리
+### Reference Repository
 - https://github.com/centic9/jgit-cookbook
-  - Jgit을 편하게 사용할 수 있도록 git 기능에 대한 code snippet을 제공합니다.
+  - Provides code snippets for using Jgit more conveniently and implementing git functionality.
 
-### 자바 클래스
-- FileBrowser : 파일 브라우저를 구현하는 핵심 클래스입니다.
-- CustomJgitUtilities : jgit을 사용한 git 기능 구현을 담당하는 클래스입니다.
-- CustomSwingUtilities : swing을 사용해 gui을 구현하는 클래스입니다.
+### Java Classes
+- FileBrowser: The core class that implements the file browser.
+- CustomJgitUtilities: The class responsible for implementing git functionality using Jgit.
+- CustomSwingUtilities: The class that implements the GUI using Swing.
+- UserInfoForGit: Class for Managing ID, Token, FilePath, and Information Storage
 
 ***
 ## Original Project Introduction
 > Writing a simple file browser in Java SWING
 
 
-원본 프로젝트는 java로 구현한 file browser입니다.
+The original project is a file browser implemented in Java.
 ***
 ### Links
 - [E-mail : ](mailto:m.elkhou@hotmail.com) m.elkhou@hotmail.com
